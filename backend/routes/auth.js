@@ -1,0 +1,212 @@
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcrypt');
+const passport = require('passport');
+const User = require('../models/User');
+
+// POST /api/auth/signup - Register new user
+router.post('/signup', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Validate input
+    if (!name || !email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please provide name, email, and password' 
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please enter a valid email address' 
+      });
+    }
+
+    // Validate password length
+    if (password.length < 8) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Password must be at least 8 characters long' 
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email already registered' 
+      });
+    }
+
+    // Split name into first and last name
+    const nameParts = name.trim().split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create new user
+    const user = new User({
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      password: hashedPassword
+    });
+
+    await user.save();
+
+    // Set session
+    req.session.userId = user._id;
+    req.session.userEmail = user.email;
+
+    // Return success without password
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error creating user' 
+    });
+  }
+});
+
+// POST /api/auth/login - Login user
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please provide email and password' 
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Invalid email or password' 
+      });
+    }
+
+    // Check password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Invalid email or password' 
+      });
+    }
+
+    // Set session
+    req.session.userId = user._id;
+    req.session.userEmail = user.email;
+
+    // Return success
+    res.json({
+      success: true,
+      message: 'Login successful',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error logging in' 
+    });
+  }
+});
+
+// POST /api/auth/logout - Logout user
+router.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Error logging out' 
+      });
+    }
+    res.json({ 
+      success: true, 
+      message: 'Logged out successfully' 
+    });
+  });
+});
+
+// GET /api/auth/logout - Logout user (for direct navigation)
+router.get('/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+    }
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Session destroy error:', err);
+        return res.redirect('/');
+      }
+      res.clearCookie('connect.sid');
+      res.redirect('/');
+    });
+  });
+});
+
+// GET /api/auth/check - Check if user is logged in
+router.get('/check', (req, res) => {
+  if (req.session.userId) {
+    res.json({ 
+      success: true, 
+      loggedIn: true,
+      userId: req.session.userId,
+      userEmail: req.session.userEmail
+    });
+  } else {
+    res.json({ 
+      success: true, 
+      loggedIn: false 
+    });
+  }
+});
+
+// GET /api/auth/google - Start Google OAuth flow
+router.get('/google', passport.authenticate('google', {
+  scope: ['profile', 'email']
+}));
+
+// GET /api/auth/google/callback - Google OAuth callback
+router.get('/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    // Set session
+    req.session.userId = req.user._id;
+    req.session.userEmail = req.user.email;
+    
+    // Successful authentication, redirect home
+    res.redirect('/?google_login=success');
+  }
+);
+
+module.exports = router;

@@ -1,0 +1,335 @@
+require('dotenv').config();
+
+const express = require('express');
+const path = require('path');
+const session = require('express-session');
+const passport = require('./config/passport');
+const connectDB = require('./config/database');
+
+// Import routes
+const productRoutes = require('./routes/products');
+const orderRoutes = require('./routes/orders');
+const blogRoutes = require('./routes/blogs');
+const userRoutes = require('./routes/users');
+const authRoutes = require('./routes/auth');
+
+// Import models
+const Product = require('./models/Product');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Connect to MongoDB
+connectDB();
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Session middleware
+app.use(session({
+  secret: 'endless-charms-secret-key-2026',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    httpOnly: true
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Set view engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../frontend/views'));
+
+// Static files
+app.use(express.static(path.join(__dirname, '../frontend/public')));
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/users', userRoutes);
+
+// Product data
+const products = [
+  { id: 1, name: 'Heart Cut Ring', price: 32000, image: 'shop-engagement-page/heart-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 2, name: 'Marquis Cut Ring', price: 32000, image: 'shop-engagement-page/marquis-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 3, name: 'Oval Cut Ring', price: 32000, image: 'shop-engagement-page/oval-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 4, name: 'Pear Cut Ring', price: 32000, image: 'shop-engagement-page/pear-teardrop-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 5, name: 'Princess Cut Ring', price: 62000, image: 'shop-engagement-page/princess-cut-ring-closeup.jpg', category: 'rings', inStock: true },
+  { id: 6, name: 'Radiant Cut Ring', price: 70000, image: 'shop-engagement-page/radiant-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 7, name: 'Round Brilliant Cut Ring', price: 42000, image: 'shop-engagement-page/round-brilliant-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 8, name: 'Emerald Cut Ring', price: 72000, image: 'shop-engagement-page/emerald-cut-ring-closeup.jpg', category: 'rings', inStock: true },
+  { id: 9, name: 'Plain Wedding Bands', price: 42000, image: 'shop-wedding-page/plain-gold-wedding-bands.jpg', category: 'bands', inStock: true },
+  { id: 10, name: 'Stud Earrings', price: 149000, image: 'shop-other-accessories-page/diamond-stud-earrings.jpg', category: 'earrings', inStock: true },
+  { id: 11, name: 'Tennis Necklace', price: 195000, image: 'shop-other-accessories-page/diamond-tennis-necklace.jpg', category: 'necklaces', inStock: true }
+];
+
+const ringStyles = [
+  { name: 'Heart Cut', image: 'shop-engagement-page/heart-cut-engagement-ring.jpg', label: 'HEART CUT SOLITAIRE' },
+  { name: 'Pear Cut', image: 'shop-engagement-page/pear-teardrop-cut-engagement-ring.jpg', label: 'PEAR CUT SOLITAIRE' },
+  { name: 'Round Brilliant Cut', image: 'shop-engagement-page/round-brilliant-cut-engagement-ring.jpg', label: 'ROUND BRILLIANT CUT SOLITAIRE' },
+  { name: 'Emerald Cut', image: 'shop-engagement-page/emerald-cut-ring-closeup.jpg', label: 'EMERALD CUT SOLITAIRE' }
+];
+
+const features = [
+  { icon: 'home-page/why-choose-endless-charms-section/premium-craftsmanship-icon.png', title: 'Premium Craftsmanship', description: '' },
+  { icon: 'home-page/why-choose-endless-charms-section/certified-stones-icon.png', title: 'Certified Metals & Stones', description: '' },
+  { icon: 'home-page/why-choose-endless-charms-section/custom-design-icon.png', title: 'Custom Design Options', description: '' },
+  { icon: 'home-page/why-choose-endless-charms-section/transparent-pricing-icon.png', title: 'Trustworthy & Transparent Pricing', description: '' },
+  { icon: 'home-page/why-choose-endless-charms-section/secure-transactions-icon.png', title: 'Secure Transactions', description: '' },
+  { icon: 'home-page/why-choose-endless-charms-section/local-showroom-icon.png', title: 'Local Showroom for Viewing', description: '' }
+];
+
+const reviewImages = [
+  'home-page/outstanding-products-services-section/14k-gold-testimonial.jpg',
+  'home-page/outstanding-products-services-section/assisst-engagement-testimonial.jpg',
+  'home-page/outstanding-products-services-section/blue-ring-testimonial.jpg',
+  'home-page/outstanding-products-services-section/blue-worn-testimonial.jpg',
+  'home-page/outstanding-products-services-section/bouquet-ring-testimonial.jpg',
+  'home-page/outstanding-products-services-section/box-certificate-testimonial.jpg',
+  'home-page/outstanding-products-services-section/box-ring-testimonial.jpg',
+  'home-page/outstanding-products-services-section/canada-ring-testimonial.jpg',
+  'home-page/outstanding-products-services-section/edited-testimonial.jpg',
+  'home-page/outstanding-products-services-section/endless-story-testimonial.jpg',
+  'home-page/outstanding-products-services-section/engagement-late-picture-testimonial.jpg',
+  'home-page/outstanding-products-services-section/engagement-order-testimonial.jpg',
+  'home-page/outstanding-products-services-section/engagement-two-rings-testimonial.jpg',
+  'home-page/outstanding-products-services-section/eternity-twisted-testimonial.jpg',
+  'home-page/outstanding-products-services-section/flower-like-testimonial.jpg',
+  'home-page/outstanding-products-services-section/green-gold-testimonial.jpg',
+  'home-page/outstanding-products-services-section/heart-eternity-testimonial.jpg',
+  'home-page/outstanding-products-services-section/italian-fiance-testimonial.jpg',
+  'home-page/outstanding-products-services-section/many-ring-collection-testimonial.jpg',
+  'home-page/outstanding-products-services-section/necklace-simple-testimonial.jpg',
+  'home-page/outstanding-products-services-section/necklace-testimonial.jpg',
+  'home-page/outstanding-products-services-section/oval-ruby-testimonial.jpg',
+  'home-page/outstanding-products-services-section/package-box-testimonial.jpg',
+  'home-page/outstanding-products-services-section/personal-delivery-testimonial.jpg',
+  'home-page/outstanding-products-services-section/possible-return-customer-testimonial.jpg',
+  'home-page/outstanding-products-services-section/pretty-custom-testimonial.jpg',
+  'home-page/outstanding-products-services-section/pretty-engagement-testimonial.jpg',
+  'home-page/outstanding-products-services-section/ring-image-testimonial.jpg',
+  'home-page/outstanding-products-services-section/ring-necklace-testimonial.jpg',
+  'home-page/outstanding-products-services-section/ruby-ring-box-testimonial.jpg',
+  'home-page/outstanding-products-services-section/two-sets-testimonial.jpg',
+  'home-page/outstanding-products-services-section/wedding-update-testimonial.jpg',
+  'home-page/outstanding-products-services-section/worn-pretty-testimonial.jpg'
+];
+
+// Engagement Rings data
+const engagementRingStyles = [
+  { id: 1, name: '1ct Round-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-round-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Round-Cut Solitaire Ring', src: '/1ct-round-cut-solitaire-ring' },
+  { id: 2, name: '1ct Princess-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-princess-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Princess-Cut Solitaire Ring', src: '/1ct-princess-cut-solitaire-ring' },
+  { id: 3, name: '1ct Cushion-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-cushion-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Cushion-Cut Solitaire Ring', src: '/1ct-cushion-cut-solitaire-ring' },
+  { id: 4, name: '1ct Radiant-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-radiant-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Radiant-Cut Solitaire Ring', src: '/1ct-radiant-cut-solitaire-ring' },
+  { id: 5, name: '1ct Oval-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-oval-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Oval-Cut Solitaire Ring', src: '/1ct-oval-cut-solitaire-ring' },
+  { id: 6, name: '1ct Emerald-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-emerald-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Emerald-Cut Solitaire Ring', src: '/1ct-emerald-cut-solitaire-ring' },
+  { id: 7, name: '1ct Heart-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-pear-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Heart-Cut Solitaire Ring', src: '/1ct-heart-cut-solitaire-ring' },
+  { id: 8, name: '1ct Pear-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-marquise-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Pear-Cut Solitaire Ring', src: '/1ct-pear-cut-solitaire-ring' },
+  { id: 9, name: '1ct Assher-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-assher-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Assher-Cut Solitaire Ring', src: '/1ct-assher-cut-solitaire-ring' }
+];
+
+// Wedding Bands data
+const weddingBandsStyles = [
+  { id: 1, name: 'Half eternity .30ct moissanite', price: 110000, image: 'sparkling-diamond-ring-with-classic-metal-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .30ct moissanite', src: '/wedding-band-1', bandCarat: '0.30' },
+  { id: 2, name: 'Half eternity .01ct moissanite', price: 70000, image: 'stacked-gold-rings-clear-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-2', bandCarat: '0.01' },
+  { id: 3, name: 'Half eternity .01ct moissanite', price: 62000, image: 'thin-eternity-and-plain-band-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-3', bandCarat: '0.01' },
+  { id: 4, name: 'Half eternity .01ct moissanite', price: 65000, image: 'gold-diamond-v-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-4', bandCarat: '0.01' },
+  { id: 5, name: 'Half eternity .01ct moissanite', price: 95000, image: 'matching-silver-rings-small-diamonds-wedding-bands.jpeg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-5', bandCarat: '0.01' },
+  { id: 6, name: 'Plain bands', price: 42000, image: 'plain-silver-wedding-bands.jpg', category: 'wedding-bands', label: 'Plain bands', src: '/wedding-band-6', bandCarat: '0' }
+];
+
+// Routes
+app.get('/', async (req, res) => {
+  try {
+    // Fetch products from database
+    const products = await Product.find({ inStock: true }).limit(11);
+    
+    res.render('index', {
+      products,
+      ringStyles,
+      features,
+      reviewImages,
+      showAll: false
+    });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.render('index', {
+      products: [],
+      ringStyles,
+      features,
+      reviewImages,
+      showAll: false
+    });
+  }
+});
+
+app.get('/home', (req, res) => {
+  res.redirect('/');
+});
+
+app.get('/engagement-rings', async (req, res) => {
+  try {
+    // Fetch engagement rings from database
+    const rings = await Product.find({ 
+      category: 'rings', 
+      subcategory: 'engagement',
+      inStock: true 
+    });
+    
+    res.render('engagement-rings', {
+      ringStyles: rings.length > 0 ? rings : engagementRingStyles
+    });
+  } catch (error) {
+    console.error('Error fetching engagement rings:', error);
+    res.render('engagement-rings', {
+      ringStyles: engagementRingStyles
+    });
+  }
+});
+
+app.get('/wedding-bands', async (req, res) => {
+  try {
+    // Fetch wedding bands from database
+    const bands = await Product.find({ 
+      category: 'bands',
+      subcategory: 'wedding-bands',
+      inStock: true 
+    });
+    
+    res.render('wedding-bands', {
+      bandStyles: bands.length > 0 ? bands : weddingBandsStyles
+    });
+  } catch (error) {
+    console.error('Error fetching wedding bands:', error);
+    res.render('wedding-bands', {
+      bandStyles: weddingBandsStyles
+    });
+  }
+});
+
+// Accessories combined page
+app.get('/accessories', async (req, res) => {
+  try {
+    // Fetch accessories from database
+    const accessories = await Product.find({ 
+      category: { $in: ['necklaces', 'bracelets', 'earrings'] },
+      inStock: true 
+    });
+    
+    res.render('accessories', { 
+      accessories: accessories.length > 0 
+        ? accessories 
+        : products.filter(p => ['necklaces', 'bracelets', 'earrings'].includes(p.category))
+    });
+  } catch (error) {
+    console.error('Error fetching accessories:', error);
+    const accessories = products.filter(p => ['necklaces', 'bracelets', 'earrings'].includes(p.category));
+    res.render('accessories', { accessories });
+  }
+});
+
+app.get('/necklaces', (req, res) => {
+  res.redirect('/accessories');
+});
+
+app.get('/bracelets', (req, res) => {
+  res.redirect('/accessories');
+});
+
+app.get('/earrings', (req, res) => {
+  res.redirect('/accessories');
+});
+
+app.get('/contact', (req, res) => {
+  res.render('contact');
+});
+
+app.get('/about', (req, res) => {
+  res.render('about');
+});
+
+// Blogs page
+app.get('/blogs', (req, res) => {
+  res.render('blogs');
+});
+
+// Profile page
+app.get('/profile', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect('/login');
+  }
+  res.render('profile', { user: req.user });
+});
+
+app.get('/bag', (req, res) => {
+    // Mock data based on your provided UI image
+    const bagItems = [
+        {
+            name: "1ct Round-Cut Solitaire Ring",
+            price: 32000,
+            image: "engagement1.jpg", 
+            metal: "14k White Gold",
+            stone: "Moissanite",
+            carat: "1ct",
+            size: "4.5",
+            quantity: 1
+        },
+        {
+            name: "2ct Round-Cut Solitaire Ring",
+            price: 32000,
+            image: "engagement2.jpg",
+            metal: "14k White Gold",
+            stone: "Moissanite",
+            carat: "2ct",
+            size: "4.5",
+            quantity: 1
+        }
+    ];
+
+    const subtotal = bagItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+    res.render('bag', { bagItems, subtotal });
+});
+
+app.get('/checkout', (req, res) => {
+  res.render('checkout');
+});
+
+app.get('/order-confirmation', (req, res) => {
+  res.render('order-confirmation');
+});
+
+app.get('/signup', (req, res) => {
+  // Mock user data to render on the profile page
+  const user = {
+    firstName: 'Jane',
+    lastName: 'Doe',
+    email: 'jane.doe@example.com',
+    phone: '+1 (555) 123-4567',
+    address: '123 Endless Charm St, Jewel City',
+    avatar: '/images/profile icon.png'
+  };  
+
+  res.render('signup', { user });
+});
+
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+// Keep old route for backwards compatibility
+app.get('/signin', (req, res) => {
+  res.redirect('/login');
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});

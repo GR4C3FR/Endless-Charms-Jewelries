@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Endless Charms</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <div class="top-announcement">
+      <p>Free Shipping Over ₱15,000!</p>
+    </div>
+    <div class="main-header">
+      <nav class="navbar">
+        <div class="logo">
+          <img src="/images/navigation/logo.png" alt="Endless Charms">
+          <span>ENDLESS CHARMS</span>
+        </div>
+        <div class="nav-links">
+          <a href="/">HOME</a>
+          <a href="/engagement-rings">ENGAGEMENT RINGS</a>
+          <a href="/wedding-bands">WEDDING BANDS</a>
+          <a href="/accessories">ACCESSORIES</a>
+          <a href="/about">ABOUT US</a>
+          <a href="/blogs">BLOGS</a>
+          <a href="/contact">CONTACT US</a>
+        </div>
+        <div class="nav-icons">
+          <button class="icon-btn">
+            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
+          </button>
+          <button class="icon-btn" onclick="handleProfileClick()">
+            <img src="<%= user && user.avatar ? user.avatar : '/images/navigation/profile-icon.png' %>" alt="Profile" class="profile-icon">
+          </button>
+          <button class="icon-btn" onclick="handleBagClick()">
+            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon">
+            <span class="bag-badge" style="display: none;">0</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="profile-page">
+    <div class="profile-container">
+      <div class="profile-sidebar">
+        <div class="profile-header">
+          <div class="profile-avatar-large">
+            <img src="<%= user && user.avatar ? user.avatar : '/images/profile-icon.png' %>" alt="<%= user ? user.firstName : 'User' %>">
+          </div>
+          <h2><%= user ? user.firstName + ' ' + user.lastName : 'Guest' %></h2>
+          <p class="profile-email"><%= user ? user.email : '' %></p>
+        </div>
+        <nav class="profile-nav">
+          <a href="#" class="profile-nav-item active" data-tab="account">Account Details</a>
+          <a href="#" class="profile-nav-item" data-tab="orders">Order History</a>
+          <a href="#" class="profile-nav-item" data-tab="addresses">Addresses</a>
+          <a href="/api/auth/logout" class="profile-nav-item logout">Logout</a>
+        </nav>
+      </div>
+
+      <div class="profile-content">
+        <!-- Account Details Tab -->
+        <div id="account-tab" class="profile-tab active">
+          <h3>Account Details</h3>
+          <form id="profile-form" class="profile-details-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" name="firstName" value="<%= user ? user.firstName : '' %>" required>
+              </div>
+              <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" name="lastName" value="<%= user ? user.lastName : '' %>" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" value="<%= user ? user.email : '' %>" disabled>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" value="<%= user && user.phone ? user.phone : '' %>" placeholder="+63 XXX XXX XXXX">
+            </div>
+            <div class="form-group">
+              <label for="address">Address</label>
+              <textarea id="address" name="address" rows="3" placeholder="Enter your full address"><%= user && user.address ? user.address : '' %></textarea>
+            </div>
+            <% if (!user || !user.googleId) { %>
+            <div class="form-group">
+              <label>Change Password</label>
+              <button type="button" class="btn-secondary" onclick="showChangePasswordModal()">Change Password</button>
+            </div>
+            <% } %>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Save Changes</button>
+              <button type="button" class="btn-secondary" onclick="location.reload()">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Order History Tab -->
+        <div id="orders-tab" class="profile-tab">
+          <h3>Order History</h3>
+          <div id="orders-list">
+            <p class="loading-text">Loading your orders...</p>
+          </div>
+        </div>
+
+        <!-- Addresses Tab -->
+        <div id="addresses-tab" class="profile-tab">
+          <h3>Saved Addresses</h3>
+          <div class="addresses-list">
+            <div class="address-card">
+              <h4>Default Address</h4>
+              <p><%= user && user.address ? user.address : 'No address saved yet' %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>ENDLESS CHARMS</h4>
+        <p>Your trusted jewelry partner</p>
+      </div>
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <a href="/about">About Us</a>
+        <a href="/contact">Contact</a>
+        <a href="/blogs">Blog</a>
+      </div>
+      <div class="footer-section">
+        <h4>Customer Service</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms & Conditions</a>
+        <a href="#">Return Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Endless Charms. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Login Required Modal -->
+  <div id="loginRequiredModal" class="modal" style="display: none;">
+    <div class="modal-content login-modal">
+      <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+      <h2>Login Required</h2>
+      <p id="loginModalMessage">Please log in to continue.</p>
+      <div class="modal-buttons">
+        <button class="primary-btn" onclick="window.location.href='/login'">Log In</button>
+        <button class="secondary-btn" onclick="window.location.href='/signup'">Sign Up</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+  <script>
+    // Tab switching
+    document.querySelectorAll('.profile-nav-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        if (this.classList.contains('logout')) return;
+        
+        e.preventDefault();
+        const tab = this.dataset.tab;
+        
+        // Update active nav item
+        document.querySelectorAll('.profile-nav-item').forEach(nav => nav.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update active tab
+        document.querySelectorAll('.profile-tab').forEach(content => content.classList.remove('active'));
+        document.getElementById(tab + '-tab').classList.add('active');
+        
+        // Load orders if orders tab is clicked
+        if (tab === 'orders') {
+          loadOrders();
+        }
+      });
+    });
+
+    // Profile form submission
+    document.getElementById('profile-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value
+      };
+      
+      try {
+        const userId = '<%= user ? user._id : "" %>';
+        const response = await fetch(`/api/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+          alert('Profile updated successfully!');
+          location.reload();
+        } else {
+          alert('Failed to update profile. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      }
+    });
+
+    // Load orders
+    async function loadOrders() {
+      const ordersListDiv = document.getElementById('orders-list');
+      try {
+        const userId = '<%= user ? user._id : "" %>';
+        const response = await fetch(`/api/orders?userId=${userId}`);
+        const orders = await response.json();
+        
+        if (orders.length === 0) {
+          ordersListDiv.innerHTML = '<p class="no-orders">You haven\'t placed any orders yet.</p>';
+          return;
+        }
+        
+        ordersListDiv.innerHTML = orders.map(order => `
+          <div class="order-card">
+            <div class="order-header">
+              <span class="order-number">Order #${order._id.substring(0, 8).toUpperCase()}</span>
+              <span class="order-date">${new Date(order.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div class="order-status">
+              <span class="status-badge status-${order.status}">${order.status}</span>
+            </div>
+            <div class="order-items">
+              ${order.items.map(item => `
+                <div class="order-item">
+                  <span>${item.product?.name || 'Product'} x ${item.quantity}</span>
+                  <span>₱${(item.price * item.quantity).toLocaleString()}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="order-total">
+              <strong>Total: ₱${order.totalAmount.toLocaleString()}</strong>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        ordersListDiv.innerHTML = '<p class="error-text">Failed to load orders.</p>';
+      }
+    }
+
+    function showChangePasswordModal() {
+      alert('Password change functionality coming soon!');
+    }
+  </script>
+</body>
+</html>
