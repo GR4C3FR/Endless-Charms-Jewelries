@@ -361,7 +361,8 @@ window.addEventListener('DOMContentLoaded', () => {
 // Delegate add-to-bag button clicks
 // Create and open customization modal
 function openCustomizationModal(baseItem, originBtn, existingItem) {
-  // build overlay
+  try {
+    // build overlay
   const overlay = document.createElement('div');
   overlay.className = 'ec-modal-overlay';
   overlay.innerHTML = `
@@ -433,7 +434,10 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   const priceEl = overlay.querySelector('#modal-product-price');
   img.src = baseItem.image ? `/images/${baseItem.image}` : '';
   nameEl.textContent = baseItem.name || 'Item';
-  if (priceEl) priceEl.style.fontSize = '18px';
+  if (priceEl) {
+    priceEl.style.fontSize = '18px';
+    priceEl.textContent = `₱${(baseItem.price || 0).toLocaleString()}`;
+  }
 
   // Pricing table for engagement rings (1ct base) and upsize rules + wedding band pricing
   const priceTable = {
@@ -545,47 +549,94 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   
   // For wedding bands, setup band-specific UI
   if (isBandSource) {
-    // Hide carat selector for bands (will use dropdown instead)
-    const caratGroup = caratSel && caratSel.parentElement; if (caratGroup) caratGroup.style.display = 'none';
-    // Hide ring size (single); show female/male sizes
-    const sizeGroup = sizeSel && sizeSel.parentElement; if (sizeGroup) sizeGroup.style.display = 'none';
-    const femaleGroup = overlay.querySelector('#female-size-group'); if (femaleGroup) femaleGroup.style.display = 'block';
-    const maleGroup = overlay.querySelector('#male-size-group'); if (maleGroup) maleGroup.style.display = 'block';
-    // Convert band type buttons to dropdown
-    const bandTypeGroup = overlay.querySelector('#band-type-group'); if (bandTypeGroup) bandTypeGroup.style.display = 'block';
-    const bandTypeLabel = bandTypeGroup?.querySelector('.ec-opt-label');
-    if (bandTypeLabel) bandTypeLabel.textContent = 'Carat Size';
-    // Replace buttons with dropdown
-    const bandTypeList = overlay.querySelector('#opt-band-type');
-    bandTypeList.innerHTML = '';
-    const dropdown = document.createElement('select');
-    dropdown.id = 'band-carat-dropdown';
-    dropdown.className = 'ec-select';
-    const options = [
-      { value: '0', label: '0 ct (Plain)' },
-      { value: '0.30', label: '0.30 ct' },
-      { value: '0.01', label: '0.01 ct' }
-    ];
-    options.forEach(opt => {
-      const optEl = document.createElement('option');
-      optEl.value = opt.value;
-      optEl.textContent = opt.label;
-      dropdown.appendChild(optEl);
-    });
-    bandTypeList.appendChild(dropdown);
-    // Show pair notice
-    const pairNotice = overlay.querySelector('#pair-notice'); if (pairNotice) pairNotice.style.display = 'block';
-    // Add size restriction note for bands
-    const noteWrap = document.createElement('div');
-    noteWrap.className = 'ec-contact-note';
-    noteWrap.style.marginTop = '10px';
-    noteWrap.innerHTML = `
-      <p style="margin:0 0 8px 0;color:#8a0621;font-size:13px;">
-        Sizes above 7 require custom pricing. Please contact us for a quote.
-      </p>
-    `;
-    const pairNoticeEl = overlay.querySelector('#pair-notice');
-    if (pairNoticeEl && pairNoticeEl.parentElement) pairNoticeEl.parentElement.insertBefore(noteWrap, pairNoticeEl.nextSibling);
+    // Check if this is a plain band
+    const isPlainBand = (baseItem && baseItem.name && baseItem.name.toLowerCase && baseItem.name.toLowerCase().includes('plain')) || (baseItem && baseItem.isPlain);
+    
+    if (isPlainBand) {
+      // Hide all customization for plain bands except metal and female/male sizes
+      const caratGroup = caratSel && caratSel.parentElement; if (caratGroup) caratGroup.style.display = 'none';
+      const stoneGroup = overlay.querySelector('.ec-opt-group:nth-of-type(2)'); if (stoneGroup) stoneGroup.style.display = 'none';
+      const sizeGroup = sizeSel && sizeSel.parentElement; if (sizeGroup) sizeGroup.style.display = 'none';
+      const bandTypeGroup = overlay.querySelector('#band-type-group'); if (bandTypeGroup) bandTypeGroup.style.display = 'none';
+      
+      // Show female/male sizes
+      const femaleGroup = overlay.querySelector('#female-size-group'); if (femaleGroup) femaleGroup.style.display = 'block';
+      const maleGroup = overlay.querySelector('#male-size-group'); if (maleGroup) maleGroup.style.display = 'block';
+      
+      // Show pair notice
+      const pairNotice = overlay.querySelector('#pair-notice'); if (pairNotice) pairNotice.style.display = 'block';
+      
+      // Add size restriction note for bands
+      const noteWrap = document.createElement('div');
+      noteWrap.className = 'ec-contact-note';
+      noteWrap.style.marginTop = '10px';
+      noteWrap.innerHTML = `
+        <p style="margin:0 0 8px 0;color:#8a0621;font-size:13px;">
+          Sizes above 7 require custom pricing. Please contact us for a quote.
+        </p>
+      `;
+      const pairNoticeEl = overlay.querySelector('#pair-notice');
+      if (pairNoticeEl && pairNoticeEl.parentElement) pairNoticeEl.parentElement.insertBefore(noteWrap, pairNoticeEl.nextSibling);
+      
+      selectedBandCarat = '0';  // Always plain
+    } else {
+      // Hide carat selector for bands (will use dropdown instead)
+      const caratGroup = caratSel && caratSel.parentElement; if (caratGroup) caratGroup.style.display = 'none';
+      // Hide ring size (single); show female/male sizes
+      const sizeGroup = sizeSel && sizeSel.parentElement; if (sizeGroup) sizeGroup.style.display = 'none';
+      const femaleGroup = overlay.querySelector('#female-size-group'); if (femaleGroup) femaleGroup.style.display = 'block';
+      const maleGroup = overlay.querySelector('#male-size-group'); if (maleGroup) maleGroup.style.display = 'block';
+      
+      // Add female/male carat size selectors for non-plain bands
+      const femaleCaratGroup = document.createElement('div');
+      femaleCaratGroup.className = 'ec-opt-group';
+      femaleCaratGroup.innerHTML = `
+        <div class="ec-opt-label">Female Carat Size</div>
+        <select id="opt-female-carat" class="ec-select">
+          <option value="1">1 ct</option>
+          <option value="2">2 ct</option>
+          <option value="3">3 ct</option>
+        </select>
+      `;
+      
+      const maleCaratGroup = document.createElement('div');
+      maleCaratGroup.className = 'ec-opt-group';
+      maleCaratGroup.innerHTML = `
+        <div class="ec-opt-label">Male Carat Size</div>
+        <select id="opt-male-carat" class="ec-select">
+          <option value="0">0 ct (plain bands)</option>
+          <option value="1">1 ct</option>
+          <option value="2">2 ct</option>
+          <option value="3">3 ct</option>
+        </select>
+      `;
+      
+      try {
+        if (femaleGroup && femaleGroup.parentElement) {
+          femaleGroup.parentElement.insertBefore(femaleCaratGroup, femaleGroup.nextSibling);
+        }
+        if (maleGroup && maleGroup.parentElement) {
+          maleGroup.parentElement.insertBefore(maleCaratGroup, maleGroup.nextSibling);
+        }
+      } catch(err) {
+        console.warn('Error inserting carat groups:', err);
+      }
+      
+      // Show pair notice
+      const pairNotice = overlay.querySelector('#pair-notice'); if (pairNotice) pairNotice.style.display = 'block';
+      
+      // Add size restriction note for bands
+      const noteWrap = document.createElement('div');
+      noteWrap.className = 'ec-contact-note';
+      noteWrap.style.marginTop = '10px';
+      noteWrap.innerHTML = `
+        <p style="margin:0 0 8px 0;color:#8a0621;font-size:13px;">
+          Sizes above 7 require custom pricing. Please contact us for a quote.
+        </p>
+      `;
+      const pairNoticeEl = overlay.querySelector('#pair-notice');
+      if (pairNoticeEl && pairNoticeEl.parentElement) pairNoticeEl.parentElement.insertBefore(noteWrap, pairNoticeEl.nextSibling);
+    }
   }
   // For engagement rings restrict carat to 1,2,3 only
   else if (isRingSource) {
@@ -614,6 +665,8 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   let selectedBandCarat = '0';  // For wedding bands: '0', '0.30', or '0.01'
   let selectedFemaleSize = '3';
   let selectedMaleSize = '3';
+  let selectedFemaleCarat = '1';  // Female carat size for bands (default to 1 ct)
+  let selectedMaleCarat = '1';    // Male carat size for bands (default to 1 ct)
   let editing = false;
 
   // If this customization is for an existing bag item, prefill selections
@@ -634,6 +687,8 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
     if (opts.bandCarat) selectedBandCarat = opts.bandCarat;
     if (opts.femaleSize) selectedFemaleSize = opts.femaleSize;
     if (opts.maleSize) selectedMaleSize = opts.maleSize;
+    if (opts.femaleCarat) selectedFemaleCarat = opts.femaleCarat;
+    if (opts.maleCarat) selectedMaleCarat = opts.maleCarat;
     overlay.querySelector('#modal-qty').value = existingItem.quantity || 1;
     if (opts.size) sizeSel.value = opts.size;
   }
@@ -669,6 +724,8 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       // Clear and populate with lengths
       while (caratSel.firstChild) caratSel.removeChild(caratSel.firstChild);
       ['14', '16', '18'].forEach(len => { const o = document.createElement('option'); o.value = len; o.textContent = len + '"'; caratSel.appendChild(o); });
+      selectedCarat = '14';  // Default to 14"
+      caratSel.value = '14';
       // Hide metal selector - tennis items are 14k only
       const metalGroup = overlay.querySelector('.ec-opt-group:nth-of-type(1)');
       if (metalGroup) metalGroup.style.display = 'none';
@@ -683,6 +740,8 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
         b.addEventListener('click', () => { selectedStone = s; computePrice(); });
         stoneList.appendChild(b);
       });
+      // Compute and display price after setting defaults
+      setTimeout(() => computePrice(), 50);
     } else if (accessoryType === 'tennis-bracelet') {
       // For tennis bracelet: show size selector (stored as carat for reuse)
       const caratGroup = caratSel && caratSel.parentElement;
@@ -694,6 +753,8 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       // Clear and populate with sizes
       while (caratSel.firstChild) caratSel.removeChild(caratSel.firstChild);
       ['4-6', '7', '8'].forEach(size => { const o = document.createElement('option'); o.value = size; o.textContent = size + '"'; caratSel.appendChild(o); });
+      selectedCarat = '4-6';  // Default to 4-6"
+      caratSel.value = '4-6';
       // Hide metal selector - tennis items are 14k only
       const metalGroup = overlay.querySelector('.ec-opt-group:nth-of-type(1)');
       if (metalGroup) metalGroup.style.display = 'none';
@@ -708,12 +769,14 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
         b.addEventListener('click', () => { selectedStone = s; computePrice(); });
         stoneList.appendChild(b);
       });
+      // Compute and display price after setting defaults
+      setTimeout(() => computePrice(), 50);
     }
   }
 
   // helper to compute price
   function computePrice() {
-    const carat = parseFloat(selectedCarat);
+    const carat = isAccessorySource ? selectedCarat : parseFloat(selectedCarat);
     const stone = selectedStone;
     const metal = (selectedMetal && selectedMetal.indexOf('14k') === 0) ? '14k' : '18k';
 
@@ -835,6 +898,22 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
         computePrice();
       });
     }
+    
+    // Female and Male carat listeners for bands
+    const femaleCaratSel = overlay.querySelector('#opt-female-carat');
+    const maleCaratSel = overlay.querySelector('#opt-male-carat');
+    if (femaleCaratSel) {
+      femaleCaratSel.addEventListener('change', (ev) => {
+        selectedFemaleCarat = ev.target.value;
+        computePrice();
+      });
+    }
+    if (maleCaratSel) {
+      maleCaratSel.addEventListener('change', (ev) => {
+        selectedMaleCarat = ev.target.value;
+        computePrice();
+      });
+    }
   }
 
   // Size validation function for wedding bands
@@ -869,6 +948,10 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
     if (isBandSource) {
       const bandCaratDropdown = overlay.querySelector('#band-carat-dropdown');
       if (bandCaratDropdown) bandCaratDropdown.value = selectedBandCarat;
+      const femaleCaratSel = overlay.querySelector('#opt-female-carat');
+      const maleCaratSel = overlay.querySelector('#opt-male-carat');
+      if (femaleCaratSel) femaleCaratSel.value = selectedFemaleCarat;
+      if (maleCaratSel) maleCaratSel.value = selectedMaleCarat;
       if (femaleSizeSel) femaleSizeSel.value = selectedFemaleSize;
       if (maleSizeSel) maleSizeSel.value = selectedMaleSize;
     }
@@ -902,6 +985,8 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       opts.bandCarat = selectedBandCarat;
       opts.femaleSize = selectedFemaleSize;
       opts.maleSize = selectedMaleSize;
+      opts.femaleCarat = selectedFemaleCarat;
+      opts.maleCarat = selectedMaleCarat;
     } else {
       opts.size = sizeSel.value;
     }
@@ -949,6 +1034,10 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
 
   // initial compute
   computePrice();
+  } catch(err) {
+    console.error('Error in openCustomizationModal:', err);
+    overlay.remove();
+  }
 }
 
 // Delegate add-to-bag button clicks -> open modal

@@ -15,6 +15,7 @@ const authRoutes = require('./routes/auth');
 
 // Import models
 const Product = require('./models/Product');
+const Blog = require('./models/Blog');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -57,22 +58,25 @@ app.use('/api/users', userRoutes);
 
 // Product data
 const products = [
-  { id: 1, name: 'Heart Cut Ring', price: 32000, image: 'shop-engagement-page/heart-cut-engagement-ring.jpg', category: 'rings', inStock: true },
-  { id: 2, name: 'Marquis Cut Ring', price: 32000, image: 'shop-engagement-page/marquis-cut-engagement-ring.jpg', category: 'rings', inStock: true },
-  { id: 3, name: 'Oval Cut Ring', price: 32000, image: 'shop-engagement-page/oval-cut-engagement-ring.jpg', category: 'rings', inStock: true },
-  { id: 4, name: 'Pear Cut Ring', price: 32000, image: 'shop-engagement-page/pear-teardrop-cut-engagement-ring.jpg', category: 'rings', inStock: true },
-  { id: 5, name: 'Princess Cut Ring', price: 62000, image: 'shop-engagement-page/princess-cut-ring-closeup.jpg', category: 'rings', inStock: true },
-  { id: 6, name: 'Radiant Cut Ring', price: 70000, image: 'shop-engagement-page/radiant-cut-engagement-ring.jpg', category: 'rings', inStock: true },
-  { id: 7, name: 'Round Brilliant Cut Ring', price: 42000, image: 'shop-engagement-page/round-brilliant-cut-engagement-ring.jpg', category: 'rings', inStock: true },
-  { id: 8, name: 'Emerald Cut Ring', price: 72000, image: 'shop-engagement-page/emerald-cut-ring-closeup.jpg', category: 'rings', inStock: true },
-  { id: 9, name: 'Plain Wedding Bands', price: 42000, image: 'shop-wedding-page/plain-gold-wedding-bands.jpg', category: 'bands', inStock: true },
-  { id: 10, name: 'Stud Earrings', price: 149000, image: 'shop-other-accessories-page/diamond-stud-earrings.jpg', category: 'earrings', inStock: true },
-  { id: 11, name: 'Tennis Necklace', price: 195000, image: 'shop-other-accessories-page/diamond-tennis-necklace.jpg', category: 'necklaces', inStock: true }
+  { id: 1, name: 'Heart Cut Ring', basePrice: 32000, image: 'shop-engagement-page/heart-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 2, name: 'Marquise Cut Ring', basePrice: 32000, image: 'shop-engagement-page/marquis-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 3, name: 'Oval Cut Ring', basePrice: 32000, image: 'shop-engagement-page/oval-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 4, name: 'Pear Cut Ring', basePrice: 32000, image: 'shop-engagement-page/pear-teardrop-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 5, name: 'Princess Cut Ring', basePrice: 62000, image: 'shop-engagement-page/princess-cut-ring-closeup.jpg', category: 'rings', inStock: true },
+  { id: 6, name: 'Radiant Cut Ring', basePrice: 70000, image: 'shop-engagement-page/radiant-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 7, name: 'Round Brilliant Cut Ring', basePrice: 42000, image: 'shop-engagement-page/round-brilliant-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 8, name: 'Emerald Cut Ring', basePrice: 72000, image: 'shop-engagement-page/emerald-cut-ring-closeup.jpg', category: 'rings', inStock: true },
+  { id: 9, name: 'Asscher Cut Ring', basePrice: 32000, image: 'shop-engagement-page/asscher-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 10, name: 'Cushion Cut Ring', basePrice: 32000, image: 'shop-engagement-page/cushion-cut-engagement-ring.jpg', category: 'rings', inStock: true },
+  { id: 11, name: 'Plain Wedding Bands', basePrice: 42000, image: 'shop-wedding-page/plain-gold-wedding-bands.jpg', category: 'bands', inStock: true },
+  { id: 12, name: 'Stud Earrings', basePrice: 149000, image: 'shop-other-accessories-page/diamond-stud-earrings.jpg', category: 'earrings', inStock: true },
+  { id: 13, name: '.30 ct Tennis Necklace', basePrice: 195000, image: 'shop-other-accessories-page/diamond-tennis-necklace.jpg', category: 'necklaces', inStock: true },
+  { id: 14, name: '.30 ct Tennis Bracelet', basePrice: 149000, image: 'shop-other-accessories-page/diamond-tennis-bracelet.jpg', category: 'bracelets', inStock: true }
 ];
 
 const ringStyles = [
   { name: 'Heart Cut', image: 'shop-engagement-page/heart-cut-engagement-ring.jpg', label: 'HEART CUT SOLITAIRE' },
-  { name: 'Pear Cut', image: 'shop-engagement-page/pear-teardrop-cut-engagement-ring.jpg', label: 'PEAR CUT SOLITAIRE' },
+  { name: 'Pear Cut', image: 'shop-engagement-page/pear-teardrop-engagement-ring.jpg', label: 'PEAR CUT SOLITAIRE' },
   { name: 'Round Brilliant Cut', image: 'shop-engagement-page/round-brilliant-cut-engagement-ring.jpg', label: 'ROUND BRILLIANT CUT SOLITAIRE' },
   { name: 'Emerald Cut', image: 'shop-engagement-page/emerald-cut-ring-closeup.jpg', label: 'EMERALD CUT SOLITAIRE' }
 ];
@@ -124,25 +128,26 @@ const reviewImages = [
 
 // Engagement Rings data
 const engagementRingStyles = [
-  { id: 1, name: '1ct Round-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-round-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Round-Cut Solitaire Ring', src: '/1ct-round-cut-solitaire-ring' },
-  { id: 2, name: '1ct Princess-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-princess-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Princess-Cut Solitaire Ring', src: '/1ct-princess-cut-solitaire-ring' },
-  { id: 3, name: '1ct Cushion-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-cushion-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Cushion-Cut Solitaire Ring', src: '/1ct-cushion-cut-solitaire-ring' },
-  { id: 4, name: '1ct Radiant-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-radiant-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Radiant-Cut Solitaire Ring', src: '/1ct-radiant-cut-solitaire-ring' },
-  { id: 5, name: '1ct Oval-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-oval-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Oval-Cut Solitaire Ring', src: '/1ct-oval-cut-solitaire-ring' },
-  { id: 6, name: '1ct Emerald-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-emerald-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Emerald-Cut Solitaire Ring', src: '/1ct-emerald-cut-solitaire-ring' },
-  { id: 7, name: '1ct Heart-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-pear-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Heart-Cut Solitaire Ring', src: '/1ct-heart-cut-solitaire-ring' },
-  { id: 8, name: '1ct Pear-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-marquise-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Pear-Cut Solitaire Ring', src: '/1ct-pear-cut-solitaire-ring' },
-  { id: 9, name: '1ct Assher-Cut Solitaire Ring', price: 32000, image: 'Airdropped/1ct-assher-cut-solitaire-ring.jpg', category: 'rings', label: '1ct Assher-Cut Solitaire Ring', src: '/1ct-assher-cut-solitaire-ring' }
+  { id: 1, name: '1ct Round-Cut Solitaire Ring', basePrice: 32000, image: 'shop-engagement-page/round-brilliant-cut-engagement-ring.jpg', category: 'rings', label: '1ct Round-Cut Solitaire Ring', src: '/1ct-round-cut-solitaire-ring' },
+  { id: 2, name: '1ct Princess-Cut Solitaire Ring', basePrice: 32000, image: 'shop-engagement-page/princess-cut-ring-closeup.jpg', category: 'rings', label: '1ct Princess-Cut Solitaire Ring', src: '/1ct-princess-cut-solitaire-ring' },
+  { id: 3, name: '1ct Cushion-Cut Solitaire Ring', basePrice: 32000, image: 'shop-engagement-page/cushion-cut-engagement-ring.jpg', category: 'rings', label: '1ct Cushion-Cut Solitaire Ring', src: '/1ct-cushion-cut-solitaire-ring' },
+  { id: 4, name: '1ct Radiant-Cut Solitaire Ring', basePrice: 32000, image: 'shop-engagement-page/radiant-cut-engagement-ring.jpg', category: 'rings', label: '1ct Radiant-Cut Solitaire Ring', src: '/1ct-radiant-cut-solitaire-ring' },
+  { id: 5, name: '1ct Oval-Cut Solitaire Ring', basePrice: 32000, image: 'shop-engagement-page/oval-cut-engagement-ring.jpg', category: 'rings', label: '1ct Oval-Cut Solitaire Ring', src: '/1ct-oval-cut-solitaire-ring' },
+  { id: 6, name: '1ct Emerald-Cut Solitaire Ring', basePrice: 32000, image: 'shop-engagement-page/emerald-cut-ring-closeup.jpg', category: 'rings', label: '1ct Emerald-Cut Solitaire Ring', src: '/1ct-emerald-cut-solitaire-ring' },
+  { id: 7, name: '1ct Heart-Cut Solitaire Ring', basePrice: 32000, image: 'shop-engagement-page/heart-cut-engagement-ring.jpg', category: 'rings', label: '1ct Heart-Cut Solitaire Ring', src: '/1ct-heart-cut-solitaire-ring' },
+  { id: 8, name: '1ct Pear-Cut Solitaire Ring', basePrice: 32000, image: 'shop-engagement-page/pear-teardrop-engagement-ring.jpg', category: 'rings', label: '1ct Pear-Cut Solitaire Ring', src: '/1ct-pear-cut-solitaire-ring' },
+  { id: 9, name: '1ct Asscher-Cut Solitaire Ring', basePrice: 32000, image: 'shop-engagement-page/asscher-cut-engagement-ring.jpg', category: 'rings', label: '1ct Asscher-Cut Solitaire Ring', src: '/1ct-asscher-cut-solitaire-ring' },
+  { id: 10, name: '1ct Marquise-Cut Solitaire Ring', basePrice: 32000, image: 'shop-engagement-page/marquis-cut-engagement-ring.jpg', category: 'rings', label: '1ct Marquise-Cut Solitaire Ring', src: '/1ct-marquise-cut-solitaire-ring' }
 ];
 
 // Wedding Bands data
 const weddingBandsStyles = [
-  { id: 1, name: 'Half eternity .30ct moissanite', price: 110000, image: 'sparkling-diamond-ring-with-classic-metal-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .30ct moissanite', src: '/wedding-band-1', bandCarat: '0.30' },
-  { id: 2, name: 'Half eternity .01ct moissanite', price: 70000, image: 'stacked-gold-rings-clear-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-2', bandCarat: '0.01' },
-  { id: 3, name: 'Half eternity .01ct moissanite', price: 62000, image: 'thin-eternity-and-plain-band-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-3', bandCarat: '0.01' },
-  { id: 4, name: 'Half eternity .01ct moissanite', price: 65000, image: 'gold-diamond-v-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-4', bandCarat: '0.01' },
-  { id: 5, name: 'Half eternity .01ct moissanite', price: 95000, image: 'matching-silver-rings-small-diamonds-wedding-bands.jpeg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-5', bandCarat: '0.01' },
-  { id: 6, name: 'Plain bands', price: 42000, image: 'plain-silver-wedding-bands.jpg', category: 'wedding-bands', label: 'Plain bands', src: '/wedding-band-6', bandCarat: '0' }
+  { id: 1, name: 'Half eternity .30ct moissanite', basePrice: 110000, image: 'sparkling-diamond-ring-with-classic-metal-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .30ct moissanite', src: '/wedding-band-1', bandCarat: '0.30' },
+  { id: 2, name: 'Half eternity .01ct moissanite', basePrice: 70000, image: 'stacked-gold-rings-clear-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-2', bandCarat: '0.01' },
+  { id: 3, name: 'Half eternity .01ct moissanite', basePrice: 62000, image: 'thin-eternity-and-plain-band-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-3', bandCarat: '0.01' },
+  { id: 4, name: 'Half eternity .01ct moissanite', basePrice: 65000, image: 'gold-diamond-v-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-4', bandCarat: '0.01' },
+  { id: 5, name: 'Half eternity .01ct moissanite', basePrice: 95000, image: 'matching-silver-rings-small-diamonds-wedding-bands.jpeg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-5', bandCarat: '0.01' },
+  { id: 6, name: 'Plain bands', basePrice: 50000, image: 'plain-silver-wedding-bands.jpg', category: 'wedding-bands', label: 'Plain bands', src: '/wedding-band-6', bandCarat: '0', isPlain: true }
 ];
 
 // Routes
@@ -182,9 +187,12 @@ app.get('/engagement-rings', async (req, res) => {
       subcategory: 'engagement',
       inStock: true 
     });
-    
+
+    // If the DB set is incomplete, fall back to the full curated list so all cards and images render
+    const data = rings.length >= engagementRingStyles.length ? rings : engagementRingStyles;
+
     res.render('engagement-rings', {
-      ringStyles: rings.length > 0 ? rings : engagementRingStyles
+      ringStyles: data
     });
   } catch (error) {
     console.error('Error fetching engagement rings:', error);
@@ -256,8 +264,42 @@ app.get('/about', (req, res) => {
 });
 
 // Blogs page
-app.get('/blogs', (req, res) => {
-  res.render('blogs');
+app.get('/blogs', async (req, res) => {
+  try {
+    const blogs = await Blog.find({ published: true })
+      .sort({ publishedAt: -1 })
+      .limit(6); // Show only 6 recent blogs on main page
+    res.render('blogs', { blogs });
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    res.render('blogs', { blogs: [] });
+  }
+});
+
+// All blogs page
+app.get('/blogs/all/view', async (req, res) => {
+  try {
+    const blogs = await Blog.find({ published: true })
+      .sort({ publishedAt: -1 });
+    res.render('all-blogs', { blogs });
+  } catch (error) {
+    console.error('Error fetching all blogs:', error);
+    res.render('all-blogs', { blogs: [] });
+  }
+});
+
+// Blog detail page
+app.get('/blogs/:slug', async (req, res) => {
+  try {
+    const blog = await Blog.findOne({ slug: req.params.slug, published: true });
+    if (!blog) {
+      return res.status(404).send('Blog not found');
+    }
+    res.render('blog-detail', { blog });
+  } catch (error) {
+    console.error('Error fetching blog:', error);
+    res.status(500).send('Server error');
+  }
 });
 
 // Profile page

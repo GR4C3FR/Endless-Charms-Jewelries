@@ -120,7 +120,7 @@ const products = [
   { 
     name: 'Pear Cut Ring', 
     basePrice: 19000,
-    image: 'shop-engagement-page/pear-teardrop-cut-engagement-ring.jpg', 
+    image: 'shop-engagement-page/pear-teardrop-engagement-ring.jpg', 
     category: 'rings', 
     subcategory: 'engagement', 
     inStock: true, 
@@ -186,7 +186,7 @@ const products = [
   { 
     name: 'Half eternity .30ct moissanite', 
     basePrice: 110000,
-    image: 'sparkling-diamond-ring-with-classic-metal-wedding-bands.jpg', 
+    image: 'shop-wedding-page/sparkling-diamond-ring-with-classic-metal-wedding-bands.jpg', 
     category: 'bands', 
     subcategory: 'wedding-bands', 
     inStock: true, 
@@ -209,7 +209,7 @@ const products = [
   { 
     name: 'Half eternity .01ct moissanite', 
     basePrice: 70000,
-    image: 'stacked-gold-rings-clear-wedding-bands.jpg', 
+    image: 'shop-wedding-page/stacked-gold-rings-clear-wedding-bands.jpg', 
     category: 'bands', 
     subcategory: 'wedding-bands', 
     inStock: true, 
@@ -232,7 +232,7 @@ const products = [
   { 
     name: 'Half eternity .01ct moissanite', 
     basePrice: 62000,
-    image: 'thin-eternity-and-plain-band-wedding-bands.jpg', 
+    image: 'shop-wedding-page/thin-eternity-and-plain-band-wedding-bands.jpg', 
     category: 'bands', 
     subcategory: 'wedding-bands', 
     inStock: true, 
@@ -255,7 +255,7 @@ const products = [
   { 
     name: 'Half eternity .01ct moissanite', 
     basePrice: 65000,
-    image: 'gold-diamond-v-wedding-bands.jpg', 
+    image: 'shop-wedding-page/gold-diamond-v-wedding-bands.jpg', 
     category: 'bands', 
     subcategory: 'wedding-bands', 
     inStock: true, 
@@ -278,7 +278,7 @@ const products = [
   { 
     name: 'Half eternity .01ct moissanite', 
     basePrice: 95000,
-    image: 'matching-silver-rings-small-diamonds-wedding-bands.jpeg', 
+    image: 'shop-wedding-page/matching-silver-rings-small-diamonds-wedding-bands.jpeg', 
     category: 'bands', 
     subcategory: 'wedding-bands', 
     inStock: true, 
@@ -323,8 +323,8 @@ const products = [
   },
 
   { 
-    name: 'Tennis Necklace', 
-    basePrice: 30000,
+    name: '.30 ct Tennis Necklace', 
+    basePrice: 195000,
     image: 'diamond-tennis-necklace.jpg', 
     category: 'necklaces', 
     subcategory: 'accessories', 
@@ -360,7 +360,7 @@ const products = [
   },
   { 
     name: 'Stud Earrings', 
-    basePrice: 15000,
+    basePrice: 149000,
     image: 'diamond-stud-earrings.jpg', 
     category: 'earrings', 
     subcategory: 'accessories', 
@@ -395,8 +395,8 @@ const products = [
     }
   },
   { 
-    name: 'Tennis Bracelet', 
-    basePrice: 25000,
+    name: '.30 ct Tennis Bracelet', 
+    basePrice: 149000,
     image: 'diamond-tennis-bracelet.jpg', 
     category: 'bracelets', 
     subcategory: 'accessories', 

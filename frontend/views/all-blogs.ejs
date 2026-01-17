@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Us - Endless Charms</title>
+  <title>All Blogs - Endless Charms</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -44,103 +44,38 @@
     </div>
   </header>
 
-  <!-- About Hero Section -->
-  <section class="about-hero">
-    <div class="hero-banner">
-      <img src="/images/stackable-14k-18k-gold-and-white-gold-statement-rings.png" alt="Endless Charms Jewelry" class="hero-image">
-      <div class="hero-overlay"></div>
-      <h1 class="hero-headline">Crafting Timeless Jewelry Made Just for You</h1>
-    </div>
-
-    <!-- Overlapping Content Box -->
-    <div class="about-content-box">
-      <div class="content-box-inner">
-        <h2 class="content-subtitle">The Story of Endless Charms</h2>
-        <p class="content-text">
-          Endless Charms began with a simple belief that jewelry should be as meaningful as the stories they represent. We craft timeless, made-to-order pieces using premium metals and brilliant stones, each created with care and built to last. What started as a passion for craftsmanship has become a commitment to creating personal and purposeful jewelry for every milestone.
-        </p>
-
-        <h2 class="content-subtitle">Mission and Vision</h2>
-        <p class="content-text">
-          Our mission is to craft personalized fine jewelry that reflects every customer's unique journey. We envision becoming the most trusted name in custom jewelry, known for meaningful designs and exceptional service.
-        </p>
-      </div>
+  <!-- Page Header -->
+  <section class="all-blogs-header">
+    <div class="container">
+      <h1 class="all-blogs-title">All Blog Articles</h1>
+      <p class="all-blogs-subtitle">Explore our complete collection of jewelry insights, guides, and expert tips</p>
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section class="features-section">
-    <div class="features-container">
-      <div class="feature-card">
-        <h3 class="feature-title">Craftsmanship Philosophy</h3>
-        <p class="feature-text">
-          We believe jewelry should blend artistry, precision, and personal meaning. Every detail is thoughtfully crafted using premium materials and expert techniques. Our goal is to create pieces that hold emotional value and stand the test of time.
-        </p>
+  <!-- All Blog Cards Section -->
+  <section class="all-blogs-section">
+    <div class="container">
+      <div class="all-blogs-grid">
+        <% if (blogs && blogs.length > 0) { %>
+          <% blogs.forEach(function(blog) { %>
+            <article class="blog-card">
+              <div class="blog-card-image">
+                <img src="<%= blog.image %>" alt="<%= blog.title %>">
+              </div>
+              <div class="blog-card-content">
+                <span class="blog-timestamp">
+                  <%= new Date(blog.publishedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                </span>
+                <h3 class="blog-card-title"><%= blog.title %></h3>
+                <p class="blog-card-excerpt"><%= blog.excerpt %></p>
+                <a href="/blogs/<%= blog.slug %>" class="blog-read-btn">Read Now</a>
+              </div>
+            </article>
+          <% }); %>
+        <% } else { %>
+          <p>No blogs available at the moment.</p>
+        <% } %>
       </div>
-
-      <div class="feature-card">
-        <h3 class="feature-title">How Our Jewelry Is Made</h3>
-        <p class="feature-text">
-          Each piece is made to order, beginning with your chosen metal and stones. From custom sizes to stone settings and engraved details, every element is carefully crafted. We refine and inspect each piece to ensure lasting beauty and durability.
-        </p>
-      </div>
-
-      <div class="feature-card">
-        <h3 class="feature-title">Customer Satisfaction</h3>
-        <p class="feature-text">
-          We prioritize quality in every stage of creation, from material selection to final polishing. Our team ensures each piece meets high standards of craftsmanship. Your satisfaction and confidence matter most to us.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Carousel Section -->
-  <section class="carousel-section">
-    <div class="carousel-container">
-      <!-- Left Arrow -->
-      <button class="carousel-arrow carousel-arrow-left" onclick="changeSlide(-1)">
-        &lt;
-      </button>
-
-      <!-- Slides -->
-      <div class="carousel-content">
-        <!-- Slide 1: What We Offer -->
-        <div class="carousel-slide active" data-slide="1">
-          <h2 class="carousel-heading">What We Offer</h2>
-          <p class="carousel-text">
-            We create any ring, necklace, bracelet, or earring style you envision. Each piece can be fully customized and designed based on your photo, sketch, or idea, ensuring a truly personal and meaningful creation.
-          </p>
-        </div>
-
-        <!-- Slide 2: Stones -->
-        <div class="carousel-slide" data-slide="2">
-          <h2 class="carousel-heading">Stones</h2>
-          <p class="carousel-text">
-            We offer Natural Diamond, Lab-Grown Diamond, Moissanite, Signity Stones, and Birthstones for all your jewelry needs.
-          </p>
-        </div>
-
-        <!-- Slide 3: Metals -->
-        <div class="carousel-slide" data-slide="3">
-          <h2 class="carousel-heading">Metals</h2>
-          <p class="carousel-text">
-            Choose from 18k Yellow, White, and Rose Gold, or 14k Yellow, White, and Rose Gold for your perfect piece.
-          </p>
-        </div>
-
-        <!-- Slide 4: Additional Options -->
-        <div class="carousel-slide" data-slide="4">
-          <h2 class="carousel-heading">Additional Custom Options</h2>
-          <p class="carousel-text">
-            We offer engraving, custom stone settings, custom ring sizes including half sizes, and designs from photos or sketches.
-          </p>
-        </div>
-      </div>
-
-      <!-- Right Arrow -->
-      <button class="carousel-arrow carousel-arrow-right" onclick="changeSlide(1)">
-        &gt;
-      </button>
     </div>
   </section>
 
@@ -153,7 +88,6 @@
           <p>100% authentic and pawnable gold,<br>secure payments, and fully<br>customizable made-to-order pieces.</p>
           <p class="copyright">© Copyright 2025</p>
         </div>
-        
         <div class="footer-section">
           <h4>Quick Links</h4>
           <ul class="footer-links">
@@ -162,7 +96,6 @@
             <li><a href="/about">About</a></li>
           </ul>
         </div>
-        
         <div class="footer-section">
           <h4>Collections</h4>
           <ul class="footer-links">
@@ -171,7 +104,6 @@
             <li><a href="/accessories">Other Accessories</a></li>
           </ul>
         </div>
-        
         <div class="footer-section">
           <h4>Contacts</h4>
           <p>endlesscharms@sample.com</p>
