@@ -161,6 +161,17 @@
 
   <script src="/js/script.js"></script>
   <script>
+    // Handle logout - clear localStorage
+    document.querySelector('.profile-nav-item.logout').addEventListener('click', function(e) {
+      e.preventDefault();
+      // Clear all user-related localStorage items
+      localStorage.removeItem('ec_user_logged_in');
+      localStorage.removeItem('ec_user_email');
+      localStorage.removeItem('ec_user_name');
+      // Redirect to logout endpoint
+      window.location.href = '/api/auth/logout';
+    });
+
     // Tab switching
     document.querySelectorAll('.profile-nav-item').forEach(item => {
       item.addEventListener('click', function(e) {
