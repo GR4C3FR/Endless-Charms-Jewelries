@@ -15,6 +15,7 @@ const authRoutes = require('./routes/auth');
 
 // Import models
 const Product = require('./models/Product');
+const Blog = require('./models/Blog');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -256,8 +257,42 @@ app.get('/about', (req, res) => {
 });
 
 // Blogs page
-app.get('/blogs', (req, res) => {
-  res.render('blogs');
+app.get('/blogs', async (req, res) => {
+  try {
+    const blogs = await Blog.find({ published: true })
+      .sort({ publishedAt: -1 })
+      .limit(6); // Show only 6 recent blogs on main page
+    res.render('blogs', { blogs });
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    res.render('blogs', { blogs: [] });
+  }
+});
+
+// All blogs page
+app.get('/blogs/all/view', async (req, res) => {
+  try {
+    const blogs = await Blog.find({ published: true })
+      .sort({ publishedAt: -1 });
+    res.render('all-blogs', { blogs });
+  } catch (error) {
+    console.error('Error fetching all blogs:', error);
+    res.render('all-blogs', { blogs: [] });
+  }
+});
+
+// Blog detail page
+app.get('/blogs/:slug', async (req, res) => {
+  try {
+    const blog = await Blog.findOne({ slug: req.params.slug, published: true });
+    if (!blog) {
+      return res.status(404).send('Blog not found');
+    }
+    res.render('blog-detail', { blog });
+  } catch (error) {
+    console.error('Error fetching blog:', error);
+    res.status(500).send('Server error');
+  }
 });
 
 // Profile page
