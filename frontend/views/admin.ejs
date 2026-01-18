@@ -13,7 +13,7 @@
         }
 
         .admin-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #620814;
             color: white;
             padding: 30px;
             border-radius: 10px;
@@ -52,12 +52,12 @@
         }
 
         .admin-tab:hover {
-            color: #667eea;
+            color: #620814;
         }
 
         .admin-tab.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
+            color: #620814;
+            border-bottom-color: #620814;
         }
 
         .tab-content {
@@ -99,7 +99,7 @@
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #620814;
         }
 
         .form-group textarea {
@@ -123,13 +123,13 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #620814;
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(98, 8, 20, 0.4);
         }
 
         .btn-danger {
@@ -332,24 +332,13 @@
                     <a href="/contact" class="nav-link">CONTACT</a>
                     <a href="/about" class="nav-link">ABOUT</a>
                 </div>
-                <div class="nav-actions">
-                    <a href="/bag" class="icon-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <path d="M16 10a4 4 0 0 1-8 0"></path>
-                        </svg>
-                    </a>
-                    <% if (user) { %>
-                        <a href="/profile" class="icon-button">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                        </a>
-                    <% } else { %>
-                        <a href="/login" class="btn btn-secondary">LOG IN</a>
-                    <% } %>
+                <div class="nav-icons">
+                    <button class="icon-btn" onclick="window.location.href='/profile'">
+                        <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon">
+                    </button>
+                    <button class="icon-btn" onclick="window.location.href='/bag'">
+                        <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon">
+                    </button>
                 </div>
             </nav>
         </div>
@@ -357,7 +346,7 @@
 
     <div class="admin-container">
         <div class="admin-header">
-            <h1>🛡️ Admin Panel</h1>
+            <h1>Admin Panel</h1>
             <p>Welcome back, <%= user.firstName %>! Manage your blog posts and content here.</p>
         </div>
 
@@ -368,7 +357,7 @@
 
         <!-- Create Blog Tab -->
         <div id="create-tab" class="tab-content active">
-            <h2 id="form-title">✨ Create New Blog Post</h2>
+            <h2 id="form-title">Create New Blog Post</h2>
             <div id="create-alert" class="alert"></div>
             
             <form id="create-blog-form" enctype="multipart/form-data">
@@ -418,14 +407,14 @@
                     <small style="color: #6b7280; display: block; margin-top: 5px;">Leave empty to publish immediately. Set a future date to schedule publication.</small>
                 </div>
 
-                <button type="submit" class="btn btn-primary" id="submit-btn">📝 Create Blog Post</button>
-                <button type="button" class="btn btn-secondary" id="cancel-edit-btn" style="display: none; margin-left: 10px;" onclick="cancelEdit()">❌ Cancel</button>
+                <button type="submit" class="btn btn-primary" id="submit-btn">Create Blog Post</button>
+                <button type="button" class="btn btn-secondary" id="cancel-edit-btn" style="display: none; margin-left: 10px;" onclick="cancelEdit()">Cancel</button>
             </form>
         </div>
 
         <!-- Manage Blogs Tab -->
         <div id="manage-tab" class="tab-content">
-            <h2>📚 Manage Blog Posts</h2>
+            <h2>Manage Blog Posts</h2>
             <div id="manage-alert" class="alert"></div>
             
             <div id="blogs-list">
@@ -539,7 +528,7 @@
                 console.error('Error:', error);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = isEditing ? '💾 Update Blog Post' : '📝 Create Blog Post';
+                submitBtn.textContent = isEditing ? 'Update Blog Post' : 'Create Blog Post';
             }
         });
 
@@ -579,9 +568,9 @@
                                     </div>
                                     <p>${blog.excerpt.substring(0, 150)}...</p>
                                     <div class="blog-item-actions">
-                                        <button class="btn btn-secondary" onclick="editBlog('${blog._id}')">✏️ Edit</button>
-                                        <button class="btn btn-secondary" onclick="viewBlog('${blog.slug}')">👁️ View</button>
-                                        <button class="btn btn-danger" onclick="deleteBlog('${blog._id}')">🗑️ Delete</button>
+                                        <button class="btn btn-secondary" onclick="editBlog('${blog._id}')">Edit</button>
+                                        <button class="btn btn-secondary" onclick="viewBlog('${blog.slug}')">View</button>
+                                        <button class="btn btn-danger" onclick="deleteBlog('${blog._id}')">Delete</button>
                                     </div>
                                 </div>
                             </div>
@@ -610,8 +599,8 @@
                     document.querySelector('[data-tab="create"]').click();
                     
                     // Update form title and button
-                    document.getElementById('form-title').textContent = '✏️ Edit Blog Post';
-                    document.getElementById('submit-btn').textContent = '💾 Update Blog Post';
+                    document.getElementById('form-title').textContent = 'Edit Blog Post';
+                    document.getElementById('submit-btn').textContent = 'Update Blog Post';
                     document.getElementById('cancel-edit-btn').style.display = 'inline-block';
                     
                     // Populate form fields
@@ -663,8 +652,8 @@
             document.getElementById('schedule-group').style.display = 'none';
             
             // Reset form title and button
-            document.getElementById('form-title').textContent = '✨ Create New Blog Post';
-            document.getElementById('submit-btn').textContent = '📝 Create Blog Post';
+            document.getElementById('form-title').textContent = 'Create New Blog Post';
+            document.getElementById('submit-btn').textContent = 'Create Blog Post';
             document.getElementById('cancel-edit-btn').style.display = 'none';
             
             // Make image required again

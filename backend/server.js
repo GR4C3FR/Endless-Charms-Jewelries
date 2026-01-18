@@ -44,6 +44,12 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Make user available to all views
+app.use((req, res, next) => {
+  res.locals.user = req.user || null;
+  next();
+});
+
 // Set view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../frontend/views'));
