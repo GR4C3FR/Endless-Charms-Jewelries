@@ -49,6 +49,19 @@ function generateSlug(title) {
 // GET all blogs (including unpublished for admin)
 router.get('/blogs', isAdmin, async (req, res) => {
   try {
+    // First, auto-publish any scheduled blogs whose time has arrived
+    const now = new Date();
+    const scheduledBlogs = await Blog.find({
+      scheduledPublishDate: { $lte: now },
+      published: false
+    });
+    
+    for (const blog of scheduledBlogs) {
+      blog.published = true;
+      blog.publishedAt = blog.scheduledPublishDate;
+      await blog.save();
+    }
+    
     const blogs = await Blog.find().sort({ createdAt: -1 });
     res.json(blogs);
   } catch (error) {
@@ -93,6 +106,22 @@ router.post('/blogs', isAdmin, upload.single('image'), async (req, res) => {
       }
     }
     
+    // Handle scheduled publishing
+    const { scheduledPublishDate } = req.body;
+    const isPublished = published === 'true' || published === true;
+    let publishedAt = null;
+    let scheduleDate = null;
+    
+    if (scheduledPublishDate) {
+      scheduleDate = new Date(scheduledPublishDate);
+      // Only publish if scheduled date is in the past
+      if (scheduleDate <= new Date()) {
+        publishedAt = scheduleDate;
+      }
+    } else if (isPublished) {
+      publishedAt = new Date();
+    }
+    
     // Create blog object
     const blogData = {
       title,
@@ -102,8 +131,9 @@ router.post('/blogs', isAdmin, upload.single('image'), async (req, res) => {
       content,
       author: author || 'Endless Charms',
       tags: tagsArray,
-      published: published === 'true' || published === true,
-      publishedAt: (published === 'true' || published === true) ? new Date() : null
+      published: scheduledPublishDate ? (scheduleDate <= new Date()) : isPublished,
+      publishedAt,
+      scheduledPublishDate: scheduledPublishDate ? scheduleDate : null
     };
     
     const blog = new Blog(blogData);
@@ -164,12 +194,26 @@ router.put('/blogs/:id', isAdmin, upload.single('image'), async (req, res) => {
       blog.image = `/images/blog-page/${req.file.filename}`;
     }
     
-    // Update published status
-    if (published !== undefined) {
+    // Handle scheduled publishing
+    if (req.body.scheduledPublishDate) {
+      const scheduleDate = new Date(req.body.scheduledPublishDate);
+      blog.scheduledPublishDate = scheduleDate;
+      // Only publish if scheduled date is in the past
+      if (scheduleDate <= new Date()) {
+        blog.published = true;
+        blog.publishedAt = scheduleDate;
+      } else {
+        blog.published = false;
+        blog.publishedAt = null;
+      }
+    } else if (published !== undefined) {
       const isPublished = published === 'true' || published === true;
       blog.published = isPublished;
+      blog.scheduledPublishDate = null;
       if (isPublished && !blog.publishedAt) {
         blog.publishedAt = new Date();
+      } else if (!isPublished) {
+        blog.publishedAt = null;
       }
     }
     

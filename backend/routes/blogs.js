@@ -5,6 +5,20 @@ const Blog = require('../models/Blog');
 // GET all published blogs
 router.get('/', async (req, res) => {
   try {
+    // First, auto-publish any scheduled blogs whose time has arrived
+    await Blog.updateMany(
+      { 
+        scheduledPublishDate: { $lte: new Date() },
+        published: false
+      },
+      { 
+        $set: { 
+          published: true,
+          publishedAt: '$scheduledPublishDate'
+        }
+      }
+    );
+    
     const blogs = await Blog.find({ published: true })
       .sort({ publishedAt: -1 });
     res.json(blogs);

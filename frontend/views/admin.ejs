@@ -252,6 +252,11 @@
             color: #065f46;
         }
 
+        .status-scheduled {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
         .status-draft {
             background: #fef3c7;
             color: #92400e;
@@ -407,6 +412,12 @@
                     </div>
                 </div>
 
+                <div class="form-group" id="schedule-group" style="display: none;">
+                    <label for="scheduledPublishDate">Schedule Publish Date & Time</label>
+                    <input type="datetime-local" id="scheduledPublishDate" name="scheduledPublishDate" style="padding: 12px;">
+                    <small style="color: #6b7280; display: block; margin-top: 5px;">Leave empty to publish immediately. Set a future date to schedule publication.</small>
+                </div>
+
                 <button type="submit" class="btn btn-primary" id="submit-btn">📝 Create Blog Post</button>
                 <button type="button" class="btn btn-secondary" id="cancel-edit-btn" style="display: none; margin-left: 10px;" onclick="cancelEdit()">❌ Cancel</button>
             </form>
@@ -424,6 +435,20 @@
     </div>
 
     <script>
+        // Toggle schedule field based on publish checkbox
+        const publishedCheckbox = document.getElementById('published');
+        const scheduleGroup = document.getElementById('schedule-group');
+        const scheduledDateInput = document.getElementById('scheduledPublishDate');
+
+        publishedCheckbox.addEventListener('change', function() {
+            if (!this.checked) {
+                scheduleGroup.style.display = 'block';
+            } else {
+                scheduleGroup.style.display = 'none';
+                scheduledDateInput.value = '';
+            }
+        });
+
         // Tab switching
         document.querySelectorAll('.admin-tab').forEach(tab => {
             tab.addEventListener('click', () => {
@@ -545,11 +570,11 @@
                                 <div class="blog-item-content">
                                     <h3 class="blog-item-title">${blog.title}</h3>
                                     <div class="blog-item-meta">
-                                        <span class="status-badge ${blog.published ? 'status-published' : 'status-draft'}">
-                                            ${blog.published ? 'Published' : 'Draft'}
+                                        <span class="status-badge ${blog.published ? 'status-published' : (blog.scheduledPublishDate ? 'status-scheduled' : 'status-draft')}">
+                                            ${blog.published ? 'Published' : (blog.scheduledPublishDate ? 'Scheduled' : 'Draft')}
                                         </span>
                                         <span style="margin-left: 10px;">
-                                            ${blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString() : 'Not published'}
+                                            ${blog.scheduledPublishDate ? 'Scheduled: ' + new Date(blog.scheduledPublishDate).toLocaleString() : (blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString() : 'Not published')}
                                         </span>
                                     </div>
                                     <p>${blog.excerpt.substring(0, 150)}...</p>
@@ -598,6 +623,17 @@
                     document.getElementById('tags').value = blog.tags.join(', ');
                     document.getElementById('published').checked = blog.published;
                     
+                    // Handle scheduled date
+                    if (blog.scheduledPublishDate) {
+                        const scheduleDate = new Date(blog.scheduledPublishDate);
+                        const localDateTime = new Date(scheduleDate.getTime() - scheduleDate.getTimezoneOffset() * 60000)
+                            .toISOString()
+                            .slice(0, 16);
+                        document.getElementById('scheduledPublishDate').value = localDateTime;
+                        document.getElementById('schedule-group').style.display = 'block';
+                        document.getElementById('published').checked = false;
+                    }
+                    
                     // Show current image
                     document.getElementById('image-preview').innerHTML = `<img src="${blog.image}" alt="Current image">`;
                     
@@ -623,6 +659,8 @@
             document.getElementById('create-blog-form').reset();
             document.getElementById('blog-id').value = '';
             document.getElementById('image-preview').innerHTML = '';
+            document.getElementById('scheduledPublishDate').value = '';
+            document.getElementById('schedule-group').style.display = 'none';
             
             // Reset form title and button
             document.getElementById('form-title').textContent = '✨ Create New Blog Post';
