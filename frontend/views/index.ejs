@@ -29,9 +29,6 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
-          <button class="icon-btn">
-            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
-          </button>
           <button class="icon-btn" onclick="handleProfileClick()">
             <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon">
           </button>
@@ -66,24 +63,32 @@
       
       <div class="products-grid" id="productsGrid">
         <% products.slice(0, 8).forEach(product => { %>
-          <a href="/product/<%= product.id %>" class="product-card">
+          <div class="product-card add-to-bag-card"
+               data-id="product-<%= product.id %>"
+               data-name="<%= product.name.replace(/\"/g, '&quot;') %>"
+               data-price="<%= product.basePrice || product.price || 0 %>"
+               data-image="<%= product.image %>">
             <div class="product-image">
               <img src="/images/<%= product.image %>" alt="<%= product.name %>">
             </div>
             <div class="product-info">
               <h3 class="product-name"><%= product.name %></h3>
             </div>
-          </a>
+          </div>
         <% }); %>
         <% products.slice(8, 12).forEach(product => { %>
-          <a href="/product/<%= product.id %>" class="product-card hidden-product" style="display: none;">
+          <div class="product-card hidden-product add-to-bag-card" style="display: none;"
+               data-id="product-<%= product.id %>"
+               data-name="<%= product.name.replace(/\"/g, '&quot;') %>"
+               data-price="<%= product.basePrice || product.price || 0 %>"
+               data-image="<%= product.image %>">
             <div class="product-image">
               <img src="/images/<%= product.image %>" alt="<%= product.name %>">
             </div>
             <div class="product-info">
               <h3 class="product-name"><%= product.name %></h3>
             </div>
-          </a>
+          </div>
         <% }); %>
       </div>
       
@@ -109,12 +114,16 @@
     
     <div class="container">
       <div class="ring-styles-grid">
-        <% ringStyles.forEach(style => { %>
-          <div class="ring-style-card">
+        <% ringStyles.forEach((style, idx) => { %>
+          <div class="ring-style-card add-to-bag-card"
+               data-id="ring-<%= idx %>"
+               data-name="<%= (style.name || style.label).replace(/\"/g, '&quot;') %>"
+               data-price="<%= style.basePrice || style.price || 0 %>"
+               data-image="<%= style.image %>">
             <div class="ring-style-image">
               <img src="/images/<%= style.image %>" alt="<%= style.name %>">
             </div>
-            <p class="ring-style-label"><%= style.label %></p>
+            <p class="ring-style-label"><%= style.label || style.name %></p>
           </div>
         <% }); %>
       </div>

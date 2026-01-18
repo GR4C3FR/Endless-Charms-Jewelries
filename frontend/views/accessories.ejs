@@ -65,20 +65,18 @@
       <div class="container">
         <div class="weddingband-styles-grid">
           <% accessories.forEach((item, idx) => { %>
-            <div class="weddingband-style-card">
+            <div class="weddingband-style-card add-to-bag-card"
+                 data-id="accessory-<%= idx %>"
+                 data-name="<%= item.name.replace(/\"/g, '&quot;') %>"
+                 data-price="<%= item.basePrice %>"
+                 data-image="shop-other-accessories-page/<%= item.image %>">
               <div class="weddingband-style-image">
                 <img src="/images/shop-other-accessories-page/<%= item.image %>" alt="<%= item.name %>">
               </div>
               <div class="weddingband-style-info">
                 <p class="weddingband-style-label"><%= item.name %></p>
                 <div class="weddingband-style-footer">
-                  <button class="add-to-bag-btn"
-                          data-id="accessory-<%= idx %>"
-                          data-name="<%= item.name.replace(/\"/g, '&quot;') %>"
-                          data-price="<%= item.basePrice %>"
-                          data-image="shop-other-accessories-page/<%= item.image %>">
-                    ADD TO BAG
-                  </button>
+                  <!-- card is clickable to open customization modal -->
                 </div>
               </div>
             </div>

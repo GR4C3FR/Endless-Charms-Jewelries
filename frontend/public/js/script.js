@@ -1043,8 +1043,9 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
 // Delegate add-to-bag button clicks -> open modal
 window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.add-to-bag-btn');
-    if (!btn) return;
+    // allow either the original button or the whole card to act as trigger
+    const trigger = e.target.closest('.add-to-bag-btn, .add-to-bag-card');
+    if (!trigger) return;
     e.preventDefault();
 
     // Check if user is logged in
@@ -1054,13 +1055,16 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     const item = {
-      id: btn.dataset.id || btn.getAttribute('data-id'),
-      name: btn.dataset.name || btn.getAttribute('data-name') || 'Item',
-      price: parseFloat(btn.dataset.price || btn.getAttribute('data-price') || '0'),
-      image: btn.dataset.image || btn.getAttribute('data-image') || ''
+      id: trigger.dataset.id || trigger.getAttribute('data-id'),
+      name: trigger.dataset.name || trigger.getAttribute('data-name') || 'Item',
+      price: parseFloat(trigger.dataset.price || trigger.getAttribute('data-price') || '0'),
+      image: trigger.dataset.image || trigger.getAttribute('data-image') || ''
     };
 
-    openCustomizationModal(item, btn);
+    // only pass an origin button for the small visual feedback when the actual button was clicked
+    const originBtn = trigger.classList.contains('add-to-bag-btn') ? trigger : null;
+
+    openCustomizationModal(item, originBtn);
   });
 });
 

@@ -27,6 +27,10 @@ body {
   box-sizing: border-box;
 }
 
+.all-blogs-grid{
+  margin: 7em 0;
+}
+
 /* Header & Navigation */
 .main-header {
   background: transparent;
@@ -519,6 +523,7 @@ body {
 
 .carousel-container {
   max-width: 1200px;
+  height: 25em;
   margin: 40px auto;
   display: flex;
   align-items: center;
@@ -1782,6 +1787,7 @@ h1, h2, h3 {
 .ring-style-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
 }
 
 .ring-style-image {
@@ -1940,7 +1946,7 @@ h1, h2, h3 {
   overflow: hidden;
 }
 
-.weddingband-style-card:hover .weddingband-style-image {
+.weddingband-style-card:hover {
   box-shadow: 0 5px 20px rgba(98, 4, 24, 0.3);
 }
 
@@ -2078,6 +2084,14 @@ h1, h2, h3 {
 }
 
 /* Blog Cards Section */
+.blog-card{
+  margin-bottom: 5em;
+}
+
+.blog-card:hover{
+  cursor: pointer;
+}
+
 .blog-cards-section {
   padding: 80px 0;
   background: white;
@@ -2457,7 +2471,8 @@ h1, h2, h3 {
 /* Bag Specific Styles */
 .bag-page {
     margin-top: 150px;
-    padding-bottom: 100px;
+    padding-bottom: 50px;
+    min-height: 50em;
 }
 
 .bag-title {
@@ -2798,8 +2813,12 @@ h1, h2, h3 {
 }
 
 .profile-card .google-btn img {
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
+}
+
+.profile-card .google-btn:hover .google-icon {
+  content: url("/images/google_logo_white.png");
 }
 
 @media (max-width: 900px) {
@@ -2984,9 +3003,8 @@ h1, h2, h3 {
 }
 /* Profile Page Styles */
 .profile-page {
-  margin-top: 140px;
   min-height: calc(100vh - 200px);
-  padding: 40px 20px;
+  padding: 140px 20px;
   background-color: #f9f9f9;
 }
 
@@ -2995,7 +3013,6 @@ h1, h2, h3 {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: 30px;
   background: white;
   border-radius: 10px;
   overflow: hidden;
