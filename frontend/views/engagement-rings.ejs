@@ -29,7 +29,7 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
-          <button class="icon-btn">
+          <button id="headerSearchBtn" class="icon-btn">
             <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
           </button>
           <button class="icon-btn" onclick="handleProfileClick()">
@@ -42,6 +42,37 @@
         </div>
       </nav>
     </header>
+
+    <!-- Search dropdown (hidden by default). Toggled by the header search button -->
+   <div id="searchDropdown" class="search-dropdown">
+      <div class="search-dropdown-inner container">
+        <div class="search-bar-row">
+        <input
+            id="headerSearchInput"
+            type="text"
+            class="header-search-input"
+            placeholder="Search products, e.g. 'moissanite'"
+          />
+          <button id="headerSearchClose" class="icon-btn">
+          &times;
+          </button>
+        </div>
+        <div div id="searchResults" class="search-results-grid">
+          <!-- Placeholder for search results; items should use the same card layout as product tiles -->
+          <!-- Sample placeholder (hidden) -->
+          <div class="search-result-card" style="display:none;">
+            <div class="weddingband-style-image">
+              <img
+                src="/images/shop-engagement-page/placeholder.png"
+                alt="Sample"
+                class="search-result-img"
+              />
+            </div>
+            <p class="weddingband-style-label">Sample Product</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="main-parent-div">
         <!-- Hero Section (Row One) -->
@@ -71,23 +102,22 @@
             <div class="container">
                 <div class="weddingband-styles-grid">
                     <% ringStyles.forEach((ring, idx) => { %>
-                        <div class="weddingband-style-card">
-                            <div class="weddingband-style-image">
-                                <img src="/images/<%= ring.image %>" alt="<%= ring.name %>">
-                            </div>
-                            <div class="weddingband-style-info">
-                                <p class="weddingband-style-label"><%= ring.name %></p>
-                                <div class="weddingband-style-footer">
-                                    <button class="add-to-bag-btn"
-                                            data-id="ring-<%= idx %>"
-                                            data-name="<%= ring.name.replace(/\"/g, '&quot;') %>"
-                                            data-price="<%= ring.basePrice %>"
-                                            data-image="<%= ring.image %>">
-                                        ADD TO BAG
-                                    </button>
-                                </div>
-                            </div>
+                      <div class="weddingband-style-card add-to-bag-card"
+                         data-id="ring-<%= idx %>"
+                         data-name="<%= ring.name.replace(/\"/g, '&quot;') %>"
+                         data-price="<%= ring.basePrice %>"
+                         data-image="<%= ring.image %>"
+                         data-page="engagement-rings">
+                        <div class="weddingband-style-image">
+                          <img src="/images/<%= ring.image %>" alt="<%= ring.name %>">
                         </div>
+                        <div class="weddingband-style-info">
+                          <p class="weddingband-style-label"><%= ring.name %></p>
+                          <div class="weddingband-style-footer">
+                            <!-- card is clickable to open customization modal -->
+                          </div>
+                        </div>
+                      </div>
                     <% }); %>
                 </div>
             </div>

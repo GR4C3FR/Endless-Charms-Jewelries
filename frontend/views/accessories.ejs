@@ -29,7 +29,7 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
-          <button class="icon-btn">
+          <button id="headerSearchBtn" class="icon-btn">
             <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
           </button>
           <button class="icon-btn" onclick="handleProfileClick()">
@@ -43,6 +43,37 @@
       </nav>
     </div>
   </header>
+
+  <!-- Search dropdown (hidden by default). Toggled by the header search button -->
+  <div id="searchDropdown" class="search-dropdown">
+    <div class="search-dropdown-inner container">
+      <div class="search-bar-row">
+        <input
+          id="headerSearchInput"
+          type="text"
+          class="header-search-input"
+          placeholder="Search products, e.g. 'moissanite'"
+        />
+        <button id="headerSearchClose" class="icon-btn">
+          &times;
+        </button>
+      </div>
+      <div id="searchResults" class="search-results-grid">
+        <!-- Placeholder for search results; items should use the same card layout as product tiles -->
+        <!-- Sample placeholder (hidden) -->
+        <div class="search-result-card" style="display:none;">
+          <div class="weddingband-style-image">
+            <img
+              src="/images/shop-other-accessories-page/placeholder.png"
+              alt="Sample"
+              class="search-result-img"
+            />
+          </div>
+          <p class="weddingband-style-label">Sample Product</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="main-parent-div">
     <!-- Hero Section (two-column image + text like provided design) -->
@@ -65,20 +96,19 @@
       <div class="container">
         <div class="weddingband-styles-grid">
           <% accessories.forEach((item, idx) => { %>
-            <div class="weddingband-style-card">
+            <div class="weddingband-style-card add-to-bag-card"
+                 data-id="accessory-<%= idx %>"
+                 data-name="<%= item.name.replace(/\"/g, '&quot;') %>"
+                 data-price="<%= item.basePrice %>"
+                 data-image="shop-other-accessories-page/<%= item.image %>"
+                 data-page="accessories">
               <div class="weddingband-style-image">
                 <img src="/images/shop-other-accessories-page/<%= item.image %>" alt="<%= item.name %>">
               </div>
               <div class="weddingband-style-info">
                 <p class="weddingband-style-label"><%= item.name %></p>
                 <div class="weddingband-style-footer">
-                  <button class="add-to-bag-btn"
-                          data-id="accessory-<%= idx %>"
-                          data-name="<%= item.name.replace(/\"/g, '&quot;') %>"
-                          data-price="<%= item.basePrice %>"
-                          data-image="shop-other-accessories-page/<%= item.image %>">
-                    ADD TO BAG
-                  </button>
+                  <!-- card is clickable to open customization modal -->
                 </div>
               </div>
             </div>

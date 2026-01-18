@@ -301,7 +301,7 @@ const products = [
   { 
     name: 'Plain bands', 
     basePrice: 42000,
-    image: 'plain-silver-wedding-bands.jpg', 
+    image: 'shop-wedding-page/plain-silver-wedding-bands.jpg', 
     category: 'bands', 
     subcategory: 'wedding-bands', 
     inStock: true, 

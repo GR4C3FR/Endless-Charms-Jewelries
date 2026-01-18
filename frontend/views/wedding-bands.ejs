@@ -29,7 +29,7 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
-          <button class="icon-btn">
+          <button id="headerSearchBtn" class="icon-btn">
             <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
           </button>
           <button class="icon-btn" onclick="handleProfileClick()">
@@ -43,6 +43,37 @@
       </nav>
     </div>
   </header>
+
+  <!-- Search dropdown (hidden by default). Toggled by the header search button -->
+  <div id="searchDropdown" class="search-dropdown">
+    <div class="search-dropdown-inner container">
+      <div class="search-bar-row">
+        <input
+          id="headerSearchInput"
+          type="text"
+          class="header-search-input"
+          placeholder="Search products, e.g. 'moissanite'"
+        />
+        <button id="headerSearchClose" class="icon-btn">
+          &times;
+        </button>
+      </div>
+      <div id="searchResults" class="search-results-grid">
+        <!-- Placeholder for search results; items should use the same card layout as product tiles -->
+        <!-- Sample placeholder (hidden) -->
+        <div class="search-result-card" style="display:none;">
+          <div class="weddingband-style-image">
+            <img
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3C/svg%3E"
+              alt="Sample"
+              class="search-result-img"
+            />
+          </div>
+          <p class="weddingband-style-label">Sample Product</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Main Content -->
   <div class="main-parent-div">
@@ -70,20 +101,19 @@
       <div class="container">
         <div class="weddingband-styles-grid">
           <% bandStyles.forEach((band, idx) => { %>
-            <div class="weddingband-style-card">
+            <div class="weddingband-style-card add-to-bag-card"
+                 data-id="band-<%= idx %>"
+                 data-name="<%= band.name.replace(/\"/g, '&quot;') %>"
+                 data-price="<%= band.basePrice %>"
+                 data-image="<%= band.image %>"
+                 data-page="wedding-bands">
               <div class="weddingband-style-image">
-                <img src="/images/shop-wedding-page/<%= band.image %>" alt="<%= band.name %>">
+                <img src="/images/<%= band.image %>" alt="<%= band.name %>">
               </div>
               <div class="weddingband-style-info">
                 <p class="weddingband-style-label"><%= band.name %></p>
                 <div class="weddingband-style-footer">
-                  <button class="add-to-bag-btn"
-                          data-id="band-<%= idx %>"
-                          data-name="<%= band.name.replace(/\"/g, '&quot;') %>"
-                          data-price="<%= band.basePrice %>"
-                          data-image="shop-wedding-page/<%= band.image %>">
-                    ADD TO BAG
-                  </button>
+                  <!-- card is clickable to open customization modal -->
                 </div>
               </div>
             </div>

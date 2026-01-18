@@ -535,6 +535,17 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   const isBandSource = baseItem && String(baseItem.id).startsWith('band-');
   const isAccessorySource = baseItem && String(baseItem.id).startsWith('accessory-');
   
+  // default selections - must be declared before using them
+  let selectedMetal = '14k yellow gold';
+  let selectedStone = 'Signity';
+  let selectedCarat = '1';
+  let selectedBandCarat = '0';  // For wedding bands: '0', '0.30', or '0.01'
+  let selectedFemaleSize = '3';
+  let selectedMaleSize = '3';
+  let selectedFemaleCarat = '1';  // Female carat size for bands (default to 1 ct)
+  let selectedMaleCarat = '1';    // Male carat size for bands (default to 1 ct)
+  let editing = false;
+  
   // Determine accessory type early
   if (isAccessorySource) {
     const productName = (baseItem.name || '').toLowerCase();
@@ -553,6 +564,9 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
     const isPlainBand = (baseItem && baseItem.name && baseItem.name.toLowerCase && baseItem.name.toLowerCase().includes('plain')) || (baseItem && baseItem.isPlain);
     
     if (isPlainBand) {
+      // For plain bands, set stone to null
+      selectedStone = null;
+      baseItem.isPlainBand = true;  // Store flag for later use
       // Hide all customization for plain bands except metal and female/male sizes
       const caratGroup = caratSel && caratSel.parentElement; if (caratGroup) caratGroup.style.display = 'none';
       const stoneGroup = overlay.querySelector('.ec-opt-group:nth-of-type(2)'); if (stoneGroup) stoneGroup.style.display = 'none';
@@ -579,6 +593,7 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       if (pairNoticeEl && pairNoticeEl.parentElement) pairNoticeEl.parentElement.insertBefore(noteWrap, pairNoticeEl.nextSibling);
       
       selectedBandCarat = '0';  // Always plain
+      baseItem.isPlainBand = true;  // Store flag for later use
     } else {
       // Hide carat selector for bands (will use dropdown instead)
       const caratGroup = caratSel && caratSel.parentElement; if (caratGroup) caratGroup.style.display = 'none';
@@ -657,17 +672,6 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
     const contactBtn = noteWrap.querySelector('#contact-page-btn');
     if (contactBtn) contactBtn.addEventListener('click', ()=> { window.location.href = '/contact'; });
   }
-
-  // default selections
-  let selectedMetal = '14k yellow gold';
-  let selectedStone = 'Signity';
-  let selectedCarat = '1';
-  let selectedBandCarat = '0';  // For wedding bands: '0', '0.30', or '0.01'
-  let selectedFemaleSize = '3';
-  let selectedMaleSize = '3';
-  let selectedFemaleCarat = '1';  // Female carat size for bands (default to 1 ct)
-  let selectedMaleCarat = '1';    // Male carat size for bands (default to 1 ct)
-  let editing = false;
 
   // If this customization is for an existing bag item, prefill selections
   if (existingItem) {
@@ -921,9 +925,20 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
     if (isBandSource) {
       const fSize = parseFloat(selectedFemaleSize);
       const mSize = parseFloat(selectedMaleSize);
+      const addBtn = overlay.querySelector('#modal-add');
       if (fSize > 7 || mSize > 7) {
-        showToast('Sizes above 7 require custom pricing. Please message our page for a quote.');
+        if (addBtn) {
+          addBtn.disabled = true;
+          addBtn.style.opacity = '0.5';
+          addBtn.style.cursor = 'not-allowed';
+        }
         return false;
+      } else {
+        if (addBtn) {
+          addBtn.disabled = false;
+          addBtn.style.opacity = '1';
+          addBtn.style.cursor = 'pointer';
+        }
       }
     }
     return true;
@@ -932,12 +947,18 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   // Female/Male size listeners with validation
   if (femaleSizeSel) femaleSizeSel.addEventListener('change', (ev) => { 
     selectedFemaleSize = ev.target.value;
-    validateBandSizes();
+    const isValid = validateBandSizes();
+    if (!isValid) {
+      showToast('Sizes above 7 require custom pricing. Please contact us for a quote.');
+    }
     computePrice();
   });
   if (maleSizeSel) maleSizeSel.addEventListener('change', (ev) => { 
     selectedMaleSize = ev.target.value;
-    validateBandSizes();
+    const isValid = validateBandSizes();
+    if (!isValid) {
+      showToast('Sizes above 7 require custom pricing. Please contact us for a quote.');
+    }
     computePrice();
   });
 
@@ -977,6 +998,12 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   const addBtn = overlay.querySelector('#modal-add');
   if (editing) addBtn.textContent = 'Save changes';
   addBtn.addEventListener('click', ()=>{
+    // Validate sizes for wedding bands
+    if (isBandSource && !validateBandSizes()) {
+      showToast('Sizes above 7 require custom pricing. Please contact us for a quote.');
+      return;
+    }
+    
     const perUnit = computePrice();
     const qty = parseInt(qtyInput.value||'1');
     // Build options object based on product type
@@ -987,6 +1014,11 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       opts.maleSize = selectedMaleSize;
       opts.femaleCarat = selectedFemaleCarat;
       opts.maleCarat = selectedMaleCarat;
+      // For plain bands, don't include stone in options
+      if (baseItem.isPlainBand) {
+        delete opts.stone;
+        delete opts.carat;
+      }
     } else {
       opts.size = sizeSel.value;
     }
@@ -1034,6 +1066,10 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
 
   // initial compute
   computePrice();
+  // Initial validation for wedding bands
+  if (isBandSource) {
+    validateBandSizes();
+  }
   } catch(err) {
     console.error('Error in openCustomizationModal:', err);
     overlay.remove();
@@ -1043,8 +1079,9 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
 // Delegate add-to-bag button clicks -> open modal
 window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.add-to-bag-btn');
-    if (!btn) return;
+    // allow either the original button or the whole card to act as trigger
+    const trigger = e.target.closest('.add-to-bag-btn, .add-to-bag-card');
+    if (!trigger) return;
     e.preventDefault();
 
     // Check if user is logged in
@@ -1054,13 +1091,16 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     const item = {
-      id: btn.dataset.id || btn.getAttribute('data-id'),
-      name: btn.dataset.name || btn.getAttribute('data-name') || 'Item',
-      price: parseFloat(btn.dataset.price || btn.getAttribute('data-price') || '0'),
-      image: btn.dataset.image || btn.getAttribute('data-image') || ''
+      id: trigger.dataset.id || trigger.getAttribute('data-id'),
+      name: trigger.dataset.name || trigger.getAttribute('data-name') || 'Item',
+      price: parseFloat(trigger.dataset.price || trigger.getAttribute('data-price') || '0'),
+      image: trigger.dataset.image || trigger.getAttribute('data-image') || ''
     };
 
-    openCustomizationModal(item, btn);
+    // only pass an origin button for the small visual feedback when the actual button was clicked
+    const originBtn = trigger.classList.contains('add-to-bag-btn') ? trigger : null;
+
+    openCustomizationModal(item, originBtn);
   });
 });
 
@@ -1422,4 +1462,231 @@ window.addEventListener('click', (e) => {
   if (e.target === modal) {
     closeLoginModal();
   }
+});
+
+function initializeProductSearch() {
+  const btn = document.getElementById('headerSearchBtn');
+  const dropdown = document.getElementById('searchDropdown');
+  const closeBtn = document.getElementById('headerSearchClose');
+  const input = document.getElementById('headerSearchInput');
+  const resultsGrid = document.getElementById('searchResults');
+  const header = document.querySelector('.main-header');
+
+  // Determine current page from URL or data attribute
+  const currentPage = detectCurrentPage();
+  
+  if (!btn || !dropdown || !input || !resultsGrid) {
+    return; // Search elements not found on this page
+  }
+
+  // Position dropdown under header
+  function positionDropdown() {
+    if (!dropdown || !header) return;
+    const headerH = header.offsetHeight || 72;
+    dropdown.style.top = headerH + 'px';
+    dropdown.style.height = (window.innerHeight - headerH) + 'px';
+  }
+
+  // Display random items in search results (max 5)
+  function displayRandomItems() {
+    const allCards = document.querySelectorAll('.weddingband-styles-grid .add-to-bag-card');
+    const cardsArray = Array.from(allCards);
+    
+    // Shuffle and get max 5 random items
+    const shuffled = cardsArray.sort(() => 0.5 - Math.random()).slice(0, 5);
+    
+    resultsGrid.innerHTML = '';
+    
+    shuffled.forEach(card => {
+      const resultCard = document.createElement('div');
+      resultCard.className = 'weddingband-style-card add-to-bag-card';
+      resultCard.setAttribute('data-id', card.getAttribute('data-id'));
+      resultCard.setAttribute('data-name', card.getAttribute('data-name'));
+      resultCard.setAttribute('data-price', card.getAttribute('data-price'));
+      resultCard.setAttribute('data-image', card.getAttribute('data-image'));
+      resultCard.setAttribute('data-page', card.getAttribute('data-page') || currentPage);
+      resultCard.style.cursor = 'pointer';
+
+      const imgPath = card.getAttribute('data-image');
+      resultCard.innerHTML = `
+        <div class="weddingband-style-image">
+          <img src="/images/${imgPath}" alt="${card.getAttribute('data-name')}" style="width: 100%; height: auto;">
+        </div>
+        <div class="weddingband-style-info">
+          <p class="weddingband-style-label">${card.getAttribute('data-name')}</p>
+        </div>
+      `;
+      resultsGrid.appendChild(resultCard);
+    });
+  }
+
+  // Perform real-time search on current page products
+  function performSearch(searchTerm) {
+    const term = searchTerm.toLowerCase().trim();
+    const allCards = document.querySelectorAll('.weddingband-styles-grid .add-to-bag-card');
+    resultsGrid.innerHTML = '';
+
+    // If search is empty, show random items instead
+    if (!term) {
+      displayRandomItems();
+      return;
+    }
+
+    const addedIds = new Set();
+    let resultCount = 0;
+
+    allCards.forEach(card => {
+      const name = card.getAttribute('data-name')?.toLowerCase() || '';
+      const id = card.getAttribute('data-id');
+      
+      if (name.includes(term) && !addedIds.has(id)) {
+        addedIds.add(id);
+        resultCount++;
+        
+        const resultCard = document.createElement('div');
+        resultCard.className = 'weddingband-style-card add-to-bag-card';
+        resultCard.setAttribute('data-id', id);
+        resultCard.setAttribute('data-name', card.getAttribute('data-name'));
+        resultCard.setAttribute('data-price', card.getAttribute('data-price'));
+        resultCard.setAttribute('data-image', card.getAttribute('data-image'));
+        resultCard.setAttribute('data-page', card.getAttribute('data-page') || currentPage);
+        resultCard.style.cursor = 'pointer';
+
+        const imgPath = card.getAttribute('data-image');
+        resultCard.innerHTML = `
+          <div class="weddingband-style-image">
+            <img src="/images/${imgPath}" alt="${card.getAttribute('data-name')}" style="width: 100%; height: auto;">
+          </div>
+          <div class="weddingband-style-info">
+            <p class="weddingband-style-label">${card.getAttribute('data-name')}</p>
+          </div>
+        `;
+        resultsGrid.appendChild(resultCard);
+      }
+    });
+
+    // Show "No Results Found" message if no matches
+    if (resultCount === 0) {
+      const noResultsMsg = document.createElement('div');
+      noResultsMsg.style.cssText = `
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 40px 20px;
+        font-size: 18px;
+        color: #999;
+        font-weight: 500;
+      `;
+      noResultsMsg.textContent = 'No Results Found';
+      resultsGrid.appendChild(noResultsMsg);
+    }
+  }
+
+  // Position dropdown on load and resize
+  positionDropdown();
+  window.addEventListener('resize', positionDropdown);
+
+  // Search input listener for real-time filtering
+  input.addEventListener('input', (e) => {
+    performSearch(e.target.value);
+  });
+
+  // Toggle search dropdown visibility
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isVisible = dropdown.style.display !== 'block';
+    if (isVisible) {
+      positionDropdown();
+      dropdown.style.display = 'block';
+      input.focus();
+      // Display random items on dropdown open
+      displayRandomItems();
+    } else {
+      dropdown.style.display = 'none';
+    }
+  });
+
+  // Close button
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.style.display = 'none';
+    });
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target) && e.target !== btn && dropdown.style.display === 'block') {
+      dropdown.style.display = 'none';
+    }
+  });
+
+  // Prevent dropdown from closing when clicking inside it
+  dropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // Handle result card clicks with cross-page redirect
+  resultsGrid.addEventListener('click', (e) => {
+    const card = e.target.closest('.add-to-bag-card');
+    if (card) {
+      const productPage = card.getAttribute('data-page') || currentPage;
+      const productId = card.getAttribute('data-id');
+      
+      if (productPage === currentPage) {
+        // Same page: open modal directly
+        const baseItem = {
+          id: productId,
+          name: card.getAttribute('data-name'),
+          basePrice: parseFloat(card.getAttribute('data-price')),
+          image: card.getAttribute('data-image')
+        };
+        dropdown.style.display = 'none';
+        input.value = '';
+        openCustomizationModal(baseItem);
+      } else {
+        // Different page: redirect and store product ID for auto-open
+        sessionStorage.setItem('autoOpenProductId', productId);
+        const pageUrls = {
+          'engagement-rings': '/engagement-rings',
+          'wedding-bands': '/wedding-bands',
+          'accessories': '/accessories'
+        };
+        window.location.href = pageUrls[productPage];
+      }
+    }
+  });
+
+  // Check for auto-open on page load (after redirect)
+  window.addEventListener('load', () => {
+    const autoOpenId = sessionStorage.getItem('autoOpenProductId');
+    if (autoOpenId) {
+      sessionStorage.removeItem('autoOpenProductId');
+      setTimeout(() => {
+        const card = document.querySelector(`.add-to-bag-card[data-id="${autoOpenId}"]`);
+        if (card) {
+          const baseItem = {
+            id: card.getAttribute('data-id'),
+            name: card.getAttribute('data-name'),
+            basePrice: parseFloat(card.getAttribute('data-price')),
+            image: card.getAttribute('data-image')
+          };
+          openCustomizationModal(baseItem);
+        }
+      }, 100);
+    }
+  });
+}
+
+// Detect current page from URL
+function detectCurrentPage() {
+  const pathname = window.location.pathname;
+  if (pathname.includes('engagement-rings')) return 'engagement-rings';
+  if (pathname.includes('wedding-bands')) return 'wedding-bands';
+  if (pathname.includes('accessories')) return 'accessories';
+  return 'unknown';
+}
+
+// Initialize search when DOM is ready
+window.addEventListener('DOMContentLoaded', () => {
+  initializeProductSearch();
 });
