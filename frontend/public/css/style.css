@@ -82,6 +82,7 @@ body {
   display: flex;
   align-items: center;
   overflow: visible;
+  z-index: 1600;
 }
 
 .nav-link {
@@ -110,7 +111,7 @@ body {
   visibility: hidden;
   transition: all 0.3s;
   padding: 10px 0;
-  z-index: 1000;
+  z-index: 1600;
   border-radius: 8px;
   margin-top: 10px;
   pointer-events: auto;
