@@ -1427,3 +1427,230 @@ window.addEventListener('click', (e) => {
     closeLoginModal();
   }
 });
+
+function initializeProductSearch() {
+  const btn = document.getElementById('headerSearchBtn');
+  const dropdown = document.getElementById('searchDropdown');
+  const closeBtn = document.getElementById('headerSearchClose');
+  const input = document.getElementById('headerSearchInput');
+  const resultsGrid = document.getElementById('searchResults');
+  const header = document.querySelector('.main-header');
+
+  // Determine current page from URL or data attribute
+  const currentPage = detectCurrentPage();
+  
+  if (!btn || !dropdown || !input || !resultsGrid) {
+    return; // Search elements not found on this page
+  }
+
+  // Position dropdown under header
+  function positionDropdown() {
+    if (!dropdown || !header) return;
+    const headerH = header.offsetHeight || 72;
+    dropdown.style.top = headerH + 'px';
+    dropdown.style.height = (window.innerHeight - headerH) + 'px';
+  }
+
+  // Display random items in search results (max 5)
+  function displayRandomItems() {
+    const allCards = document.querySelectorAll('.weddingband-styles-grid .add-to-bag-card');
+    const cardsArray = Array.from(allCards);
+    
+    // Shuffle and get max 5 random items
+    const shuffled = cardsArray.sort(() => 0.5 - Math.random()).slice(0, 5);
+    
+    resultsGrid.innerHTML = '';
+    
+    shuffled.forEach(card => {
+      const resultCard = document.createElement('div');
+      resultCard.className = 'weddingband-style-card add-to-bag-card';
+      resultCard.setAttribute('data-id', card.getAttribute('data-id'));
+      resultCard.setAttribute('data-name', card.getAttribute('data-name'));
+      resultCard.setAttribute('data-price', card.getAttribute('data-price'));
+      resultCard.setAttribute('data-image', card.getAttribute('data-image'));
+      resultCard.setAttribute('data-page', card.getAttribute('data-page') || currentPage);
+      resultCard.style.cursor = 'pointer';
+
+      const imgPath = card.getAttribute('data-image');
+      resultCard.innerHTML = `
+        <div class="weddingband-style-image">
+          <img src="/images/${imgPath}" alt="${card.getAttribute('data-name')}" style="width: 100%; height: auto;">
+        </div>
+        <div class="weddingband-style-info">
+          <p class="weddingband-style-label">${card.getAttribute('data-name')}</p>
+        </div>
+      `;
+      resultsGrid.appendChild(resultCard);
+    });
+  }
+
+  // Perform real-time search on current page products
+  function performSearch(searchTerm) {
+    const term = searchTerm.toLowerCase().trim();
+    const allCards = document.querySelectorAll('.weddingband-styles-grid .add-to-bag-card');
+    resultsGrid.innerHTML = '';
+
+    // If search is empty, show random items instead
+    if (!term) {
+      displayRandomItems();
+      return;
+    }
+
+    const addedIds = new Set();
+    let resultCount = 0;
+
+    allCards.forEach(card => {
+      const name = card.getAttribute('data-name')?.toLowerCase() || '';
+      const id = card.getAttribute('data-id');
+      
+      if (name.includes(term) && !addedIds.has(id)) {
+        addedIds.add(id);
+        resultCount++;
+        
+        const resultCard = document.createElement('div');
+        resultCard.className = 'weddingband-style-card add-to-bag-card';
+        resultCard.setAttribute('data-id', id);
+        resultCard.setAttribute('data-name', card.getAttribute('data-name'));
+        resultCard.setAttribute('data-price', card.getAttribute('data-price'));
+        resultCard.setAttribute('data-image', card.getAttribute('data-image'));
+        resultCard.setAttribute('data-page', card.getAttribute('data-page') || currentPage);
+        resultCard.style.cursor = 'pointer';
+
+        const imgPath = card.getAttribute('data-image');
+        resultCard.innerHTML = `
+          <div class="weddingband-style-image">
+            <img src="/images/${imgPath}" alt="${card.getAttribute('data-name')}" style="width: 100%; height: auto;">
+          </div>
+          <div class="weddingband-style-info">
+            <p class="weddingband-style-label">${card.getAttribute('data-name')}</p>
+          </div>
+        `;
+        resultsGrid.appendChild(resultCard);
+      }
+    });
+
+    // Show "No Results Found" message if no matches
+    if (resultCount === 0) {
+      const noResultsMsg = document.createElement('div');
+      noResultsMsg.style.cssText = `
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 40px 20px;
+        font-size: 18px;
+        color: #999;
+        font-weight: 500;
+      `;
+      noResultsMsg.textContent = 'No Results Found';
+      resultsGrid.appendChild(noResultsMsg);
+    }
+  }
+
+  // Position dropdown on load and resize
+  positionDropdown();
+  window.addEventListener('resize', positionDropdown);
+
+  // Search input listener for real-time filtering
+  input.addEventListener('input', (e) => {
+    performSearch(e.target.value);
+  });
+
+  // Toggle search dropdown visibility
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isVisible = dropdown.style.display !== 'block';
+    if (isVisible) {
+      positionDropdown();
+      dropdown.style.display = 'block';
+      input.focus();
+      // Display random items on dropdown open
+      displayRandomItems();
+    } else {
+      dropdown.style.display = 'none';
+    }
+  });
+
+  // Close button
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.style.display = 'none';
+    });
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target) && e.target !== btn && dropdown.style.display === 'block') {
+      dropdown.style.display = 'none';
+    }
+  });
+
+  // Prevent dropdown from closing when clicking inside it
+  dropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // Handle result card clicks with cross-page redirect
+  resultsGrid.addEventListener('click', (e) => {
+    const card = e.target.closest('.add-to-bag-card');
+    if (card) {
+      const productPage = card.getAttribute('data-page') || currentPage;
+      const productId = card.getAttribute('data-id');
+      
+      if (productPage === currentPage) {
+        // Same page: open modal directly
+        const baseItem = {
+          id: productId,
+          name: card.getAttribute('data-name'),
+          basePrice: parseFloat(card.getAttribute('data-price')),
+          image: card.getAttribute('data-image')
+        };
+        dropdown.style.display = 'none';
+        input.value = '';
+        openCustomizationModal(baseItem);
+      } else {
+        // Different page: redirect and store product ID for auto-open
+        sessionStorage.setItem('autoOpenProductId', productId);
+        const pageUrls = {
+          'engagement-rings': '/engagement-rings',
+          'wedding-bands': '/wedding-bands',
+          'accessories': '/accessories'
+        };
+        window.location.href = pageUrls[productPage];
+      }
+    }
+  });
+
+  // Check for auto-open on page load (after redirect)
+  window.addEventListener('load', () => {
+    const autoOpenId = sessionStorage.getItem('autoOpenProductId');
+    if (autoOpenId) {
+      sessionStorage.removeItem('autoOpenProductId');
+      setTimeout(() => {
+        const card = document.querySelector(`.add-to-bag-card[data-id="${autoOpenId}"]`);
+        if (card) {
+          const baseItem = {
+            id: card.getAttribute('data-id'),
+            name: card.getAttribute('data-name'),
+            basePrice: parseFloat(card.getAttribute('data-price')),
+            image: card.getAttribute('data-image')
+          };
+          openCustomizationModal(baseItem);
+        }
+      }, 100);
+    }
+  });
+}
+
+// Detect current page from URL
+function detectCurrentPage() {
+  const pathname = window.location.pathname;
+  if (pathname.includes('engagement-rings')) return 'engagement-rings';
+  if (pathname.includes('wedding-bands')) return 'wedding-bands';
+  if (pathname.includes('accessories')) return 'accessories';
+  return 'unknown';
+}
+
+// Initialize search when DOM is ready
+window.addEventListener('DOMContentLoaded', () => {
+  initializeProductSearch();
+});

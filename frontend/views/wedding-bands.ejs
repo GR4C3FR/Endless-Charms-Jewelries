@@ -105,7 +105,8 @@
                  data-id="band-<%= idx %>"
                  data-name="<%= band.name.replace(/\"/g, '&quot;') %>"
                  data-price="<%= band.basePrice %>"
-                 data-image="shop-wedding-page/<%= band.image %>">
+                 data-image="shop-wedding-page/<%= band.image %>"
+                 data-page="wedding-bands">
               <div class="weddingband-style-image">
                 <img src="/images/shop-wedding-page/<%= band.image %>" alt="<%= band.name %>">
               </div>
@@ -184,50 +185,4 @@
     </div>
   </div>
 
-  <script src="/js/script.js"></script>  <script>
-    (function(){
-      const btn = document.getElementById('headerSearchBtn');
-      const dropdown = document.getElementById('searchDropdown');
-      const closeBtn = document.getElementById('headerSearchClose');
-      const input = document.getElementById('headerSearchInput');
-      const header = document.querySelector('.main-header');
-
-      function positionDropdown() {
-        if (!dropdown || !header) return;
-        const headerH = header.offsetHeight || 72;
-        dropdown.style.top = headerH + 'px';
-        dropdown.style.height = (window.innerHeight - headerH) + 'px';
-      }
-
-      if (!btn || !dropdown) return;
-
-      // position on load and resize
-      positionDropdown();
-      window.addEventListener('resize', positionDropdown);
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isVisible = dropdown.style.display !== 'block';
-        // toggle: if showing, position and show; if hiding, hide
-        if (isVisible) {
-          positionDropdown();
-          dropdown.style.display = 'block';
-          if (input) input.focus();
-        } else {
-          dropdown.style.display = 'none';
-        }
-      });
-
-      if (closeBtn) closeBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.style.display = 'none'; });
-
-      // Close when clicking outside (but respect header button)
-      document.addEventListener('click', (e) => {
-        if (!dropdown.contains(e.target) && e.target !== btn && dropdown.style.display === 'block') {
-          dropdown.style.display = 'none';
-        }
-      });
-
-      // Prevent clicks inside the dropdown from closing it
-      dropdown.addEventListener('click', (e) => { e.stopPropagation(); });
-    })();
-  </script>
+  <script src="/js/script.js"></script>
