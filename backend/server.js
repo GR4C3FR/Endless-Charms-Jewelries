@@ -12,6 +12,7 @@ const orderRoutes = require('./routes/orders');
 const blogRoutes = require('./routes/blogs');
 const userRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
+const bagRoutes = require('./routes/bag');
 
 // Import models
 const Product = require('./models/Product');
@@ -55,6 +56,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/bag', bagRoutes);
 
 // Product data
 const products = [
@@ -364,6 +366,20 @@ app.get('/signup', (req, res) => {
 
 app.get('/login', (req, res) => {
   res.render('login');
+});
+
+app.get('/complete-profile', (req, res) => {
+  // Check if user is authenticated
+  if (!req.session.userId) {
+    return res.redirect('/login');
+  }
+  
+  // Check if user actually needs to complete profile
+  if (!req.session.needsProfileCompletion) {
+    return res.redirect('/');
+  }
+  
+  res.render('complete-profile');
 });
 
 // Keep old route for backwards compatibility

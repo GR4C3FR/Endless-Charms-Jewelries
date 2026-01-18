@@ -189,10 +189,12 @@
     // Handle logout - clear localStorage
     document.querySelector('.profile-nav-item.logout').addEventListener('click', function(e) {
       e.preventDefault();
-      // Clear all user-related localStorage items
+      // Clear all user-related localStorage items including bag
       localStorage.removeItem('ec_user_logged_in');
       localStorage.removeItem('ec_user_email');
       localStorage.removeItem('ec_user_name');
+      localStorage.removeItem('ec_bag'); // Clear bag items
+      localStorage.removeItem('ec_profile'); // Clear profile
       // Redirect to logout endpoint
       window.location.href = '/api/auth/logout';
     });

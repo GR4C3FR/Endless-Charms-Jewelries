@@ -204,9 +204,79 @@ router.get('/google/callback',
     req.session.userId = req.user._id;
     req.session.userEmail = req.user.email;
     
+    // Check if user needs to complete profile (firstName or lastName missing/default)
+    const needsProfileCompletion = !req.user.firstName || 
+                                   !req.user.lastName || 
+                                   req.user.firstName === 'User' || 
+                                   req.user.lastName === 'Guest' ||
+                                   req.user.lastName === '';
+    
+    if (needsProfileCompletion) {
+      req.session.needsProfileCompletion = true;
+      return res.redirect('/complete-profile');
+    }
+    
     // Successful authentication, redirect home
     res.redirect('/?google_login=success');
   }
 );
+
+// POST /api/auth/complete-profile - Complete profile after Google OAuth
+router.post('/complete-profile', async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Not authenticated' 
+      });
+    }
+    
+    const { firstName, lastName } = req.body;
+    
+    if (!firstName || !lastName) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'First name and last name are required' 
+      });
+    }
+    
+    // Update user
+    const user = await User.findByIdAndUpdate(
+      req.session.userId,
+      { 
+        firstName: firstName.trim(), 
+        lastName: lastName.trim() 
+      },
+      { new: true }
+    );
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    }
+    
+    // Clear the needs completion flag
+    delete req.session.needsProfileCompletion;
+    
+    res.json({ 
+      success: true, 
+      message: 'Profile completed successfully',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Complete profile error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error completing profile' 
+    });
+  }
+});
 
 module.exports = router;

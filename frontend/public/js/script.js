@@ -240,8 +240,51 @@ function getBag() {
   }
 }
 
-function saveBag(bag) {
+async function saveBag(bag) {
   localStorage.setItem('ec_bag', JSON.stringify(bag));
+  
+  // If user is logged in, sync with database
+  if (isUserLoggedIn()) {
+    try {
+      console.log('Syncing bag to database...', bag.length, 'items');
+      const response = await fetch('/api/bag', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ bag: bag })
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        console.error('Failed to sync bag with database:', data.message);
+      } else {
+        console.log('Bag synced successfully:', data);
+      }
+    } catch (error) {
+      console.error('Error syncing bag:', error);
+    }
+  }
+}
+
+async function loadBagFromDatabase() {
+  if (!isUserLoggedIn()) {
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/bag');
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && Array.isArray(data.bag)) {
+        localStorage.setItem('ec_bag', JSON.stringify(data.bag));
+        updateBadge();
+        renderBagPage();
+      }
+    }
+  } catch (error) {
+    console.error('Error loading bag from database:', error);
+  }
 }
 
 function addToBag(item) {
@@ -354,6 +397,8 @@ function renderBagPage() {
 
 // Initialize bag badge and render bag page on load
 window.addEventListener('DOMContentLoaded', () => {
+  // Load bag from database if user is logged in
+  loadBagFromDatabase();
   updateBadge();
   renderBagPage();
 });

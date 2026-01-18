@@ -96,6 +96,19 @@
           localStorage.setItem('ec_user_email', data.user.email);
           localStorage.setItem('ec_user_name', `${data.user.firstName} ${data.user.lastName}`);
           
+          // Load bag from database after signup (should be empty for new users)
+          try {
+            const bagResponse = await fetch('/api/bag');
+            if (bagResponse.ok) {
+              const bagData = await bagResponse.json();
+              if (bagData.success && Array.isArray(bagData.bag)) {
+                localStorage.setItem('ec_bag', JSON.stringify(bagData.bag));
+              }
+            }
+          } catch (error) {
+            console.error('Error loading bag:', error);
+          }
+          
           // Redirect to home page
           window.location.href = '/';
         } else {

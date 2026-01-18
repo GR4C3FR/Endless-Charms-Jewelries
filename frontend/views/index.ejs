@@ -261,11 +261,24 @@
           if (data.loggedIn) {
             localStorage.setItem('ec_user_logged_in', 'true');
             localStorage.setItem('ec_user_email', data.userEmail);
-            // Remove query parameter from URL
-            window.history.replaceState({}, document.title, '/');
-            // Update badge
-            updateBadge();
+            
+            // Load bag from database after Google login
+            return fetch('/api/bag').then(bagRes => {
+              if (bagRes.ok) {
+                return bagRes.json().then(bagData => {
+                  if (bagData.success && Array.isArray(bagData.bag)) {
+                    localStorage.setItem('ec_bag', JSON.stringify(bagData.bag));
+                  }
+                });
+              }
+            }).catch(err => console.error('Error loading bag:', err));
           }
+        })
+        .then(() => {
+          // Remove query parameter from URL
+          window.history.replaceState({}, document.title, '/');
+          // Update badge
+          updateBadge();
         })
         .catch(err => console.error('Error checking auth:', err));
     }

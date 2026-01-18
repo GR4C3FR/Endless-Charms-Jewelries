@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Your Profile - Endless Charms</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .complete-profile-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+      padding: 20px;
+    }
+    
+    .complete-profile-box {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      width: 100%;
+      max-width: 500px;
+    }
+    
+    .complete-profile-box h1 {
+      color: #620418;
+      font-size: 28px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    
+    .complete-profile-box p {
+      color: #666;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      color: #620418;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #620418;
+      box-shadow: 0 0 0 3px rgba(98, 4, 24, 0.1);
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #620418;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    
+    .submit-btn:hover {
+      background: #8a0621;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(98, 4, 24, 0.3);
+    }
+    
+    .submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .error-message {
+      color: #d32f2f;
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
+    
+    .error-message.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="complete-profile-container">
+    <div class="complete-profile-box">
+      <h1>Complete Your Profile</h1>
+      <p>Please provide your name to continue</p>
+      
+      <form id="complete-profile-form">
+        <div class="form-group">
+          <label for="firstName">First Name *</label>
+          <input type="text" id="firstName" name="firstName" required placeholder="Enter your first name">
+        </div>
+        
+        <div class="form-group">
+          <label for="lastName">Last Name *</label>
+          <input type="text" id="lastName" name="lastName" required placeholder="Enter your last name">
+        </div>
+        
+        <div class="error-message" id="error-message"></div>
+        
+        <button type="submit" class="submit-btn" id="submit-btn">Continue</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('complete-profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const errorMessage = document.getElementById('error-message');
+      const submitBtn = document.getElementById('submit-btn');
+      
+      // Validate
+      if (!firstName || !lastName) {
+        errorMessage.textContent = 'Both first name and last name are required';
+        errorMessage.classList.add('show');
+        return;
+      }
+      
+      // Disable button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+      
+      try {
+        const response = await fetch('/api/auth/complete-profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ firstName, lastName })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Set user info in localStorage
+          localStorage.setItem('ec_user_logged_in', 'true');
+          localStorage.setItem('ec_user_email', data.user.email);
+          localStorage.setItem('ec_user_name', `${data.user.firstName} ${data.user.lastName}`);
+          
+          // Load bag from database
+          try {
+            const bagResponse = await fetch('/api/bag');
+            if (bagResponse.ok) {
+              const bagData = await bagResponse.json();
+              if (bagData.success && Array.isArray(bagData.bag)) {
+                localStorage.setItem('ec_bag', JSON.stringify(bagData.bag));
+              }
+            }
+          } catch (error) {
+            console.error('Error loading bag:', error);
+          }
+          
+          // Redirect to home
+          window.location.href = '/';
+        } else {
+          errorMessage.textContent = data.message || 'Failed to update profile';
+          errorMessage.classList.add('show');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Continue';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        errorMessage.textContent = 'An error occurred. Please try again.';
+        errorMessage.classList.add('show');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Continue';
+      }
+    });
+  </script>
+</body>
+</html>

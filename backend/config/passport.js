@@ -48,12 +48,11 @@ passport.use(
           return done(null, user);
         }
 
-        // Create new user
-        const nameParts = profile.displayName.split(' ');
+        // Create new user with temporary values
         const newUser = new User({
           googleId: profile.id,
-          firstName: nameParts[0] || 'User',
-          lastName: nameParts.slice(1).join(' ') || 'Guest',
+          firstName: 'User',
+          lastName: 'Guest',
           email: profile.emails[0].value.toLowerCase(),
           avatar: profile.photos && profile.photos.length > 0 ? profile.photos[0].value : '/images/profile-icon.png'
         });
