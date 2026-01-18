@@ -1043,6 +1043,13 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   const addBtn = overlay.querySelector('#modal-add');
   if (editing) addBtn.textContent = 'Save changes';
   addBtn.addEventListener('click', ()=>{
+    // Check if user is logged in (only when adding to bag, not when editing)
+    if (!editing && !isUserLoggedIn()) {
+      overlay.remove();
+      showLoginModal('Please log in first to add items to your bag.');
+      return;
+    }
+    
     // Validate sizes for wedding bands
     if (isBandSource && !validateBandSizes()) {
       showToast('Sizes above 7 require custom pricing. Please contact us for a quote.');
@@ -1128,12 +1135,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const trigger = e.target.closest('.add-to-bag-btn, .add-to-bag-card');
     if (!trigger) return;
     e.preventDefault();
-
-    // Check if user is logged in
-    if (!isUserLoggedIn()) {
-      showLoginModal('Please log in first to add items to your bag.');
-      return;
-    }
 
     const item = {
       id: trigger.dataset.id || trigger.getAttribute('data-id'),
