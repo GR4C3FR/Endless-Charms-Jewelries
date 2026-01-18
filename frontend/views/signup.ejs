@@ -22,8 +22,12 @@
         <p>Please enter your details.</p>
         <form class="profile-form">
           <div>
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" placeholder="Enter your name">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" placeholder="Enter your first name">
+          </div>
+          <div>
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Enter your last name">
           </div>
           <div>
             <label for="email">Email</label>
@@ -57,12 +61,13 @@
     document.querySelector('.profile-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const name = document.getElementById('name').value;
+      const firstName = document.getElementById('firstName').value;
+      const lastName = document.getElementById('lastName').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
       // Basic validation
-      if (!name || !email || !password) {
+      if (!firstName || !lastName || !email || !password) {
         alert('Please fill in all fields');
         return;
       }
@@ -85,7 +90,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ name, email, password })
+          body: JSON.stringify({ firstName, lastName, email, password })
         });
 
         const data = await response.json();

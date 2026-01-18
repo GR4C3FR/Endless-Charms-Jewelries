@@ -7,13 +7,13 @@ const User = require('../models/User');
 // POST /api/auth/signup - Register new user
 router.post('/signup', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     // Validate input
-    if (!name || !email || !password) {
+    if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Please provide name, email, and password' 
+        message: 'Please provide first name, last name, email, and password' 
       });
     }
 
@@ -43,19 +43,14 @@ router.post('/signup', async (req, res) => {
       });
     }
 
-    // Split name into first and last name
-    const nameParts = name.trim().split(' ');
-    const firstName = nameParts[0];
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-
     // Hash password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create new user
     const user = new User({
-      firstName,
-      lastName,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       email: email.toLowerCase(),
       password: hashedPassword
     });
