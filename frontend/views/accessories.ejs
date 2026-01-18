@@ -29,7 +29,7 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
-          <button class="icon-btn">
+          <button id="headerSearchBtn" class="icon-btn">
             <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
           </button>
           <button class="icon-btn" onclick="handleProfileClick()">
@@ -43,6 +43,37 @@
       </nav>
     </div>
   </header>
+
+  <!-- Search dropdown (hidden by default). Toggled by the header search button -->
+  <div id="searchDropdown" class="search-dropdown">
+    <div class="search-dropdown-inner container">
+      <div class="search-bar-row">
+        <input
+          id="headerSearchInput"
+          type="text"
+          class="header-search-input"
+          placeholder="Search products, e.g. 'moissanite'"
+        />
+        <button id="headerSearchClose" class="icon-btn">
+          &times;
+        </button>
+      </div>
+      <div id="searchResults" class="search-results-grid">
+        <!-- Placeholder for search results; items should use the same card layout as product tiles -->
+        <!-- Sample placeholder (hidden) -->
+        <div class="search-result-card" style="display:none;">
+          <div class="weddingband-style-image">
+            <img
+              src="/images/shop-other-accessories-page/placeholder.png"
+              alt="Sample"
+              class="search-result-img"
+            />
+          </div>
+          <p class="weddingband-style-label">Sample Product</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="main-parent-div">
     <!-- Hero Section (two-column image + text like provided design) -->
@@ -148,4 +179,50 @@
     </div>
   </div>
 
-  <script src="/js/script.js"></script>
+  <script src="/js/script.js"></script>  <script>
+    (function(){
+      const btn = document.getElementById('headerSearchBtn');
+      const dropdown = document.getElementById('searchDropdown');
+      const closeBtn = document.getElementById('headerSearchClose');
+      const input = document.getElementById('headerSearchInput');
+      const header = document.querySelector('.main-header');
+
+      function positionDropdown() {
+        if (!dropdown || !header) return;
+        const headerH = header.offsetHeight || 72;
+        dropdown.style.top = headerH + 'px';
+        dropdown.style.height = (window.innerHeight - headerH) + 'px';
+      }
+
+      if (!btn || !dropdown) return;
+
+      // position on load and resize
+      positionDropdown();
+      window.addEventListener('resize', positionDropdown);
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isVisible = dropdown.style.display !== 'block';
+        // toggle: if showing, position and show; if hiding, hide
+        if (isVisible) {
+          positionDropdown();
+          dropdown.style.display = 'block';
+          if (input) input.focus();
+        } else {
+          dropdown.style.display = 'none';
+        }
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.style.display = 'none'; });
+
+      // Close when clicking outside (but respect header button)
+      document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && e.target !== btn && dropdown.style.display === 'block') {
+          dropdown.style.display = 'none';
+        }
+      });
+
+      // Prevent clicks inside the dropdown from closing it
+      dropdown.addEventListener('click', (e) => { e.stopPropagation(); });
+    })();
+  </script>
