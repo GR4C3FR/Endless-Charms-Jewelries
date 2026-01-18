@@ -57,20 +57,31 @@ router.post('/signup', async (req, res) => {
 
     await user.save();
 
-    // Set session
-    req.session.userId = user._id;
-    req.session.userEmail = user.email;
-
-    // Return success without password
-    res.status(201).json({
-      success: true,
-      message: 'User registered successfully',
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email
+    // Use Passport login to establish session
+    req.login(user, (err) => {
+      if (err) {
+        console.error('Signup session error:', err);
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Error establishing session' 
+        });
       }
+
+      // Set additional session data
+      req.session.userId = user._id;
+      req.session.userEmail = user.email;
+
+      // Return success without password
+      res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        user: {
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email
+        }
+      });
     });
   } catch (error) {
     console.error('Signup error:', error);
@@ -112,20 +123,32 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Set session
-    req.session.userId = user._id;
-    req.session.userEmail = user.email;
-
-    // Return success
-    res.json({
-      success: true,
-      message: 'Login successful',
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email
+    // Use Passport login to establish session
+    req.login(user, (err) => {
+      if (err) {
+        console.error('Login session error:', err);
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Error establishing session' 
+        });
       }
+
+      // Set additional session data
+      req.session.userId = user._id;
+      req.session.userEmail = user.email;
+
+      // Return success
+      res.json({
+        success: true,
+        message: 'Login successful',
+        user: {
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          isAdmin: user.isAdmin
+        }
+      });
     });
   } catch (error) {
     console.error('Login error:', error);

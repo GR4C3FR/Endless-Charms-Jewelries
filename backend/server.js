@@ -13,6 +13,7 @@ const blogRoutes = require('./routes/blogs');
 const userRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
 const bagRoutes = require('./routes/bag');
+const adminRoutes = require('./routes/admin');
 
 // Import models
 const Product = require('./models/Product');
@@ -57,6 +58,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/bag', bagRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Product data
 const products = [
@@ -366,6 +368,20 @@ app.get('/signup', (req, res) => {
 
 app.get('/login', (req, res) => {
   res.render('login');
+});
+
+// Admin page - requires authentication
+app.get('/admin', (req, res) => {
+  // Check if user is authenticated and is admin
+  if (!req.isAuthenticated()) {
+    return res.redirect('/login');
+  }
+  
+  if (!req.user.isAdmin) {
+    return res.status(403).send('Access denied. Admin privileges required.');
+  }
+  
+  res.render('admin', { user: req.user });
 });
 
 app.get('/complete-profile', (req, res) => {
