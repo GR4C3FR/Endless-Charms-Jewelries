@@ -154,7 +154,7 @@
                         <span id="html-validation" class="validation-ok">✓ Valid HTML</span>
                     </div>
                     <div class="content-preview-toggle">
-                        <button type="button" class="btn btn-secondary" onclick="togglePreview()">Preview Content</button>
+                        <button type="button" class="btn btn-secondary preview-btn" onclick="togglePreview()">Preview Content</button>
                     </div>
                     <div id="content-preview" class="content-preview" style="display: none;">
                         <h3>Content Preview:</h3>
@@ -640,7 +640,7 @@
             // Hide preview if visible
             document.getElementById('content-preview').style.display = 'none';
             const previewBtn = document.querySelector('.content-preview-toggle .btn');
-            if (previewBtn) previewBtn.textContent = '👁️ Preview Content';
+            if (previewBtn) previewBtn.textContent = 'Preview Content'; 
         }
 
         // View blog function
