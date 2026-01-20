@@ -5,310 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Endless Charms</title>
     <link rel="stylesheet" href="/css/style.css">
-    <style>
-        .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        .admin-header {
-            background: #620814;
-            color: white;
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .admin-header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
-
-        .admin-header p {
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-        }
-
-        .admin-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e5e7eb;
-            flex-wrap: wrap;
-        }
-
-        .admin-tab {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
-            color: #6b7280;
-            transition: all 0.3s;
-        }
-
-        .admin-tab:hover {
-            color: #620814;
-        }
-
-        .admin-tab.active {
-            color: #620814;
-            border-bottom-color: #620814;
-        }
-
-        .tab-content {
-            display: none;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .form-group input[type="text"],
-        .form-group input[type="file"],
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #620814;
-        }
-
-        .form-group textarea {
-            min-height: 150px;
-            resize: vertical;
-            font-family: inherit;
-        }
-
-        .form-group .content-textarea {
-            min-height: 300px;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #620814;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(98, 8, 20, 0.4);
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
-
-        .image-preview {
-            margin-top: 10px;
-            max-width: 400px;
-        }
-
-        .image-preview img {
-            max-width: 100%;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .alert {
-            padding: 15px 20px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .alert.show {
-            display: block;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-
-        .blog-list {
-            display: grid;
-            gap: 20px;
-        }
-
-        .blog-item {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
-        .blog-item:hover {
-            border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .blog-item-image {
-            width: 150px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-
-        .blog-item-content {
-            flex: 1;
-        }
-
-        .blog-item-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin: 0 0 10px 0;
-            color: #1f2937;
-        }
-
-        .blog-item-meta {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-bottom: 10px;
-        }
-
-        .blog-item-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .blog-item-actions button {
-            padding: 8px 16px;
-            font-size: 0.875rem;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-published {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-scheduled {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-draft {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-            cursor: pointer;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6b7280;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6b7280;
-        }
-
-        .empty-state h3 {
-            margin: 0 0 10px 0;
-            color: #374151;
-        }
-
-        @media (max-width: 768px) {
-            .blog-item {
-                flex-direction: column;
-            }
-
-            .blog-item-image {
-                width: 100%;
-                height: 200px;
-            }
-
-            .admin-header h1 {
-                font-size: 1.75rem;
-            }
-
-            .admin-tabs {
-                overflow-x: auto;
-            }
-        }
-    </style>
 </head>
 <body>
     <!-- Navigation Header -->
@@ -347,7 +43,7 @@
     <div class="admin-container">
         <div class="admin-header">
             <h1>Admin Panel</h1>
-            <p>Welcome back, <%= user.firstName %>! Manage your blog posts and content here.</p>
+            <p>Manage your blog posts and content here.</p>
         </div>
 
         <div class="admin-tabs">
@@ -377,11 +73,93 @@
                 <div class="form-group">
                     <label for="excerpt">Excerpt *</label>
                     <textarea id="excerpt" name="excerpt" required placeholder="Write a brief summary that will appear in the blog list (150-200 characters recommended)"></textarea>
-                </div>
-
-                <div class="form-group">
+                </div>                <div class="form-group">
                     <label for="content">Content *</label>
-                    <textarea id="content" name="content" class="content-textarea" required placeholder="Write your full blog content here. You can use paragraphs and formatting."></textarea>
+                    <div class="formatting-guide">
+                        <details>
+                            <summary>Formatting Guide</summary>
+                            <div class="guide-content">
+                                <h4>How to Format Your Blog Content:</h4>
+                                
+                                <div class="guide-section">
+                                    <strong>Main Headings (H2):</strong>
+                                    <code>&lt;h2&gt;Your Main Section Title&lt;/h2&gt;</code>
+                                    <p>Use for major sections - these appear in the Table of Contents</p>
+                                </div>
+                                
+                                <div class="guide-section">
+                                    <strong>Subheadings (H3):</strong>
+                                    <code>&lt;h3&gt;Your Subsection Title&lt;/h3&gt;</code>
+                                    <p>Use for subsections under main headings</p>
+                                </div>
+                                
+                                <div class="guide-section">
+                                    <strong>Paragraphs:</strong>
+                                    <code>&lt;p&gt;Your paragraph text here.&lt;/p&gt;</code>
+                                    <p>Wrap each paragraph in &lt;p&gt; tags</p>
+                                </div>
+                                
+                                <div class="guide-section">
+                                    <strong>Bold Text:</strong>
+                                    <code>&lt;strong&gt;Important text&lt;/strong&gt;</code>
+                                    <p>Use for emphasis and key points</p>
+                                </div>
+                                
+                                <div class="guide-section">
+                                    <strong>Bullet Lists:</strong>
+                                    <code>&lt;ul&gt;<br>&nbsp;&nbsp;&lt;li&gt;First item&lt;/li&gt;<br>&nbsp;&nbsp;&lt;li&gt;Second item&lt;/li&gt;<br>&lt;/ul&gt;</code>
+                                    <p>Use for unordered lists</p>
+                                </div>
+                                
+                                <div class="guide-section">
+                                    <strong>Numbered Lists:</strong>
+                                    <code>&lt;ol&gt;<br>&nbsp;&nbsp;&lt;li&gt;First step&lt;/li&gt;<br>&nbsp;&nbsp;&lt;li&gt;Second step&lt;/li&gt;<br>&lt;/ol&gt;</code>
+                                    <p>Use for ordered/sequential lists</p>
+                                </div>
+                                
+                                <div class="guide-example">
+                                    <strong>📋 Complete Example:</strong>
+                                    <pre>&lt;p&gt;Introduction paragraph goes here.&lt;/p&gt;
+
+&lt;h2&gt;Main Section Title&lt;/h2&gt;
+&lt;p&gt;Paragraph explaining the section.&lt;/p&gt;
+
+&lt;h3&gt;Subsection Title&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Point One:&lt;/strong&gt; Description here&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Point Two:&lt;/strong&gt; Description here&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Step-by-Step Instructions&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;First step description&lt;/li&gt;
+  &lt;li&gt;Second step description&lt;/li&gt;
+  &lt;li&gt;Third step description&lt;/li&gt;
+&lt;/ol&gt;</pre>
+                                </div>
+                            </div>
+                        </details>
+                    </div>                    <div class="formatting-toolbar">
+                        <button type="button" class="format-btn" onclick="insertFormatting('h2')" title="Main Heading">H2</button>
+                        <button type="button" class="format-btn" onclick="insertFormatting('h3')" title="Subheading">H3</button>
+                        <button type="button" class="format-btn" onclick="insertFormatting('p')" title="Paragraph">P</button>
+                        <button type="button" class="format-btn" onclick="insertFormatting('strong')" title="Bold"><strong>B</strong></button>
+                        <button type="button" class="format-btn" onclick="insertFormatting('ul')" title="Bullet List">• List</button>
+                        <button type="button" class="format-btn" onclick="insertFormatting('ol')" title="Numbered List">1. List</button>
+                        <button type="button" class="format-btn template-btn" onclick="insertTemplate()" title="Insert Blog Template">Template</button>
+                    </div>                    <textarea id="content" name="content" class="content-textarea" required placeholder="Write your blog content with HTML formatting. Use the toolbar above for quick formatting or click the guide for examples."></textarea>
+                    <div class="content-stats">
+                        <span id="char-count">0 characters</span>
+                        <span id="word-count">0 words</span>
+                        <span id="html-validation" class="validation-ok">✓ Valid HTML</span>
+                    </div>
+                    <div class="content-preview-toggle">
+                        <button type="button" class="btn btn-secondary" onclick="togglePreview()">Preview Content</button>
+                    </div>
+                    <div id="content-preview" class="content-preview" style="display: none;">
+                        <h3>Content Preview:</h3>
+                        <div id="preview-render" class="blog-detail-content"></div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -421,9 +199,201 @@
                 <div class="loading">Loading blogs...</div>
             </div>
         </div>
-    </div>
+    </div>    <script>
+        // Insert formatting helper function
+        function insertFormatting(type) {
+            const textarea = document.getElementById('content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            const hasSelection = selectedText.length > 0;
+            
+            let beforeText = '';
+            let afterText = '';
+            let newCursorPos = start;
+            
+            switch(type) {
+                case 'h2':
+                    beforeText = '<h2>';
+                    afterText = '</h2>\n\n';
+                    break;
+                case 'h3':
+                    beforeText = '<h3>';
+                    afterText = '</h3>\n\n';
+                    break;
+                case 'p':
+                    beforeText = '<p>';
+                    afterText = '</p>\n\n';
+                    break;
+                case 'strong':
+                    beforeText = '<strong>';
+                    afterText = '</strong>';
+                    break;
+                case 'ul':
+                    beforeText = '<ul>\n  <li>';
+                    afterText = '</li>\n  <li>Second item</li>\n  <li>Third item</li>\n</ul>\n\n';
+                    break;
+                case 'ol':
+                    beforeText = '<ol>\n  <li>';
+                    afterText = '</li>\n  <li>Second step</li>\n  <li>Third step</li>\n</ol>\n\n';
+                    break;
+            }
+            
+            const newText = beforeText + (hasSelection ? selectedText : 'Your text here') + afterText;
+            textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
+            
+            // Set cursor position
+            if (hasSelection) {
+                newCursorPos = start + newText.length;
+            } else {
+                newCursorPos = start + beforeText.length;
+            }
+            
+            textarea.focus();
+            textarea.setSelectionRange(newCursorPos, newCursorPos + (hasSelection ? 0 : 'Your text here'.length));
+        }
+          // Toggle preview function
+        function togglePreview() {
+            const preview = document.getElementById('content-preview');
+            const previewRender = document.getElementById('preview-render');
+            const content = document.getElementById('content').value;
+            const button = event.target;
+            
+            if (preview.style.display === 'none') {
+                previewRender.innerHTML = content || '<p style="color: #6b7280; font-style: italic;">No content to preview yet. Start writing your blog content above.</p>';
+                preview.style.display = 'block';
+                button.textContent = 'Hide Preview';
+            } else {
+                preview.style.display = 'none';
+                button.textContent = 'Preview Content';
+            }
+        }
+          // Insert blog template
+        function insertTemplate() {
+            const textarea = document.getElementById('content');
+            if (textarea.value.trim() !== '' && !confirm('This will replace your current content. Continue?')) {
+                return;
+            }
+            
+            const template = `<p>Write an engaging introduction paragraph that hooks the reader and introduces the main topic of your blog post. Make it clear what value the reader will get from reading this article.</p>
 
-    <script>
+<h2>First Main Section Title</h2>
+<p>Provide context and background information for this section. Explain the importance of this topic to your readers.</p>
+
+<h3>Key Points or Benefits</h3>
+<ul>
+  <li><strong>First Point:</strong> Detailed explanation of this point</li>
+  <li><strong>Second Point:</strong> Detailed explanation of this point</li>
+  <li><strong>Third Point:</strong> Detailed explanation of this point</li>
+  <li><strong>Fourth Point:</strong> Detailed explanation of this point</li>
+</ul>
+
+<h2>Second Main Section Title</h2>
+<p>Continue building on your topic with additional insights and information. Make sure each section flows naturally to the next.</p>
+
+<h3>Step-by-Step Guide or Process</h3>
+<ol>
+  <li>First step with detailed explanation</li>
+  <li>Second step with detailed explanation</li>
+  <li>Third step with detailed explanation</li>
+  <li>Fourth step with detailed explanation</li>
+</ol>
+
+<h3>Additional Subsection</h3>
+<p>Provide more detailed information, tips, or insights related to this topic.</p>
+
+<h2>Third Main Section Title</h2>
+<p>Add more sections as needed for your topic. Each main section should cover a distinct aspect of your subject.</p>
+
+<h3>Important Considerations</h3>
+<ul>
+  <li>First consideration or tip</li>
+  <li>Second consideration or tip</li>
+  <li>Third consideration or tip</li>
+</ul>
+
+<h2>Conclusion or Final Thoughts</h2>
+<p>Summarize the key takeaways from your blog post. Reinforce the main message and provide a call-to-action or next steps for your readers.</p>
+
+<p><strong>Ready to get started? Contact Endless Charms today for personalized assistance and expert guidance!</strong></p>`;
+            
+            textarea.value = template;
+            textarea.focus();
+            updateContentStats();
+            showAlert('create-alert', 'Blog template inserted! Customize it with your content.', 'success');
+        }
+        
+        // Update content stats and validation
+        function updateContentStats() {
+            const content = document.getElementById('content').value;
+            const charCount = document.getElementById('char-count');
+            const wordCount = document.getElementById('word-count');
+            const validation = document.getElementById('html-validation');
+            
+            // Character count
+            charCount.textContent = `${content.length} characters`;
+            
+            // Word count (strip HTML and count)
+            const textOnly = content.replace(/<[^>]*>/g, ' ').trim();
+            const words = textOnly.split(/\s+/).filter(word => word.length > 0);
+            wordCount.textContent = `${words.length} words`;
+            
+            // Basic HTML validation
+            const htmlTags = ['h2', 'h3', 'p', 'ul', 'ol', 'li', 'strong', 'br', 'a'];
+            let isValid = true;
+            let errorMsg = '';
+            
+            // Check for unclosed tags
+            const tagStack = [];
+            const tagRegex = /<\/?(\w+)[^>]*>/g;
+            let match;
+            
+            while ((match = tagRegex.exec(content)) !== null) {
+                const fullTag = match[0];
+                const tagName = match[1].toLowerCase();
+                
+                // Skip self-closing and BR tags
+                if (fullTag.endsWith('/>') || tagName === 'br') continue;
+                
+                if (fullTag.startsWith('</')) {
+                    // Closing tag
+                    if (tagStack.length === 0 || tagStack[tagStack.length - 1] !== tagName) {
+                        isValid = false;
+                        errorMsg = `Mismatched closing tag: </${tagName}>`;
+                        break;
+                    }
+                    tagStack.pop();
+                } else {
+                    // Opening tag
+                    tagStack.push(tagName);
+                }
+            }
+            
+            // Check if any tags weren't closed
+            if (isValid && tagStack.length > 0) {
+                isValid = false;
+                errorMsg = `Unclosed tag: <${tagStack[tagStack.length - 1]}>`;
+            }
+            
+            // Update validation display
+            if (content.trim() === '') {
+                validation.textContent = '✓ Valid HTML';
+                validation.className = 'validation-ok';
+            } else if (isValid) {
+                validation.textContent = '✓ Valid HTML';
+                validation.className = 'validation-ok';
+            } else {
+                validation.textContent = `⚠ ${errorMsg}`;
+                validation.className = 'validation-error';
+            }
+        }
+        
+        // Add event listener to content textarea
+        document.getElementById('content').addEventListener('input', updateContentStats);
+        
+        // Initial stats update
+        updateContentStats();
+
         // Toggle schedule field based on publish checkbox
         const publishedCheckbox = document.getElementById('published');
         const scheduleGroup = document.getElementById('schedule-group');
@@ -625,11 +595,13 @@
                     
                     // Show current image
                     document.getElementById('image-preview').innerHTML = `<img src="${blog.image}" alt="Current image">`;
-                    
-                    // Make image optional for editing
+                      // Make image optional for editing
                     document.getElementById('image').required = false;
                     document.getElementById('image-required').style.display = 'none';
                     document.getElementById('image-note').style.display = 'block';
+                    
+                    // Update content stats
+                    updateContentStats();
                     
                     // Scroll to top
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -640,9 +612,7 @@
                 console.error('Error:', error);
                 alert('An error occurred while loading the blog');
             }
-        }
-
-        // Cancel edit function
+        }        // Cancel edit function
         function cancelEdit() {
             // Reset form
             document.getElementById('create-blog-form').reset();
@@ -663,6 +633,14 @@
             
             // Reset published checkbox to checked
             document.getElementById('published').checked = true;
+            
+            // Reset content stats
+            updateContentStats();
+            
+            // Hide preview if visible
+            document.getElementById('content-preview').style.display = 'none';
+            const previewBtn = document.querySelector('.content-preview-toggle .btn');
+            if (previewBtn) previewBtn.textContent = '👁️ Preview Content';
         }
 
         // View blog function
