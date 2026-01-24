@@ -152,12 +152,54 @@ const engagementRingStyles = [
 
 // Wedding Bands data
 const weddingBandsStyles = [
-  { id: 1, name: 'Half eternity .30ct moissanite', basePrice: 110000, image: 'shop-wedding-page/sparkling-diamond-ring-with-classic-metal-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .30ct moissanite', src: '/wedding-band-1', bandCarat: '0.30' },
-  { id: 2, name: 'Half eternity .01ct moissanite', basePrice: 70000, image: 'shop-wedding-page/stacked-gold-rings-clear-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-2', bandCarat: '0.01' },
-  { id: 3, name: 'Half eternity .01ct moissanite', basePrice: 62000, image: 'shop-wedding-page/thin-eternity-and-plain-band-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-3', bandCarat: '0.01' },
-  { id: 4, name: 'Half eternity .01ct moissanite', basePrice: 65000, image: 'shop-wedding-page/gold-diamond-v-wedding-bands.jpg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-4', bandCarat: '0.01' },
-  { id: 5, name: 'Half eternity .01ct moissanite', basePrice: 95000, image: 'shop-wedding-page/matching-silver-rings-small-diamonds-wedding-bands.jpeg', category: 'wedding-bands', label: 'Half eternity .01ct moissanite', src: '/wedding-band-5', bandCarat: '0.01' },
-  { id: 6, name: 'Plain bands', basePrice: 50000, image: 'shop-wedding-page/plain-silver-wedding-bands.jpg', category: 'wedding-bands', label: 'Plain bands', src: '/wedding-band-6', bandCarat: '0', isPlain: true }
+  {
+    name: 'Plain Bands',
+    image: 'shop-wedding-page/plain-gold-wedding-bands.jpg',
+    label: 'Plain Bands',
+    src: '/wedding-band-plain',
+    basePrice: 50000,
+    bandCarat: 'plain'
+  },
+  {
+    name: 'Half Eternity 0.30ct Moissanite',
+    image: 'shop-wedding-page/sparkling-diamond-ring-with-classic-metal-wedding-bands.jpg',
+    label: 'Half Eternity 0.30ct',
+    src: '/wedding-band-030ct',
+    basePrice: 75000,
+    bandCarat: '0.30'
+  },
+  {
+    name: 'Half Eternity 0.01ct Moissanite - Set A',
+    image: 'shop-wedding-page/stacked-gold-rings-clear-wedding-bands.jpg',
+    label: 'Half Eternity 0.01ct - Set A',
+    src: '/wedding-band-001ct-a',
+    basePrice: 65000,
+    bandCarat: '0.01-A'
+  },
+  {
+    name: 'Half Eternity 0.01ct Moissanite - Set B',
+    image: 'shop-wedding-page/thin-eternity-and-plain-band-wedding-bands.jpg',
+    label: 'Half Eternity 0.01ct - Set B',
+    src: '/wedding-band-001ct-b',
+    basePrice: 55000,
+    bandCarat: '0.01-B'
+  },
+  {
+    name: 'Half Eternity 0.01ct Moissanite - Set C',
+    image: 'shop-wedding-page/gold-diamond-v-wedding-bands.jpg',
+    label: 'Half Eternity 0.01ct - Set C',
+    src: '/wedding-band-001ct-c',
+    basePrice: 69000,
+    bandCarat: '0.01-C'
+  },
+  {
+    name: 'Half Eternity 0.01ct Moissanite - Set D',
+    image: 'shop-wedding-page/matching-silver-rings-small-diamonds-wedding-bands.jpeg',
+    label: 'Half Eternity 0.01ct - Set D',
+    src: '/wedding-band-001ct-d',
+    basePrice: 69000,
+    bandCarat: '0.01-D'
+  }
 ];
 
 // Routes

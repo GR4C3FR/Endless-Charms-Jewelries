@@ -114,6 +114,7 @@
                  data-name="<%= band.name.replace(/\"/g, '&quot;') %>"
                  data-price="<%= band.basePrice %>"
                  data-image="<%= band.image %>"
+                 data-band-carat="<%= band.bandCarat || 'plain' %>"
                  data-page="wedding-bands">
               <div class="weddingband-style-image">
                 <img src="/images/<%= band.image %>" alt="<%= band.name %>">

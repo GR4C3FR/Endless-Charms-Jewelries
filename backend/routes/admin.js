@@ -18,8 +18,18 @@ const storage = multer.diskStorage({
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'blog-' + uniqueSuffix + path.extname(file.originalname));
+    // For cover image, add timestamp. For content images, keep original name
+    if (file.fieldname === 'image') {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, 'blog-' + uniqueSuffix + path.extname(file.originalname));
+    } else if (file.fieldname === 'contentImages') {
+      // Keep original filename for content images
+      const sanitized = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+      cb(null, sanitized);
+    } else {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, 'blog-' + uniqueSuffix + path.extname(file.originalname));
+    }
   }
 });
 
@@ -70,21 +80,34 @@ router.get('/blogs', isAdmin, async (req, res) => {
 });
 
 // POST create new blog
-router.post('/blogs', isAdmin, upload.single('image'), async (req, res) => {
+router.post('/blogs', isAdmin, upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'contentImages', maxCount: 10 }
+]), async (req, res) => {
   try {
+    console.log('Received files:', req.files);
+    console.log('Received body:', req.body);
+    
     const { title, excerpt, content, author, tags, published } = req.body;
     
     // Validate required fields
     if (!title || !excerpt || !content) {
-      if (req.file) {
-        fs.unlinkSync(req.file.path); // Delete uploaded file
+      // Delete uploaded files
+      if (req.files && req.files.image) {
+        fs.unlinkSync(req.files.image[0].path);
+      }
+      if (req.files && req.files.contentImages) {
+        req.files.contentImages.forEach(file => fs.unlinkSync(file.path));
       }
       return res.status(400).json({ message: 'Title, excerpt, and content are required' });
     }
     
-    // Check if image was uploaded
-    if (!req.file) {
-      return res.status(400).json({ message: 'Blog image is required' });
+    // Check if cover image was uploaded
+    if (!req.files || !req.files.image) {
+      if (req.files && req.files.contentImages) {
+        req.files.contentImages.forEach(file => fs.unlinkSync(file.path));
+      }
+      return res.status(400).json({ message: 'Blog cover image is required' });
     }
     
     // Generate slug from title
@@ -126,7 +149,7 @@ router.post('/blogs', isAdmin, upload.single('image'), async (req, res) => {
     const blogData = {
       title,
       slug,
-      image: `/images/blog-page/${req.file.filename}`,
+      image: `/images/blog-page/${req.files.image[0].filename}`,
       excerpt,
       content,
       author: author || 'Endless Charms',
@@ -139,29 +162,46 @@ router.post('/blogs', isAdmin, upload.single('image'), async (req, res) => {
     const blog = new Blog(blogData);
     const newBlog = await blog.save();
     
+    console.log('Blog created successfully');
+    console.log('Cover image saved as:', blogData.image);
+    if (req.files && req.files.contentImages) {
+      console.log('Content images saved:', req.files.contentImages.map(f => f.filename));
+    }
+    
     res.status(201).json({ 
       success: true, 
       message: 'Blog created successfully',
       blog: newBlog 
     });
   } catch (error) {
-    // Delete uploaded file if blog creation fails
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
+    console.error('Error creating blog:', error);
+    // Delete uploaded files if blog creation fails
+    if (req.files && req.files.image) {
+      fs.unlinkSync(req.files.image[0].path);
+    }
+    if (req.files && req.files.contentImages) {
+      req.files.contentImages.forEach(file => fs.unlinkSync(file.path));
     }
     res.status(400).json({ message: error.message });
   }
 });
 
 // PUT update blog
-router.put('/blogs/:id', isAdmin, upload.single('image'), async (req, res) => {
+router.put('/blogs/:id', isAdmin, upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'contentImages', maxCount: 10 }
+]), async (req, res) => {
   try {
     const { title, excerpt, content, author, tags, published } = req.body;
     
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
-      if (req.file) {
-        fs.unlinkSync(req.file.path);
+      // Delete uploaded files if blog not found
+      if (req.files && req.files.image) {
+        fs.unlinkSync(req.files.image[0].path);
+      }
+      if (req.files && req.files.contentImages) {
+        req.files.contentImages.forEach(file => fs.unlinkSync(file.path));
       }
       return res.status(404).json({ message: 'Blog not found' });
     }
@@ -185,13 +225,13 @@ router.put('/blogs/:id', isAdmin, upload.single('image'), async (req, res) => {
     }
     
     // Update image if new one uploaded
-    if (req.file) {
+    if (req.files && req.files.image) {
       // Delete old image
       const oldImagePath = path.join(__dirname, '../../frontend/public', blog.image);
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
-      blog.image = `/images/blog-page/${req.file.filename}`;
+      blog.image = `/images/blog-page/${req.files.image[0].filename}`;
     }
     
     // Handle scheduled publishing
@@ -253,6 +293,18 @@ router.delete('/blogs/:id', isAdmin, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+// Error handling middleware for multer
+router.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    console.error('Multer error:', error);
+    return res.status(400).json({ message: `Upload error: ${error.message}` });
+  } else if (error) {
+    console.error('General error:', error);
+    return res.status(400).json({ message: error.message });
+  }
+  next();
 });
 
 module.exports = router;

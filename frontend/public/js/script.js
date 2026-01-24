@@ -40,28 +40,67 @@ if (!document.querySelector('style[data-toast-animations]')) {
   document.head.appendChild(style);
 }
 
-// Review carousel functionality with smooth infinite scroll
-let isAnimating = false;
-// Carousel functionality
-let carouselPosition = 0;
+// Review carousel functionality - completely rewritten for infinite loop
+let carouselCurrentIndex = 0;
 
 function scrollCarousel(direction) {
-  const content = document.getElementById('carouselContent');
-  if (!content) return;
+  const carouselContent = document.getElementById('carouselContent');
+  if (!carouselContent || carouselContent.children.length === 0) return;
   
-  const cardWidth = 240;
-  const visibleCards = 4;
-  const totalCards = content.children.length;
-  const maxScroll = (totalCards - visibleCards) * cardWidth;
+  // Get all cards
+  const allCards = carouselContent.children;
+  const totalCards = allCards.length;
   
-  let newPos = carouselPosition + (direction * cardWidth);
+  // Measure card width and gap
+  const firstCard = allCards[0];
+  const cardRect = firstCard.getBoundingClientRect();
+  const cardWidth = cardRect.width;
   
-  // Clamp between 0 and max
-  if (newPos > 0) newPos = 0;
-  if (newPos < -maxScroll) newPos = -maxScroll;
+  // Get the gap from CSS (20px as defined in .carousel-content)
+  const gap = 20;
+  const slideWidth = cardWidth + gap;
   
-  carouselPosition = newPos;
-  content.style.transform = `translateX(${carouselPosition}px)`;
+  // Get viewport width to calculate visible cards
+  const viewport = carouselContent.parentElement;
+  const viewportWidth = viewport.offsetWidth;
+  const visibleCards = Math.floor(viewportWidth / slideWidth);
+  
+  // Maximum positions we can scroll to
+  const maxPosition = totalCards - visibleCards;
+  
+  // Update index based on direction
+  // direction: 1 = prev (left arrow), -1 = next (right arrow)
+  if (direction === -1) {
+    // Next button clicked - move forward
+    carouselCurrentIndex++;
+    if (carouselCurrentIndex > maxPosition) {
+      // We've gone past the last set of images, wrap to beginning
+      carouselCurrentIndex = 0;
+    }
+  } else if (direction === 1) {
+    // Prev button clicked - move backward  
+    carouselCurrentIndex--;
+    if (carouselCurrentIndex < 0) {
+      // We've gone before the first image, wrap to end
+      carouselCurrentIndex = maxPosition;
+    }
+  }
+  
+  // Calculate the translateX value
+  const translateValue = -(carouselCurrentIndex * slideWidth);
+  
+  // Apply transform with smooth transition
+  carouselContent.style.transition = 'transform 0.5s ease-in-out';
+  carouselContent.style.transform = `translateX(${translateValue}px)`;
+  
+  console.log('Carousel Debug:', {
+    direction,
+    currentIndex: carouselCurrentIndex,
+    maxPosition,
+    totalCards,
+    visibleCards,
+    translateValue
+  });
 }
 
 function openImageModal(imagePath) {
@@ -345,6 +384,33 @@ function renderBagPage() {
         <div class="item-info">
           <h3>${item.name}</h3>
           <p class="item-price">₱${(item.price).toLocaleString()}</p>
+          ${(() => {
+            const isBand = item.productId && String(item.productId).startsWith('band-');
+            if (isBand && item.priceBreakdown) {
+              return `
+                <div class="price-breakdown" style="margin-top: 8px; padding: 8px; background: #f9f9f9; border-radius: 4px; font-size: 12px;">
+                  <div style="font-weight: 600; margin-bottom: 4px;">Price Breakdown:</div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span>Base Price (${item.priceBreakdown.metal}):</span>
+                    <span>₱${item.priceBreakdown.basePrice.toLocaleString()}</span>
+                  </div>
+                  ${item.priceBreakdown.stoneAdjustment !== 0 ? `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                      <span>Stone Adjustment (${item.priceBreakdown.stone}):</span>
+                      <span style="color: ${item.priceBreakdown.stoneAdjustment > 0 ? '#d32f2f' : '#388e3c'};">
+                        ${item.priceBreakdown.stoneAdjustment > 0 ? '+' : ''}₱${item.priceBreakdown.stoneAdjustment.toLocaleString()}
+                      </span>
+                    </div>
+                  ` : ''}
+                  <div style="display: flex; justify-content: space-between; margin-top: 4px; padding-top: 4px; border-top: 1px solid #ddd; font-weight: 600;">
+                    <span>Total:</span>
+                    <span>₱${item.price.toLocaleString()}</span>
+                  </div>
+                </div>
+              `;
+            }
+            return '';
+          })()}
           <div class="item-specs">
             ${(() => {
               const isAccessory = item.productId && String(item.productId).startsWith('accessory-');
@@ -352,12 +418,13 @@ function renderBagPage() {
               const opts = item.options || {};
               const lines = [];
               if (opts.metal || item.metal) lines.push(`Metal Type: ${opts.metal || item.metal || ''}`);
-              if (opts.stone || item.stone) lines.push(`Stone: ${opts.stone || item.stone || ''}`);
               if (isBand) {
-                if (opts.bandCarat || item.bandCarat) lines.push(`Carat Size: ${opts.bandCarat || item.bandCarat || ''} ct`);
+                // For bands, only show stone if it exists in options (plain bands won't have it)
+                if (opts.stone || item.stone) lines.push(`Stone: ${opts.stone || item.stone || ''}`);
                 if (opts.femaleSize || item.femaleSize) lines.push(`Female Ring Size: ${opts.femaleSize || item.femaleSize || ''}`);
                 if (opts.maleSize || item.maleSize) lines.push(`Male Ring Size: ${opts.maleSize || item.maleSize || ''}`);
               } else {
+                if (opts.stone || item.stone) lines.push(`Stone: ${opts.stone || item.stone || ''}`);
                 if (opts.carat || item.carat) lines.push(`Carat Size: ${opts.carat || item.carat || ''}`);
                 // only show ring size for non-accessories
                 if (!isAccessory && (opts.size || item.size)) lines.push(`Ring Size: ${opts.size || item.size || ''}`);
@@ -505,15 +572,60 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       '1': { '14k': 385000, '18k': 389000 },
       '2': { '14k': 805000, '18k': 809000 },
       '3': { '14k': 1550000, '18k': 1559000 }
+    }
+  };
+
+  // Wedding Bands Pricing - SINGLE SOURCE OF TRUTH
+  const WEDDING_BAND_PRICES = {
+    'plain': { 
+      '14k': 50000, 
+      '18k': 58000, 
+      adjustments: {} 
     },
-    // Wedding bands pricing
-    'WeddingBands': {
-      'plain': { '14k': 50000, '18k': 58000 },
-      'half-0.30': { '14k': 75000, '18k': 85000, 'signity_adjust': -10000, 'lab_adjust': 65000, 'natural_adjust': 165000 },
-      'half-0.01-a': { '14k': 65000, '18k': 75000, 'signity_adjust': -4000, 'lab_adjust': 10000, 'natural_adjust': 20000 },
-      'half-0.01-b': { '14k': 55000, '18k': 65000, 'signity_adjust': -4000, 'lab_adjust': 10000, 'natural_adjust': 20000 },
-      'half-0.01-c': { '14k': 69000, '18k': 79000, 'signity_adjust': -4000, 'lab_adjust': 10000, 'natural_adjust': 20000 },
-      'half-0.01-d': { '14k': 69000, '18k': 79000, 'signity_adjust': -7000, 'lab_adjust': 20000, 'natural_adjust': 30000 }
+    '0.30': { 
+      '14k': 75000, 
+      '18k': 85000, 
+      adjustments: { 
+        'Signity': -10000, 
+        'Lab-Grown Diamond': 65000, 
+        'Natural Diamond': 165000 
+      } 
+    },
+    '0.01-A': { 
+      '14k': 65000, 
+      '18k': 75000, 
+      adjustments: { 
+        'Signity': -4000, 
+        'Lab-Grown Diamond': 10000, 
+        'Natural Diamond': 20000 
+      } 
+    },
+    '0.01-B': { 
+      '14k': 55000, 
+      '18k': 65000, 
+      adjustments: { 
+        'Signity': -4000, 
+        'Lab-Grown Diamond': 10000, 
+        'Natural Diamond': 20000 
+      } 
+    },
+    '0.01-C': { 
+      '14k': 69000, 
+      '18k': 79000, 
+      adjustments: { 
+        'Signity': -4000, 
+        'Lab-Grown Diamond': 10000, 
+        'Natural Diamond': 20000 
+      } 
+    },
+    '0.01-D': { 
+      '14k': 69000, 
+      '18k': 79000, 
+      adjustments: { 
+        'Signity': -7000, 
+        'Lab-Grown Diamond': 20000, 
+        'Natural Diamond': 30000 
+      } 
     }
   };
 
@@ -582,13 +694,11 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   
   // default selections - must be declared before using them
   let selectedMetal = '14k yellow gold';
-  let selectedStone = 'Signity';
+  let selectedStone = 'Moissanite';  // Default to Moissanite for bands
   let selectedCarat = '1';
-  let selectedBandCarat = '0';  // For wedding bands: '0', '0.30', or '0.01'
+  let selectedBandCarat = 'plain';  // For wedding bands: 'plain', '0.30', '0.01-A', '0.01-B', '0.01-C', '0.01-D'
   let selectedFemaleSize = '3';
   let selectedMaleSize = '3';
-  let selectedFemaleCarat = '1';  // Female carat size for bands (default to 1 ct)
-  let selectedMaleCarat = '1';    // Male carat size for bands (default to 1 ct)
   let editing = false;
   
   // Determine accessory type early
@@ -605,12 +715,17 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   
   // For wedding bands, setup band-specific UI
   if (isBandSource) {
+    // Set the band carat from the base item
+    if (baseItem && baseItem.bandCarat) {
+      selectedBandCarat = baseItem.bandCarat;
+    }
+    
     // Check if this is a plain band
-    const isPlainBand = (baseItem && baseItem.name && baseItem.name.toLowerCase && baseItem.name.toLowerCase().includes('plain')) || (baseItem && baseItem.isPlain);
+    const isPlainBand = (baseItem && baseItem.name && baseItem.name.toLowerCase && baseItem.name.toLowerCase().includes('plain')) || (baseItem && baseItem.isPlain) || selectedBandCarat === 'plain';
     
     if (isPlainBand) {
-      // For plain bands, set stone to null
-      selectedStone = null;
+      // For plain bands, set stone to Moissanite (only option)
+      selectedStone = 'Moissanite';
       baseItem.isPlainBand = true;  // Store flag for later use
       // Hide all customization for plain bands except metal and female/male sizes
       const caratGroup = caratSel && caratSel.parentElement; if (caratGroup) caratGroup.style.display = 'none';
@@ -631,56 +746,21 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       noteWrap.style.marginTop = '10px';
       noteWrap.innerHTML = `
         <p style="margin:0 0 8px 0;color:#8a0621;font-size:13px;">
-          Sizes above 7 require custom pricing. Please contact us for a quote.
+          For sizes above 7, please <a href="/contact" style="color:#8a0621;text-decoration:underline;">chat with us</a> for custom pricing.
         </p>
       `;
       const pairNoticeEl = overlay.querySelector('#pair-notice');
       if (pairNoticeEl && pairNoticeEl.parentElement) pairNoticeEl.parentElement.insertBefore(noteWrap, pairNoticeEl.nextSibling);
       
-      selectedBandCarat = '0';  // Always plain
+      selectedBandCarat = 'plain';  // Always plain
       baseItem.isPlainBand = true;  // Store flag for later use
     } else {
-      // Hide carat selector for bands (will use dropdown instead)
+      // Hide carat selector for bands
       const caratGroup = caratSel && caratSel.parentElement; if (caratGroup) caratGroup.style.display = 'none';
       // Hide ring size (single); show female/male sizes
       const sizeGroup = sizeSel && sizeSel.parentElement; if (sizeGroup) sizeGroup.style.display = 'none';
       const femaleGroup = overlay.querySelector('#female-size-group'); if (femaleGroup) femaleGroup.style.display = 'block';
       const maleGroup = overlay.querySelector('#male-size-group'); if (maleGroup) maleGroup.style.display = 'block';
-      
-      // Add female/male carat size selectors for non-plain bands
-      const femaleCaratGroup = document.createElement('div');
-      femaleCaratGroup.className = 'ec-opt-group';
-      femaleCaratGroup.innerHTML = `
-        <div class="ec-opt-label">Female Carat Size</div>
-        <select id="opt-female-carat" class="ec-select">
-          <option value="1">1 ct</option>
-          <option value="2">2 ct</option>
-          <option value="3">3 ct</option>
-        </select>
-      `;
-      
-      const maleCaratGroup = document.createElement('div');
-      maleCaratGroup.className = 'ec-opt-group';
-      maleCaratGroup.innerHTML = `
-        <div class="ec-opt-label">Male Carat Size</div>
-        <select id="opt-male-carat" class="ec-select">
-          <option value="0">0 ct (plain bands)</option>
-          <option value="1">1 ct</option>
-          <option value="2">2 ct</option>
-          <option value="3">3 ct</option>
-        </select>
-      `;
-      
-      try {
-        if (femaleGroup && femaleGroup.parentElement) {
-          femaleGroup.parentElement.insertBefore(femaleCaratGroup, femaleGroup.nextSibling);
-        }
-        if (maleGroup && maleGroup.parentElement) {
-          maleGroup.parentElement.insertBefore(maleCaratGroup, maleGroup.nextSibling);
-        }
-      } catch(err) {
-        console.warn('Error inserting carat groups:', err);
-      }
       
       // Show pair notice
       const pairNotice = overlay.querySelector('#pair-notice'); if (pairNotice) pairNotice.style.display = 'block';
@@ -691,7 +771,7 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       noteWrap.style.marginTop = '10px';
       noteWrap.innerHTML = `
         <p style="margin:0 0 8px 0;color:#8a0621;font-size:13px;">
-          Sizes above 7 require custom pricing. Please contact us for a quote.
+          For sizes above 7, please <a href="/contact" style="color:#8a0621;text-decoration:underline;">chat with us</a> for custom pricing.
         </p>
       `;
       const pairNoticeEl = overlay.querySelector('#pair-notice');
@@ -736,8 +816,6 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
     if (opts.bandCarat) selectedBandCarat = opts.bandCarat;
     if (opts.femaleSize) selectedFemaleSize = opts.femaleSize;
     if (opts.maleSize) selectedMaleSize = opts.maleSize;
-    if (opts.femaleCarat) selectedFemaleCarat = opts.femaleCarat;
-    if (opts.maleCarat) selectedMaleCarat = opts.maleCarat;
     overlay.querySelector('#modal-qty').value = existingItem.quantity || 1;
     if (opts.size) sizeSel.value = opts.size;
   }
@@ -833,33 +911,7 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
 
     // BAND PRICING LOGIC
     if (isBandSource) {
-      const bandPricingMap = {
-        '0': {      // Plain Band
-          '14k': 50000,
-          '18k': 58000,
-          adjustments: {}  // No adjustments for plain band
-        },
-        '0.30': {   // Half Eternity 0.30ct
-          '14k': 75000,
-          '18k': 85000,
-          adjustments: {
-            'Signity': -10000,
-            'Lab-Grown Diamond': 65000,
-            'Natural Diamond': 165000
-          }
-        },
-        '0.01': {   // Half Eternity 0.01ct
-          '14k': 65000,  // Average of the variants (55k, 65k, 69k, 69k)
-          '18k': 75000,  // Average of the variants (65k, 75k, 79k, 79k)
-          adjustments: {
-            'Signity': -4000,
-            'Lab-Grown Diamond': 10000,
-            'Natural Diamond': 20000
-          }
-        }
-      };
-      
-      const bandConfig = bandPricingMap[selectedBandCarat] || bandPricingMap['0'];
+      const bandConfig = WEDDING_BAND_PRICES[selectedBandCarat] || WEDDING_BAND_PRICES['plain'];
       if (bandConfig && bandConfig[metal]) {
         perUnit = bandConfig[metal];
         // Apply stone adjustments (base is Moissanite)
@@ -947,22 +999,6 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
         computePrice();
       });
     }
-    
-    // Female and Male carat listeners for bands
-    const femaleCaratSel = overlay.querySelector('#opt-female-carat');
-    const maleCaratSel = overlay.querySelector('#opt-male-carat');
-    if (femaleCaratSel) {
-      femaleCaratSel.addEventListener('change', (ev) => {
-        selectedFemaleCarat = ev.target.value;
-        computePrice();
-      });
-    }
-    if (maleCaratSel) {
-      maleCaratSel.addEventListener('change', (ev) => {
-        selectedMaleCarat = ev.target.value;
-        computePrice();
-      });
-    }
   }
 
   // Size validation function for wedding bands
@@ -1014,10 +1050,6 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
     if (isBandSource) {
       const bandCaratDropdown = overlay.querySelector('#band-carat-dropdown');
       if (bandCaratDropdown) bandCaratDropdown.value = selectedBandCarat;
-      const femaleCaratSel = overlay.querySelector('#opt-female-carat');
-      const maleCaratSel = overlay.querySelector('#opt-male-carat');
-      if (femaleCaratSel) femaleCaratSel.value = selectedFemaleCarat;
-      if (maleCaratSel) maleCaratSel.value = selectedMaleCarat;
       if (femaleSizeSel) femaleSizeSel.value = selectedFemaleSize;
       if (maleSizeSel) maleSizeSel.value = selectedMaleSize;
     }
@@ -1064,8 +1096,6 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       opts.bandCarat = selectedBandCarat;
       opts.femaleSize = selectedFemaleSize;
       opts.maleSize = selectedMaleSize;
-      opts.femaleCarat = selectedFemaleCarat;
-      opts.maleCarat = selectedMaleCarat;
       // For plain bands, don't include stone in options
       if (baseItem.isPlainBand) {
         delete opts.stone;
@@ -1083,6 +1113,22 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
         bag[idx].price = perUnit;
         bag[idx].quantity = qty;
         bag[idx].options = opts;
+        
+        // Update price breakdown for wedding bands
+        if (isBandSource) {
+          const metal = (selectedMetal && selectedMetal.indexOf('14k') === 0) ? '14k' : '18k';
+          const bandConfig = WEDDING_BAND_PRICES[selectedBandCarat] || WEDDING_BAND_PRICES['plain'];
+          const basePrice = bandConfig[metal] || 0;
+          const stoneAdjustment = bandConfig.adjustments[selectedStone] || 0;
+          
+          bag[idx].priceBreakdown = {
+            basePrice: basePrice,
+            stoneAdjustment: stoneAdjustment,
+            metal: selectedMetal,
+            stone: selectedStone
+          };
+        }
+        
         saveBag(bag);
         updateBadge();
         renderBagPage();
@@ -1101,6 +1147,22 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       quantity: qty,
       options: opts
     };
+    
+    // Add price breakdown for wedding bands
+    if (isBandSource) {
+      const metal = (selectedMetal && selectedMetal.indexOf('14k') === 0) ? '14k' : '18k';
+      const bandConfig = WEDDING_BAND_PRICES[selectedBandCarat] || WEDDING_BAND_PRICES['plain'];
+      const basePrice = bandConfig[metal] || 0;
+      const stoneAdjustment = bandConfig.adjustments[selectedStone] || 0;
+      
+      bagItem.priceBreakdown = {
+        basePrice: basePrice,
+        stoneAdjustment: stoneAdjustment,
+        metal: selectedMetal,
+        stone: selectedStone
+      };
+    }
+    
     const bag = getBag();
     bag.push(bagItem);
     saveBag(bag);
@@ -1140,7 +1202,8 @@ window.addEventListener('DOMContentLoaded', () => {
       id: trigger.dataset.id || trigger.getAttribute('data-id'),
       name: trigger.dataset.name || trigger.getAttribute('data-name') || 'Item',
       price: parseFloat(trigger.dataset.price || trigger.getAttribute('data-price') || '0'),
-      image: trigger.dataset.image || trigger.getAttribute('data-image') || ''
+      image: trigger.dataset.image || trigger.getAttribute('data-image') || '',
+      bandCarat: trigger.dataset.bandCarat || trigger.getAttribute('data-band-carat') || null
     };
 
     // only pass an origin button for the small visual feedback when the actual button was clicked

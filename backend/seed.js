@@ -181,143 +181,216 @@ const products = [
     description: 'Timeless emerald-cut solitaire engagement ring. Prices vary based on stone type, metal, and carat size. For 4ct and above, please inquire through our IG/FB.',
     specifications: { cut: 'Emerald' },
     ...createEngagementRingPricing()
-  },  
+  },
+  
   // Wedding Bands
-  { 
-    name: 'Half eternity .30ct moissanite', 
-    basePrice: 110000,
-    image: 'shop-wedding-page/sparkling-diamond-ring-with-classic-metal-wedding-bands.jpg', 
-    category: 'bands', 
-    subcategory: 'wedding-bands', 
-    inStock: true, 
-    label: 'Half eternity .30ct moissanite', 
-    src: '/wedding-band-1',
-    description: 'Stunning half eternity wedding bands with 0.30ct moissanite stones.',
+  {
+    name: 'Plain Bands',
+    basePrice: 50000,
+    image: 'shop-wedding-page/plain-gold-wedding-bands.jpg',
+    category: 'bands',
+    subcategory: 'wedding-bands',
+    inStock: true,
+    label: 'Plain Bands',
+    src: '/wedding-band-plain',
+    description: 'Classic plain wedding band set. Available in 14k or 18k gold. Size 3-7 only.',
+    bandCarat: 'plain',
     availableOptions: {
       metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite'],
       sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
     },
     pricing: {
       combinations: [
-        { metal: '14k White Gold', size: '3-7', price: 110000 },
-        { metal: '14k Yellow Gold', size: '3-7', price: 110000 },
-        { metal: '18k White Gold', size: '3-7', price: 120000 },
-        { metal: '18k Yellow Gold', size: '3-7', price: 120000 }
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 50000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 50000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 58000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 58000 }
       ]
     }
   },
-  { 
-    name: 'Half eternity .01ct moissanite', 
-    basePrice: 70000,
-    image: 'shop-wedding-page/stacked-gold-rings-clear-wedding-bands.jpg', 
-    category: 'bands', 
-    subcategory: 'wedding-bands', 
-    inStock: true, 
-    label: 'Half eternity .01ct moissanite', 
-    src: '/wedding-band-2',
-    description: 'Beautiful half eternity wedding bands with 0.01ct moissanite stones.',
+  {
+    name: 'Half Eternity 0.30ct Moissanite',
+    basePrice: 75000,
+    image: 'shop-wedding-page/sparkling-diamond-ring-with-classic-metal-wedding-bands.jpg',
+    category: 'bands',
+    subcategory: 'wedding-bands',
+    inStock: true,
+    label: 'Half Eternity 0.30ct',
+    src: '/wedding-band-030ct',
+    description: 'Stunning half eternity wedding band set with 0.30ct stones. Size 3-7 only.',
+    bandCarat: '0.30',
     availableOptions: {
       metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite', 'Signity', 'Lab Diamond', 'Natural Diamond'],
       sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
     },
     pricing: {
       combinations: [
-        { metal: '14k White Gold', size: '3-7', price: 70000 },
-        { metal: '14k Yellow Gold', size: '3-7', price: 70000 },
-        { metal: '18k White Gold', size: '3-7', price: 80000 },
-        { metal: '18k Yellow Gold', size: '3-7', price: 80000 }
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 75000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 75000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 85000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 85000 },
+        { metal: '14k White Gold', stone: 'Signity', size: '3-7', price: 65000 },
+        { metal: '14k Yellow Gold', stone: 'Signity', size: '3-7', price: 65000 },
+        { metal: '18k White Gold', stone: 'Signity', size: '3-7', price: 75000 },
+        { metal: '18k Yellow Gold', stone: 'Signity', size: '3-7', price: 75000 },
+        { metal: '14k White Gold', stone: 'Lab Diamond', size: '3-7', price: 140000 },
+        { metal: '14k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 140000 },
+        { metal: '18k White Gold', stone: 'Lab Diamond', size: '3-7', price: 150000 },
+        { metal: '18k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 150000 },
+        { metal: '14k White Gold', stone: 'Natural Diamond', size: '3-7', price: 240000 },
+        { metal: '14k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 240000 },
+        { metal: '18k White Gold', stone: 'Natural Diamond', size: '3-7', price: 250000 },
+        { metal: '18k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 250000 }
       ]
     }
   },
-  { 
-    name: 'Half eternity .01ct moissanite', 
-    basePrice: 62000,
-    image: 'shop-wedding-page/thin-eternity-and-plain-band-wedding-bands.jpg', 
-    category: 'bands', 
-    subcategory: 'wedding-bands', 
-    inStock: true, 
-    label: 'Half eternity .01ct moissanite', 
-    src: '/wedding-band-3',
-    description: 'Elegant half eternity wedding bands with thin design and 0.01ct moissanite stones.',
-    availableOptions: {
-      metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
-      sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
-    },
-    pricing: {
-      combinations: [
-        { metal: '14k White Gold', size: '3-7', price: 62000 },
-        { metal: '14k Yellow Gold', size: '3-7', price: 62000 },
-        { metal: '18k White Gold', size: '3-7', price: 72000 },
-        { metal: '18k Yellow Gold', size: '3-7', price: 72000 }
-      ]
-    }
-  },
-  { 
-    name: 'Half eternity .01ct moissanite', 
+  {
+    name: 'Half Eternity 0.01ct Moissanite - Set A',
     basePrice: 65000,
-    image: 'shop-wedding-page/gold-diamond-v-wedding-bands.jpg', 
-    category: 'bands', 
-    subcategory: 'wedding-bands', 
-    inStock: true, 
-    label: 'Half eternity .01ct moissanite', 
-    src: '/wedding-band-4',
-    description: 'Sophisticated half eternity wedding bands with V-shaped setting and 0.01ct moissanite stones.',
+    image: 'shop-wedding-page/stacked-gold-rings-clear-wedding-bands.jpg',
+    category: 'bands',
+    subcategory: 'wedding-bands',
+    inStock: true,
+    label: 'Half Eternity 0.01ct - Set A',
+    src: '/wedding-band-001ct-a',
+    description: 'Elegant half eternity wedding band set with 0.01ct stones. Size 3-7 only.',
+    bandCarat: '0.01-A',
     availableOptions: {
       metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite', 'Signity', 'Lab Diamond', 'Natural Diamond'],
       sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
     },
     pricing: {
       combinations: [
-        { metal: '14k White Gold', size: '3-7', price: 65000 },
-        { metal: '14k Yellow Gold', size: '3-7', price: 65000 },
-        { metal: '18k White Gold', size: '3-7', price: 75000 },
-        { metal: '18k Yellow Gold', size: '3-7', price: 75000 }
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 65000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 65000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 75000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 75000 },
+        { metal: '14k White Gold', stone: 'Signity', size: '3-7', price: 61000 },
+        { metal: '14k Yellow Gold', stone: 'Signity', size: '3-7', price: 61000 },
+        { metal: '18k White Gold', stone: 'Signity', size: '3-7', price: 71000 },
+        { metal: '18k Yellow Gold', stone: 'Signity', size: '3-7', price: 71000 },
+        { metal: '14k White Gold', stone: 'Lab Diamond', size: '3-7', price: 75000 },
+        { metal: '14k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 75000 },
+        { metal: '18k White Gold', stone: 'Lab Diamond', size: '3-7', price: 85000 },
+        { metal: '18k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 85000 },
+        { metal: '14k White Gold', stone: 'Natural Diamond', size: '3-7', price: 85000 },
+        { metal: '14k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 85000 },
+        { metal: '18k White Gold', stone: 'Natural Diamond', size: '3-7', price: 95000 },
+        { metal: '18k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 95000 }
       ]
     }
   },
-  { 
-    name: 'Half eternity .01ct moissanite', 
-    basePrice: 95000,
-    image: 'shop-wedding-page/matching-silver-rings-small-diamonds-wedding-bands.jpeg', 
-    category: 'bands', 
-    subcategory: 'wedding-bands', 
-    inStock: true, 
-    label: 'Half eternity .01ct moissanite', 
-    src: '/wedding-band-5',
-    description: 'Matching half eternity wedding bands with small 0.01ct moissanite stones.',
+  {
+    name: 'Half Eternity 0.01ct Moissanite - Set B',
+    basePrice: 55000,
+    image: 'shop-wedding-page/thin-eternity-and-plain-band-wedding-bands.jpg',
+    category: 'bands',
+    subcategory: 'wedding-bands',
+    inStock: true,
+    label: 'Half Eternity 0.01ct - Set B',
+    src: '/wedding-band-001ct-b',
+    description: 'Delicate half eternity wedding band set with 0.01ct stones. Size 3-7 only.',
+    bandCarat: '0.01-B',
     availableOptions: {
       metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite', 'Signity', 'Lab Diamond', 'Natural Diamond'],
       sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
     },
     pricing: {
       combinations: [
-        { metal: '14k White Gold', size: '3-7', price: 95000 },
-        { metal: '14k Yellow Gold', size: '3-7', price: 95000 },
-        { metal: '18k White Gold', size: '3-7', price: 105000 },
-        { metal: '18k Yellow Gold', size: '3-7', price: 105000 }
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 55000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 55000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 65000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 65000 },
+        { metal: '14k White Gold', stone: 'Signity', size: '3-7', price: 51000 },
+        { metal: '14k Yellow Gold', stone: 'Signity', size: '3-7', price: 51000 },
+        { metal: '18k White Gold', stone: 'Signity', size: '3-7', price: 61000 },
+        { metal: '18k Yellow Gold', stone: 'Signity', size: '3-7', price: 61000 },
+        { metal: '14k White Gold', stone: 'Lab Diamond', size: '3-7', price: 65000 },
+        { metal: '14k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 65000 },
+        { metal: '18k White Gold', stone: 'Lab Diamond', size: '3-7', price: 75000 },
+        { metal: '18k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 75000 },
+        { metal: '14k White Gold', stone: 'Natural Diamond', size: '3-7', price: 75000 },
+        { metal: '14k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 75000 },
+        { metal: '18k White Gold', stone: 'Natural Diamond', size: '3-7', price: 85000 },
+        { metal: '18k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 85000 }
       ]
     }
   },
-  { 
-    name: 'Plain bands', 
-    basePrice: 42000,
-    image: 'shop-wedding-page/plain-silver-wedding-bands.jpg', 
-    category: 'bands', 
-    subcategory: 'wedding-bands', 
-    inStock: true, 
-    label: 'Plain bands', 
-    src: '/wedding-band-6',
-    description: 'Classic plain silver wedding bands. Available for Size 3-7 only.',
+  {
+    name: 'Half Eternity 0.01ct Moissanite - Set C',
+    basePrice: 69000,
+    image: 'shop-wedding-page/gold-diamond-v-wedding-bands.jpg',
+    category: 'bands',
+    subcategory: 'wedding-bands',
+    inStock: true,
+    label: 'Half Eternity 0.01ct - Set C',
+    src: '/wedding-band-001ct-c',
+    description: 'Sophisticated V-shaped half eternity wedding band set with 0.01ct stones. Size 3-7 only.',
+    bandCarat: '0.01-C',
     availableOptions: {
       metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite', 'Signity', 'Lab Diamond', 'Natural Diamond'],
       sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
     },
     pricing: {
       combinations: [
-        { metal: '14k White Gold', size: '3-7', price: 42000 },
-        { metal: '14k Yellow Gold', size: '3-7', price: 42000 },
-        { metal: '18k White Gold', size: '3-7', price: 50000 },
-        { metal: '18k Yellow Gold', size: '3-7', price: 50000 }
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 69000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 69000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 79000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 79000 },
+        { metal: '14k White Gold', stone: 'Signity', size: '3-7', price: 65000 },
+        { metal: '14k Yellow Gold', stone: 'Signity', size: '3-7', price: 65000 },
+        { metal: '18k White Gold', stone: 'Signity', size: '3-7', price: 75000 },
+        { metal: '18k Yellow Gold', stone: 'Signity', size: '3-7', price: 75000 },
+        { metal: '14k White Gold', stone: 'Lab Diamond', size: '3-7', price: 79000 },
+        { metal: '14k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 79000 },
+        { metal: '18k White Gold', stone: 'Lab Diamond', size: '3-7', price: 89000 },
+        { metal: '18k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 89000 },
+        { metal: '14k White Gold', stone: 'Natural Diamond', size: '3-7', price: 89000 },
+        { metal: '14k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 89000 },
+        { metal: '18k White Gold', stone: 'Natural Diamond', size: '3-7', price: 99000 },
+        { metal: '18k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 99000 }
+      ]
+    }
+  },
+  {
+    name: 'Half Eternity 0.01ct Moissanite - Set D',
+    basePrice: 69000,
+    image: 'shop-wedding-page/matching-silver-rings-small-diamonds-wedding-bands.jpeg',
+    category: 'bands',
+    subcategory: 'wedding-bands',
+    inStock: true,
+    label: 'Half Eternity 0.01ct - Set D',
+    src: '/wedding-band-001ct-d',
+    description: 'Matching half eternity wedding band set with 0.01ct stones. Size 3-7 only.',
+    bandCarat: '0.01-D',
+    availableOptions: {
+      metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite', 'Signity', 'Lab Diamond', 'Natural Diamond'],
+      sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
+    },
+    pricing: {
+      combinations: [
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 69000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 69000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 79000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 79000 },
+        { metal: '14k White Gold', stone: 'Signity', size: '3-7', price: 62000 },
+        { metal: '14k Yellow Gold', stone: 'Signity', size: '3-7', price: 62000 },
+        { metal: '18k White Gold', stone: 'Signity', size: '3-7', price: 72000 },
+        { metal: '18k Yellow Gold', stone: 'Signity', size: '3-7', price: 72000 },
+        { metal: '14k White Gold', stone: 'Lab Diamond', size: '3-7', price: 89000 },
+        { metal: '14k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 89000 },
+        { metal: '18k White Gold', stone: 'Lab Diamond', size: '3-7', price: 99000 },
+        { metal: '18k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 99000 },
+        { metal: '14k White Gold', stone: 'Natural Diamond', size: '3-7', price: 99000 },
+        { metal: '14k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 99000 },
+        { metal: '18k White Gold', stone: 'Natural Diamond', size: '3-7', price: 109000 },
+        { metal: '18k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 109000 }
       ]
     }
   },

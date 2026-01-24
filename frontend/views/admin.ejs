@@ -64,10 +64,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="image">Blog Image <span id="image-required">*</span></label>
+                    <label for="image">Blog Cover Image <span id="image-required">*</span></label>
                     <input type="file" id="image" name="image" accept="image/*" required>
                     <div id="image-preview" class="image-preview"></div>
                     <small id="image-note" style="display: none; color: #6b7280;">Leave empty to keep existing image</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="content-images">Content Images (Optional)</label>
+                    <p style="font-size: 14px; color: #6b7280; margin-bottom: 10px;">Upload images (JPG, PNG, GIF, WebP) to use within your blog content. Click the 🖼️ button in the toolbar below to insert images. <strong>Note: Images will be automatically saved when you publish the blog.</strong></p>
+                    <input type="file" id="content-images" name="contentImages" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml" multiple>
+                    <div id="content-images-preview" class="content-images-preview"></div>
                 </div>
 
                 <div class="form-group">
@@ -146,7 +153,17 @@
                         <button type="button" class="format-btn" onclick="insertFormatting('strong')" title="Bold"><strong>B</strong></button>
                         <button type="button" class="format-btn" onclick="insertFormatting('ul')" title="Bullet List">• List</button>
                         <button type="button" class="format-btn" onclick="insertFormatting('ol')" title="Numbered List">1. List</button>
+                        <button type="button" class="format-btn image-btn" onclick="toggleImageSelector()" title="Insert Image">🖼️ Image</button>
                         <button type="button" class="format-btn template-btn" onclick="insertTemplate()" title="Insert Blog Template">Template</button>
+                    </div>
+                    <div id="image-selector" class="image-selector" style="display: none;">
+                        <div class="image-selector-header">
+                            <span>Select an image to insert:</span>
+                            <button type="button" class="close-selector" onclick="toggleImageSelector()">✕</button>
+                        </div>
+                        <div id="image-selector-grid" class="image-selector-grid">
+                            <p style="color: #6b7280; padding: 20px; text-align: center;">No images uploaded yet. Upload images above first.</p>
+                        </div>
                     </div>                    <textarea id="content" name="content" class="content-textarea" required placeholder="Write your blog content with HTML formatting. Use the toolbar above for quick formatting or click the guide for examples."></textarea>
                     <div class="content-stats">
                         <span id="char-count">0 characters</span>
@@ -267,6 +284,109 @@
                 preview.style.display = 'none';
                 button.textContent = 'Preview Content';
             }
+        }
+
+        // Handle content images upload and preview
+        let uploadedContentImages = [];
+        
+        document.getElementById('content-images').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            const previewContainer = document.getElementById('content-images-preview');
+            
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imageData = {
+                        file: file,
+                        dataUrl: e.target.result,
+                        name: file.name
+                    };
+                    uploadedContentImages.push(imageData);
+                    
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'content-image-item';
+                    imageItem.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}">
+                        <div class="content-image-actions">
+                            <span class="content-image-name">${file.name}</span>
+                            <button type="button" class="btn-small btn-remove" onclick="removeContentImage(${uploadedContentImages.length - 1})">Remove</button>
+                        </div>
+                    `;
+                    previewContainer.appendChild(imageItem);
+                    
+                    // Update the image selector
+                    updateImageSelector();
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function toggleImageSelector() {
+            const selector = document.getElementById('image-selector');
+            if (selector.style.display === 'none') {
+                if (uploadedContentImages.filter(img => img !== null).length === 0) {
+                    showAlert('create-alert', 'Please upload images first using the "Content Images" field above.', 'error');
+                    return;
+                }
+                selector.style.display = 'block';
+            } else {
+                selector.style.display = 'none';
+            }
+        }
+
+        function updateImageSelector() {
+            const grid = document.getElementById('image-selector-grid');
+            const validImages = uploadedContentImages.filter(img => img !== null);
+            
+            if (validImages.length === 0) {
+                grid.innerHTML = '<p style="color: #6b7280; padding: 20px; text-align: center;">No images uploaded yet. Upload images above first.</p>';
+                return;
+            }
+            
+            grid.innerHTML = validImages.map((img, index) => `
+                <div class="image-selector-item" onclick="insertImageFromSelector(${uploadedContentImages.indexOf(img)})">
+                    <img src="${img.dataUrl}" alt="${img.name}">
+                    <span>${img.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function insertImageFromSelector(index) {
+            insertContentImage(index);
+            toggleImageSelector();
+        }
+
+        function insertContentImage(index) {
+            const image = uploadedContentImages[index];
+            if (!image) return;
+            
+            const textarea = document.getElementById('content');
+            const imagePath = `/images/blog-page/${image.name}`;
+            const imageHtml = `\n<img src="${imagePath}" alt="${image.name.replace(/\.[^/.]+$/, '')}" class="blog-content-image" style="max-width: 100%; height: auto; margin: 20px 0; border-radius: 8px;">\n`;
+            
+            const cursorPos = textarea.selectionStart;
+            const textBefore = textarea.value.substring(0, cursorPos);
+            const textAfter = textarea.value.substring(cursorPos);
+            
+            textarea.value = textBefore + imageHtml + textAfter;
+            textarea.focus();
+            
+            // Set cursor after inserted image
+            const newPos = cursorPos + imageHtml.length;
+            textarea.setSelectionRange(newPos, newPos);
+            
+            // Show alert
+            showAlert('create-alert', `Image inserted! Remember to upload "${image.name}" to /images/blog-page/ folder.`, 'success');
+        }
+
+        function removeContentImage(index) {
+            uploadedContentImages[index] = null;
+            const previewContainer = document.getElementById('content-images-preview');
+            const items = previewContainer.querySelectorAll('.content-image-item');
+            if (items[index]) {
+                items[index].remove();
+            }
+            updateImageSelector();
         }
           // Insert blog template
         function insertTemplate() {
@@ -469,6 +589,16 @@
             const publishedCheckbox = document.getElementById('published');
             formData.set('published', publishedCheckbox.checked ? 'true' : 'false');
             
+            // Remove the contentImages field from form (it was added by the file input)
+            formData.delete('contentImages');
+            
+            // Add content images to formData
+            uploadedContentImages.forEach((image, index) => {
+                if (image !== null && image.file) {
+                    formData.append('contentImages', image.file);
+                }
+            });
+            
             // Determine if we're creating or editing
             const isEditing = blogId !== '';
             const url = isEditing ? `/api/admin/blogs/${blogId}` : '/api/admin/blogs';
@@ -486,16 +616,26 @@
                 
                 const data = await response.json();
                 
+                console.log('Response status:', response.status);
+                console.log('Response data:', data);
+                
                 if (response.ok) {
                     showAlert('create-alert', isEditing ? 'Blog post updated successfully!' : 'Blog post created successfully!', 'success');
+                    
+                    // Clear content images after successful submission
+                    uploadedContentImages = [];
+                    document.getElementById('content-images-preview').innerHTML = '';
+                    document.getElementById('content-images').value = '';
+                    
                     cancelEdit(); // Reset form
                     loadBlogs(); // Refresh blog list
                 } else {
+                    console.error('Error response:', data);
                     showAlert('create-alert', data.message || `Failed to ${isEditing ? 'update' : 'create'} blog post`, 'error');
                 }
             } catch (error) {
-                showAlert('create-alert', 'An error occurred. Please try again.', 'error');
-                console.error('Error:', error);
+                console.error('Fetch error:', error);
+                showAlert('create-alert', 'An error occurred: ' + error.message, 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = isEditing ? 'Update Blog Post' : 'Create Blog Post';
