@@ -43,16 +43,12 @@ router.post('/signup', async (req, res) => {
       });
     }
 
-    // Hash password
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Create new user
+    // Create new user (password will be hashed by the pre-save hook)
     const user = new User({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: email.toLowerCase(),
-      password: hashedPassword
+      password: password  // Don't hash here - let the model handle it
     });
 
     await user.save();
@@ -115,7 +111,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({ 
         success: false, 
