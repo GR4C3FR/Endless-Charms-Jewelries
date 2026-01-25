@@ -87,9 +87,11 @@
           <p class="profile-email"><%= user ? user.email : '' %></p>
         </div>
         <nav class="profile-nav">
-          <a href="#" class="profile-nav-item active" data-tab="account">Account Details</a>
+          <a href="#" class="profile-nav-item active" data-tab="account">Account</a>
+          <% if (!user.isAdmin) { %>
           <a href="#" class="profile-nav-item" data-tab="orders">Order History</a>
           <a href="#" class="profile-nav-item" data-tab="addresses">Addresses</a>
+          <% } %>
           <a href="/api/auth/logout" class="profile-nav-item logout">Logout</a>
         </nav>
       </div>
@@ -97,7 +99,7 @@
       <div class="profile-content">
         <!-- Account Details Tab -->
         <div id="account-tab" class="profile-tab active">
-          <h3>Account Details</h3>
+          <h3>Account</h3>
           <form id="profile-form" class="profile-details-form">
             <div class="form-row">
               <div class="form-group">
@@ -135,14 +137,17 @@
         </div>
 
         <!-- Order History Tab -->
+        <% if (!user.isAdmin) { %>
         <div id="orders-tab" class="profile-tab">
           <h3>Order History</h3>
           <div id="orders-list">
             <p class="loading-text">Loading your orders...</p>
           </div>
         </div>
+        <% } %>
 
         <!-- Addresses Tab -->
+        <% if (!user.isAdmin) { %>
         <div id="addresses-tab" class="profile-tab">
           <h3>Saved Addresses</h3>
           <div class="addresses-list">
@@ -152,6 +157,7 @@
             </div>
           </div>
         </div>
+        <% } %>
       </div>
     </div>
   </main>
