@@ -433,37 +433,84 @@ const products = [
   },
   { 
     name: 'Stud Earrings', 
-    basePrice: 149000,
+    basePrice: 29000,
     image: 'diamond-stud-earrings.jpg', 
     category: 'earrings', 
     subcategory: 'accessories', 
     inStock: true, 
     label: 'Stud Earrings', 
     src: '/stud-earrings',
-    description: 'Elegant diamond stud earrings perfect for any occasion.',
+    description: 'Elegant diamond stud earrings perfect for any occasion. Price per pair (each stone carat size). With GRA certificate for Moissanite, IGI certificate for Lab Grown and Natural Diamond.',
     availableOptions: {
       metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
       stones: ['Signity', 'Moissanite', 'Lab-Grown Diamond', 'Natural Diamond'],
-      sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
+      carats: ['1', '2', '3']
     },
     pricing: {
       combinations: [
-        { stone: 'Signity', metal: '14k White Gold', price: 61000 },
-        { stone: 'Signity', metal: '14k Yellow Gold', price: 61000 },
-        { stone: 'Signity', metal: '18k White Gold', price: 71000 },
-        { stone: 'Signity', metal: '18k Yellow Gold', price: 71000 },
-        { stone: 'Moissanite', metal: '14k White Gold', price: 65000 },
-        { stone: 'Moissanite', metal: '14k Yellow Gold', price: 65000 },
-        { stone: 'Moissanite', metal: '18k White Gold', price: 75000 },
-        { stone: 'Moissanite', metal: '18k Yellow Gold', price: 75000 },
-        { stone: 'Lab-Grown Diamond', metal: '14k White Gold', price: 75000 },
-        { stone: 'Lab-Grown Diamond', metal: '14k Yellow Gold', price: 75000 },
-        { stone: 'Lab-Grown Diamond', metal: '18k White Gold', price: 85000 },
-        { stone: 'Lab-Grown Diamond', metal: '18k Yellow Gold', price: 85000 },
-        { stone: 'Natural Diamond', metal: '14k White Gold', price: 85000 },
-        { stone: 'Natural Diamond', metal: '14k Yellow Gold', price: 85000 },
-        { stone: 'Natural Diamond', metal: '18k White Gold', price: 95000 },
-        { stone: 'Natural Diamond', metal: '18k Yellow Gold', price: 95000 }
+        // Signity - 1ct each stone
+        { stone: 'Signity', carat: '1', metal: '14k White Gold', price: 29000 },
+        { stone: 'Signity', carat: '1', metal: '14k Yellow Gold', price: 29000 },
+        { stone: 'Signity', carat: '1', metal: '18k White Gold', price: 33000 },
+        { stone: 'Signity', carat: '1', metal: '18k Yellow Gold', price: 33000 },
+        // Signity - 2ct each stone
+        { stone: 'Signity', carat: '2', metal: '14k White Gold', price: 33000 },
+        { stone: 'Signity', carat: '2', metal: '14k Yellow Gold', price: 33000 },
+        { stone: 'Signity', carat: '2', metal: '18k White Gold', price: 37000 },
+        { stone: 'Signity', carat: '2', metal: '18k Yellow Gold', price: 37000 },
+        // Signity - 3ct each stone
+        { stone: 'Signity', carat: '3', metal: '14k White Gold', price: 38000 },
+        { stone: 'Signity', carat: '3', metal: '14k Yellow Gold', price: 38000 },
+        { stone: 'Signity', carat: '3', metal: '18k White Gold', price: 42000 },
+        { stone: 'Signity', carat: '3', metal: '18k Yellow Gold', price: 42000 },
+        
+        // Moissanite - 1ct each stone
+        { stone: 'Moissanite', carat: '1', metal: '14k White Gold', price: 36000 },
+        { stone: 'Moissanite', carat: '1', metal: '14k Yellow Gold', price: 36000 },
+        { stone: 'Moissanite', carat: '1', metal: '18k White Gold', price: 40000 },
+        { stone: 'Moissanite', carat: '1', metal: '18k Yellow Gold', price: 40000 },
+        // Moissanite - 2ct each stone
+        { stone: 'Moissanite', carat: '2', metal: '14k White Gold', price: 46000 },
+        { stone: 'Moissanite', carat: '2', metal: '14k Yellow Gold', price: 46000 },
+        { stone: 'Moissanite', carat: '2', metal: '18k White Gold', price: 50000 },
+        { stone: 'Moissanite', carat: '2', metal: '18k Yellow Gold', price: 50000 },
+        // Moissanite - 3ct each stone
+        { stone: 'Moissanite', carat: '3', metal: '14k White Gold', price: 56000 },
+        { stone: 'Moissanite', carat: '3', metal: '14k Yellow Gold', price: 56000 },
+        { stone: 'Moissanite', carat: '3', metal: '18k White Gold', price: 60000 },
+        { stone: 'Moissanite', carat: '3', metal: '18k Yellow Gold', price: 60000 },
+        
+        // Lab-Grown Diamond - 1ct each stone
+        { stone: 'Lab-Grown Diamond', carat: '1', metal: '14k White Gold', price: 89000 },
+        { stone: 'Lab-Grown Diamond', carat: '1', metal: '14k Yellow Gold', price: 89000 },
+        { stone: 'Lab-Grown Diamond', carat: '1', metal: '18k White Gold', price: 94000 },
+        { stone: 'Lab-Grown Diamond', carat: '1', metal: '18k Yellow Gold', price: 94000 },
+        // Lab-Grown Diamond - 2ct each stone
+        { stone: 'Lab-Grown Diamond', carat: '2', metal: '14k White Gold', price: 139000 },
+        { stone: 'Lab-Grown Diamond', carat: '2', metal: '14k Yellow Gold', price: 139000 },
+        { stone: 'Lab-Grown Diamond', carat: '2', metal: '18k White Gold', price: 144000 },
+        { stone: 'Lab-Grown Diamond', carat: '2', metal: '18k Yellow Gold', price: 144000 },
+        // Lab-Grown Diamond - 3ct each stone
+        { stone: 'Lab-Grown Diamond', carat: '3', metal: '14k White Gold', price: 189000 },
+        { stone: 'Lab-Grown Diamond', carat: '3', metal: '14k Yellow Gold', price: 189000 },
+        { stone: 'Lab-Grown Diamond', carat: '3', metal: '18k White Gold', price: 194000 },
+        { stone: 'Lab-Grown Diamond', carat: '3', metal: '18k Yellow Gold', price: 194000 },
+        
+        // Natural Diamond - 1ct each stone
+        { stone: 'Natural Diamond', carat: '1', metal: '14k White Gold', price: 794000 },
+        { stone: 'Natural Diamond', carat: '1', metal: '14k Yellow Gold', price: 794000 },
+        { stone: 'Natural Diamond', carat: '1', metal: '18k White Gold', price: 799000 },
+        { stone: 'Natural Diamond', carat: '1', metal: '18k Yellow Gold', price: 799000 },
+        // Natural Diamond - 2ct each stone
+        { stone: 'Natural Diamond', carat: '2', metal: '14k White Gold', price: 1594000 },
+        { stone: 'Natural Diamond', carat: '2', metal: '14k Yellow Gold', price: 1594000 },
+        { stone: 'Natural Diamond', carat: '2', metal: '18k White Gold', price: 1599000 },
+        { stone: 'Natural Diamond', carat: '2', metal: '18k Yellow Gold', price: 1599000 },
+        // Natural Diamond - 3ct each stone
+        { stone: 'Natural Diamond', carat: '3', metal: '14k White Gold', price: 3100000 },
+        { stone: 'Natural Diamond', carat: '3', metal: '14k Yellow Gold', price: 3100000 },
+        { stone: 'Natural Diamond', carat: '3', metal: '18k White Gold', price: 3150000 },
+        { stone: 'Natural Diamond', carat: '3', metal: '18k Yellow Gold', price: 3150000 }
       ]
     }
   },
