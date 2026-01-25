@@ -158,7 +158,20 @@ const weddingBandsStyles = [
     label: 'Plain Bands',
     src: '/wedding-band-plain',
     basePrice: 50000,
-    bandCarat: 'plain'
+    bandCarat: 'plain',
+    availableOptions: {
+      metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite'],
+      sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
+    },
+    pricing: {
+      combinations: [
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 50000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 50000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 58000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 58000 }
+      ]
+    }
   },
   {
     name: 'Half Eternity 0.30ct Moissanite',
@@ -166,7 +179,32 @@ const weddingBandsStyles = [
     label: 'Half Eternity 0.30ct',
     src: '/wedding-band-030ct',
     basePrice: 75000,
-    bandCarat: '0.30'
+    bandCarat: '0.30',
+    availableOptions: {
+      metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite', 'Signity', 'Lab Diamond', 'Natural Diamond'],
+      sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
+    },
+    pricing: {
+      combinations: [
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 75000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 75000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 85000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 85000 },
+        { metal: '14k White Gold', stone: 'Signity', size: '3-7', price: 65000 },
+        { metal: '14k Yellow Gold', stone: 'Signity', size: '3-7', price: 65000 },
+        { metal: '18k White Gold', stone: 'Signity', size: '3-7', price: 75000 },
+        { metal: '18k Yellow Gold', stone: 'Signity', size: '3-7', price: 75000 },
+        { metal: '14k White Gold', stone: 'Lab Diamond', size: '3-7', price: 140000 },
+        { metal: '14k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 140000 },
+        { metal: '18k White Gold', stone: 'Lab Diamond', size: '3-7', price: 150000 },
+        { metal: '18k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 150000 },
+        { metal: '14k White Gold', stone: 'Natural Diamond', size: '3-7', price: 240000 },
+        { metal: '14k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 240000 },
+        { metal: '18k White Gold', stone: 'Natural Diamond', size: '3-7', price: 250000 },
+        { metal: '18k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 250000 }
+      ]
+    }
   },
   {
     name: 'Half Eternity 0.01ct Moissanite - Set A',
@@ -174,7 +212,32 @@ const weddingBandsStyles = [
     label: 'Half Eternity 0.01ct - Set A',
     src: '/wedding-band-001ct-a',
     basePrice: 65000,
-    bandCarat: '0.01-A'
+    bandCarat: '0.01-A',
+    availableOptions: {
+      metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite', 'Signity', 'Lab Diamond', 'Natural Diamond'],
+      sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
+    },
+    pricing: {
+      combinations: [
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 65000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 65000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 75000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 75000 },
+        { metal: '14k White Gold', stone: 'Signity', size: '3-7', price: 61000 },
+        { metal: '14k Yellow Gold', stone: 'Signity', size: '3-7', price: 61000 },
+        { metal: '18k White Gold', stone: 'Signity', size: '3-7', price: 71000 },
+        { metal: '18k Yellow Gold', stone: 'Signity', size: '3-7', price: 71000 },
+        { metal: '14k White Gold', stone: 'Lab Diamond', size: '3-7', price: 75000 },
+        { metal: '14k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 75000 },
+        { metal: '18k White Gold', stone: 'Lab Diamond', size: '3-7', price: 85000 },
+        { metal: '18k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 85000 },
+        { metal: '14k White Gold', stone: 'Natural Diamond', size: '3-7', price: 85000 },
+        { metal: '14k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 85000 },
+        { metal: '18k White Gold', stone: 'Natural Diamond', size: '3-7', price: 95000 },
+        { metal: '18k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 95000 }
+      ]
+    }
   },
   {
     name: 'Half Eternity 0.01ct Moissanite - Set B',
@@ -182,7 +245,32 @@ const weddingBandsStyles = [
     label: 'Half Eternity 0.01ct - Set B',
     src: '/wedding-band-001ct-b',
     basePrice: 55000,
-    bandCarat: '0.01-B'
+    bandCarat: '0.01-B',
+    availableOptions: {
+      metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite', 'Signity', 'Lab Diamond', 'Natural Diamond'],
+      sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
+    },
+    pricing: {
+      combinations: [
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 55000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 55000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 65000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 65000 },
+        { metal: '14k White Gold', stone: 'Signity', size: '3-7', price: 51000 },
+        { metal: '14k Yellow Gold', stone: 'Signity', size: '3-7', price: 51000 },
+        { metal: '18k White Gold', stone: 'Signity', size: '3-7', price: 61000 },
+        { metal: '18k Yellow Gold', stone: 'Signity', size: '3-7', price: 61000 },
+        { metal: '14k White Gold', stone: 'Lab Diamond', size: '3-7', price: 65000 },
+        { metal: '14k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 65000 },
+        { metal: '18k White Gold', stone: 'Lab Diamond', size: '3-7', price: 75000 },
+        { metal: '18k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 75000 },
+        { metal: '14k White Gold', stone: 'Natural Diamond', size: '3-7', price: 75000 },
+        { metal: '14k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 75000 },
+        { metal: '18k White Gold', stone: 'Natural Diamond', size: '3-7', price: 85000 },
+        { metal: '18k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 85000 }
+      ]
+    }
   },
   {
     name: 'Half Eternity 0.01ct Moissanite - Set C',
@@ -190,7 +278,32 @@ const weddingBandsStyles = [
     label: 'Half Eternity 0.01ct - Set C',
     src: '/wedding-band-001ct-c',
     basePrice: 69000,
-    bandCarat: '0.01-C'
+    bandCarat: '0.01-C',
+    availableOptions: {
+      metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite', 'Signity', 'Lab Diamond', 'Natural Diamond'],
+      sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
+    },
+    pricing: {
+      combinations: [
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 69000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 69000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 79000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 79000 },
+        { metal: '14k White Gold', stone: 'Signity', size: '3-7', price: 65000 },
+        { metal: '14k Yellow Gold', stone: 'Signity', size: '3-7', price: 65000 },
+        { metal: '18k White Gold', stone: 'Signity', size: '3-7', price: 75000 },
+        { metal: '18k Yellow Gold', stone: 'Signity', size: '3-7', price: 75000 },
+        { metal: '14k White Gold', stone: 'Lab Diamond', size: '3-7', price: 79000 },
+        { metal: '14k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 79000 },
+        { metal: '18k White Gold', stone: 'Lab Diamond', size: '3-7', price: 89000 },
+        { metal: '18k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 89000 },
+        { metal: '14k White Gold', stone: 'Natural Diamond', size: '3-7', price: 89000 },
+        { metal: '14k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 89000 },
+        { metal: '18k White Gold', stone: 'Natural Diamond', size: '3-7', price: 99000 },
+        { metal: '18k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 99000 }
+      ]
+    }
   },
   {
     name: 'Half Eternity 0.01ct Moissanite - Set D',
@@ -198,7 +311,32 @@ const weddingBandsStyles = [
     label: 'Half Eternity 0.01ct - Set D',
     src: '/wedding-band-001ct-d',
     basePrice: 69000,
-    bandCarat: '0.01-D'
+    bandCarat: '0.01-D',
+    availableOptions: {
+      metals: ['14k White Gold', '14k Yellow Gold', '18k White Gold', '18k Yellow Gold'],
+      stones: ['Moissanite', 'Signity', 'Lab Diamond', 'Natural Diamond'],
+      sizes: ['3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5', '7']
+    },
+    pricing: {
+      combinations: [
+        { metal: '14k White Gold', stone: 'Moissanite', size: '3-7', price: 69000 },
+        { metal: '14k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 69000 },
+        { metal: '18k White Gold', stone: 'Moissanite', size: '3-7', price: 79000 },
+        { metal: '18k Yellow Gold', stone: 'Moissanite', size: '3-7', price: 79000 },
+        { metal: '14k White Gold', stone: 'Signity', size: '3-7', price: 62000 },
+        { metal: '14k Yellow Gold', stone: 'Signity', size: '3-7', price: 62000 },
+        { metal: '18k White Gold', stone: 'Signity', size: '3-7', price: 72000 },
+        { metal: '18k Yellow Gold', stone: 'Signity', size: '3-7', price: 72000 },
+        { metal: '14k White Gold', stone: 'Lab Diamond', size: '3-7', price: 89000 },
+        { metal: '14k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 89000 },
+        { metal: '18k White Gold', stone: 'Lab Diamond', size: '3-7', price: 99000 },
+        { metal: '18k Yellow Gold', stone: 'Lab Diamond', size: '3-7', price: 99000 },
+        { metal: '14k White Gold', stone: 'Natural Diamond', size: '3-7', price: 99000 },
+        { metal: '14k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 99000 },
+        { metal: '18k White Gold', stone: 'Natural Diamond', size: '3-7', price: 109000 },
+        { metal: '18k Yellow Gold', stone: 'Natural Diamond', size: '3-7', price: 109000 }
+      ]
+    }
   }
 ];
 

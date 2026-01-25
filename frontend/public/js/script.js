@@ -649,14 +649,24 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
 
   // populate option lists
   const metalList = overlay.querySelector('#opt-metal');
-  ['14k yellow gold','14k white gold','18k yellow gold','18k white gold'].forEach(m => {
+  // Use database options if available, otherwise use default options
+  const availableMetals = (baseItem && baseItem.availableOptions && baseItem.availableOptions.metals) 
+    ? baseItem.availableOptions.metals.map(m => m.toLowerCase())
+    : ['14k yellow gold','14k white gold','18k yellow gold','18k white gold'];
+  
+  availableMetals.forEach(m => {
     const b = document.createElement('button'); b.type = 'button';
     b.className = 'ec-opt-btn'; b.textContent = m; b.dataset.value = m;
     metalList.appendChild(b);
   });
 
   const stoneList = overlay.querySelector('#opt-stone');
-  ['Signity','Moissanite','Lab-Grown Diamond','Natural Diamond'].forEach(s => {
+  // Use database options if available, otherwise use default options
+  const availableStones = (baseItem && baseItem.availableOptions && baseItem.availableOptions.stones) 
+    ? baseItem.availableOptions.stones 
+    : ['Signity','Moissanite','Lab-Grown Diamond','Natural Diamond'];
+  
+  availableStones.forEach(s => {
     const b = document.createElement('button'); b.type = 'button';
     b.className = 'ec-opt-btn'; b.textContent = s; b.dataset.value = s;
     stoneList.appendChild(b);
@@ -911,13 +921,47 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
 
     // BAND PRICING LOGIC
     if (isBandSource) {
-      const bandConfig = WEDDING_BAND_PRICES[selectedBandCarat] || WEDDING_BAND_PRICES['plain'];
-      if (bandConfig && bandConfig[metal]) {
-        perUnit = bandConfig[metal];
-        // Apply stone adjustments (base is Moissanite)
-        const adj = bandConfig.adjustments[selectedStone];
-        if (adj !== undefined) {
-          perUnit += adj;
+      // First try to use database pricing from data attributes
+      let usedDatabasePricing = false;
+      if (baseItem && baseItem.pricingCombinations) {
+        try {
+          const combinations = baseItem.pricingCombinations;
+          const stoneToMatch = selectedStone;
+          
+          // Find matching price combination
+          const match = combinations.find(combo => {
+            // Match metal (contains the karat and color)
+            const metalMatch = combo.metal && selectedMetal && 
+                              combo.metal.toLowerCase().includes(metal) && 
+                              combo.metal.toLowerCase().includes(selectedMetal.split(' ')[1]?.toLowerCase() || '');
+            
+            // Match stone
+            const stoneMatch = combo.stone && 
+                              (combo.stone.toLowerCase() === stoneToMatch.toLowerCase() ||
+                               (combo.stone.toLowerCase().includes('lab') && stoneToMatch.toLowerCase().includes('lab')));
+            
+            return metalMatch && stoneMatch;
+          });
+          
+          if (match && match.price) {
+            perUnit = match.price;
+            usedDatabasePricing = true;
+          }
+        } catch (e) {
+          console.warn('Error parsing database pricing, falling back to hardcoded values:', e);
+        }
+      }
+      
+      // Fallback to hardcoded pricing if database pricing not available
+      if (!usedDatabasePricing) {
+        const bandConfig = WEDDING_BAND_PRICES[selectedBandCarat] || WEDDING_BAND_PRICES['plain'];
+        if (bandConfig && bandConfig[metal]) {
+          perUnit = bandConfig[metal];
+          // Apply stone adjustments (base is Moissanite)
+          const adj = bandConfig.adjustments[selectedStone];
+          if (adj !== undefined) {
+            perUnit += adj;
+          }
         }
       }
     }
@@ -1205,6 +1249,26 @@ window.addEventListener('DOMContentLoaded', () => {
       image: trigger.dataset.image || trigger.getAttribute('data-image') || '',
       bandCarat: trigger.dataset.bandCarat || trigger.getAttribute('data-band-carat') || null
     };
+    
+    // Parse pricing combinations if available (for wedding bands)
+    const pricingData = trigger.dataset.pricing || trigger.getAttribute('data-pricing');
+    if (pricingData) {
+      try {
+        item.pricingCombinations = JSON.parse(decodeURIComponent(pricingData));
+      } catch (e) {
+        console.warn('Failed to parse pricing data:', e);
+      }
+    }
+    
+    // Parse available options if available
+    const optionsData = trigger.dataset.availableOptions || trigger.getAttribute('data-available-options');
+    if (optionsData) {
+      try {
+        item.availableOptions = JSON.parse(decodeURIComponent(optionsData));
+      } catch (e) {
+        console.warn('Failed to parse available options:', e);
+      }
+    }
 
     // only pass an origin button for the small visual feedback when the actual button was clicked
     const originBtn = trigger.classList.contains('add-to-bag-btn') ? trigger : null;
@@ -1747,8 +1811,30 @@ function initializeProductSearch() {
           id: productId,
           name: card.getAttribute('data-name'),
           basePrice: parseFloat(card.getAttribute('data-price')),
-          image: card.getAttribute('data-image')
+          image: card.getAttribute('data-image'),
+          bandCarat: card.getAttribute('data-band-carat') || null
         };
+        
+        // Parse pricing combinations if available
+        const pricingData = card.getAttribute('data-pricing');
+        if (pricingData) {
+          try {
+            baseItem.pricingCombinations = JSON.parse(decodeURIComponent(pricingData));
+          } catch (e) {
+            console.warn('Failed to parse pricing data:', e);
+          }
+        }
+        
+        // Parse available options if available
+        const optionsData = card.getAttribute('data-available-options');
+        if (optionsData) {
+          try {
+            baseItem.availableOptions = JSON.parse(decodeURIComponent(optionsData));
+          } catch (e) {
+            console.warn('Failed to parse available options:', e);
+          }
+        }
+        
         dropdown.style.display = 'none';
         input.value = '';
         openCustomizationModal(baseItem);
@@ -1777,8 +1863,30 @@ function initializeProductSearch() {
             id: card.getAttribute('data-id'),
             name: card.getAttribute('data-name'),
             basePrice: parseFloat(card.getAttribute('data-price')),
-            image: card.getAttribute('data-image')
+            image: card.getAttribute('data-image'),
+            bandCarat: card.getAttribute('data-band-carat') || null
           };
+          
+          // Parse pricing combinations if available
+          const pricingData = card.getAttribute('data-pricing');
+          if (pricingData) {
+            try {
+              baseItem.pricingCombinations = JSON.parse(decodeURIComponent(pricingData));
+            } catch (e) {
+              console.warn('Failed to parse pricing data:', e);
+            }
+          }
+          
+          // Parse available options if available
+          const optionsData = card.getAttribute('data-available-options');
+          if (optionsData) {
+            try {
+              baseItem.availableOptions = JSON.parse(decodeURIComponent(optionsData));
+            } catch (e) {
+              console.warn('Failed to parse available options:', e);
+            }
+          }
+          
           openCustomizationModal(baseItem);
         }
       }, 100);

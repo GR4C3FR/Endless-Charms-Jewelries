@@ -72,6 +72,10 @@ const productSchema = new mongoose.Schema({
     sizes: [String],    // ['4', '4.5', '5', '5.5', '6', '6.5', '7', '7.5', '8']
     lengths: [String]   // ['14"', '16"', '18"'] for necklaces, ['4-6"', '7"', '8"'] for bracelets
   },
+  bandCarat: {
+    type: String,
+    trim: true
+  },
   specifications: {
     cut: String, // 'Round', 'Princess', 'Cushion', etc.
     bandCarat: String

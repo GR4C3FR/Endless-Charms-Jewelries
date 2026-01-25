@@ -114,8 +114,10 @@
                  data-name="<%= band.name.replace(/\"/g, '&quot;') %>"
                  data-price="<%= band.basePrice %>"
                  data-image="<%= band.image %>"
-                 data-band-carat="<%= band.bandCarat || 'plain' %>"
-                 data-page="wedding-bands">
+                 data-band-carat="<%= band.bandCarat || band.specifications?.bandCarat || 'plain' %>"
+                 data-page="wedding-bands"
+                 data-pricing="<%= band.pricing && band.pricing.combinations ? encodeURIComponent(JSON.stringify(band.pricing.combinations)) : '' %>"
+                 data-available-options="<%= band.availableOptions ? encodeURIComponent(JSON.stringify(band.availableOptions)) : '' %>">
               <div class="weddingband-style-image">
                 <img src="/images/<%= band.image %>" alt="<%= band.name %>">
               </div>
