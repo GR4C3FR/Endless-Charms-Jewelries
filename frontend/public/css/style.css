@@ -3542,7 +3542,7 @@ h1, h2, h3 {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #a1002b;
+  border: 1px solid #620418;
 }
 
 .form-group input:disabled {
@@ -3574,14 +3574,11 @@ h1, h2, h3 {
 
 .btn-primary:hover {
   background-color: #620418;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(161, 0, 43, 0.3);
 }
 
 .btn-secondary {
   background-color: transparent;
-  color: #a1002b;
-  border: 2px solid #a1002b;
+  border: 2px solid #620418;
 }
 
 .btn-secondary:hover {
@@ -4205,8 +4202,7 @@ h1, h2, h3 {
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(98, 8, 20, 0.4);
+  background: #4c0610;
 }
 
 .btn-danger {
@@ -4220,13 +4216,13 @@ h1, h2, h3 {
 }
 
 .btn-secondary {
-  background: #6b7280;
-  color: white;
+  background: transparent;
+  color: #620418;
   width: 12em;
 }
 
 .btn-secondary:hover {
-  background: #4b5563;
+  background: #e9e9e9;
 }
 
 .preview-btn{
