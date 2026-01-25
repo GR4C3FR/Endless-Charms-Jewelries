@@ -32,8 +32,22 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   address: {
-    type: String,
-    trim: true
+    province: {
+      type: String,
+      trim: true
+    },
+    city: {
+      type: String,
+      trim: true
+    },
+    barangay: {
+      type: String,
+      trim: true
+    },
+    street: {
+      type: String,
+      trim: true
+    }
   },
   avatar: {
     type: String,

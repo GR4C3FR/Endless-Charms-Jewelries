@@ -117,11 +117,28 @@
               <input type="tel" id="phone" name="phone" value="<%= user && user.phone ? user.phone : '' %>" placeholder="+63 XXX XXX XXXX">
               <div id="phoneSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
             </div>
-            <div class="form-group">
-              <label for="address">Address</label>
-              <textarea id="address" name="address" rows="3" placeholder="Enter your full address"><%= user && user.address ? user.address : '' %></textarea>
-              <div id="addressSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
+            <h4 style="margin-top: 25px; margin-bottom: 15px; color: #333; font-size: 16px;">Address Information</h4>
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 1;">
+                <label for="province">Province/Region</label>
+                <input type="text" id="province" name="province" value="<%= user && user.address && user.address.province ? user.address.province : '' %>" placeholder="Province or Region" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label for="city">City/Municipality</label>
+                <input type="text" id="city" name="city" value="<%= user && user.address && user.address.city ? user.address.city : '' %>" placeholder="City or Municipality" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+              </div>
             </div>
+            <div class="form-row" style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 1;">
+                <label for="barangay">Barangay</label>
+                <input type="text" id="barangay" name="barangay" value="<%= user && user.address && user.address.barangay ? user.address.barangay : '' %>" placeholder="Barangay" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label for="street">Street/Building</label>
+                <input type="text" id="street" name="street" value="<%= user && user.address && user.address.street ? user.address.street : '' %>" placeholder="House/Lot No., Building, Street Name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+              </div>
+            </div>
+            <div id="addressSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
             <% if (!user.googleId) { %>
             <div class="form-group" style="position: relative;">
               <label for="currentPassword">Current Password</label>
@@ -181,7 +198,20 @@
           <div class="addresses-list">
             <div class="address-card">
               <h4>Default Address</h4>
-              <p><%= user && user.address ? user.address : 'No address saved yet' %></p>
+              <% if (user && user.address && (user.address.province || user.address.city || user.address.barangay || user.address.street)) { %>
+                <div class="address-details">
+                  <% if (user.address.province) { %><p><strong>Province/Region:</strong> <%= user.address.province %></p><% } %>
+                  <% if (user.address.city) { %><p><strong>City/Municipality:</strong> <%= user.address.city %></p><% } %>
+                  <% if (user.address.barangay) { %><p><strong>Barangay:</strong> <%= user.address.barangay %></p><% } %>
+                  <% if (user.address.street) { %><p><strong>Street:</strong> <%= user.address.street %></p><% } %>
+                  <hr style="margin: 10px 0; border: none; border-top: 1px solid #eee;">
+                  <p style="font-style: italic; color: #666;">
+                    <%= [user.address.street, user.address.barangay, user.address.city, user.address.province].filter(Boolean).join(', ') %>
+                  </p>
+                </div>
+              <% } else { %>
+                <p>No address saved yet</p>
+              <% } %>
             </div>
           </div>
         </div>
@@ -344,11 +374,22 @@
       if (isAdmin) {
         formData.email = document.getElementById('email').value;
       } else {
-        // Include phone and address only for non-admin users
+        // Include phone and structured address only for non-admin users
         const phoneInput = document.getElementById('phone');
-        const addressInput = document.getElementById('address');
+        const provinceInput = document.getElementById('province');
+        const cityInput = document.getElementById('city');
+        const barangayInput = document.getElementById('barangay');
+        const streetInput = document.getElementById('street');
+        
         if (phoneInput) formData.phone = phoneInput.value;
-        if (addressInput) formData.address = addressInput.value;
+        
+        // Build structured address object
+        formData.address = {
+          province: provinceInput ? provinceInput.value : '',
+          city: cityInput ? cityInput.value : '',
+          barangay: barangayInput ? barangayInput.value : '',
+          street: streetInput ? streetInput.value : ''
+        };
       }
       
       if (currentPasswordInput && newPasswordInput && confirmPasswordInput) {
@@ -402,7 +443,13 @@
         const originalFirstName = '<%= user ? user.firstName : "" %>';
         const originalLastName = '<%= user ? user.lastName : "" %>';
         const originalPhone = '<%= user && user.phone ? user.phone : "" %>';
-        const originalAddress = '<%= user && user.address ? user.address : "" %>';
+        const originalAddress = {
+          street: '<%= user && user.address && user.address.street ? user.address.street : "" %>',
+          barangay: '<%= user && user.address && user.address.barangay ? user.address.barangay : "" %>',
+          city: '<%= user && user.address && user.address.city ? user.address.city : "" %>',
+          province: '<%= user && user.address && user.address.province ? user.address.province : "" %>',
+          postalCode: '<%= user && user.address && user.address.postalCode ? user.address.postalCode : "" %>'
+        };
         let passwordChanged = false;
         let emailChanged = false;
         let firstNameChanged = false;
@@ -459,8 +506,11 @@
         }
         
         // Check if address changed
-        if (!isAdmin && formData.address !== undefined && formData.address !== originalAddress) {
-          addressChanged = true;
+        if (!isAdmin && formData.address !== undefined) {
+          const addressChanged_check = JSON.stringify(formData.address) !== JSON.stringify(originalAddress);
+          if (addressChanged_check) {
+            addressChanged = true;
+          }
         }
         
         // Update profile information
