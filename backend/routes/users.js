@@ -138,9 +138,9 @@ router.post('/:id/change-password', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    // Check if user has a password (not Google OAuth user)
+    // Check if user has a password
     if (!user.password) {
-      return res.status(400).json({ message: 'Cannot change password for OAuth accounts' });
+      return res.status(400).json({ message: 'You must set a password first' });
     }
     
     // Verify current password
@@ -155,6 +155,41 @@ router.post('/:id/change-password', async (req, res) => {
     await user.save();
     
     res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST set password for Google users
+router.post('/:id/set-password', async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    
+    if (!newPassword) {
+      return res.status(400).json({ message: 'New password is required' });
+    }
+    
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+    
+    // Find user
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Check if user already has a password
+    if (user.password) {
+      return res.status(400).json({ message: 'Password already set. Use change password instead.' });
+    }
+    
+    // Set password
+    user.password = newPassword;
+    await user.save();
+    
+    res.json({ message: 'Password set successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

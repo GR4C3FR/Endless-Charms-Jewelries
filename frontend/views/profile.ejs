@@ -115,13 +115,14 @@
             <div class="form-group">
               <label for="phone">Phone Number</label>
               <input type="tel" id="phone" name="phone" value="<%= user && user.phone ? user.phone : '' %>" placeholder="+63 XXX XXX XXXX">
+              <div id="phoneSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
             </div>
             <div class="form-group">
               <label for="address">Address</label>
               <textarea id="address" name="address" rows="3" placeholder="Enter your full address"><%= user && user.address ? user.address : '' %></textarea>
+              <div id="addressSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
             </div>
-            <% } %>
-            <% if (!user || !user.googleId) { %>
+            <% if (!user.googleId) { %>
             <div class="form-group" style="position: relative;">
               <label for="currentPassword">Current Password</label>
               <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter current password" style="padding-right: 40px;">
@@ -154,6 +155,7 @@
             </div>
             <div id="passwordError" style="color: #dc2626; font-size: 14px; margin-top: 8px; margin-bottom: 15px; display: none;"></div>
             <div id="passwordSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; margin-bottom: 15px; display: none;"></div>
+            <% } %>
             <% } %>
             <div class="form-actions">
               <button type="submit" class="btn-primary">Save Changes</button>
@@ -316,6 +318,8 @@
       const emailSuccessDiv = document.getElementById('emailSuccess');
       const firstNameSuccessDiv = document.getElementById('firstNameSuccess');
       const lastNameSuccessDiv = document.getElementById('lastNameSuccess');
+      const phoneSuccessDiv = document.getElementById('phoneSuccess');
+      const addressSuccessDiv = document.getElementById('addressSuccess');
       
       // Clear all messages
       if (errorDiv) errorDiv.style.display = 'none';
@@ -323,6 +327,8 @@
       if (emailSuccessDiv) emailSuccessDiv.style.display = 'none';
       if (firstNameSuccessDiv) firstNameSuccessDiv.style.display = 'none';
       if (lastNameSuccessDiv) lastNameSuccessDiv.style.display = 'none';
+      if (phoneSuccessDiv) phoneSuccessDiv.style.display = 'none';
+      if (addressSuccessDiv) addressSuccessDiv.style.display = 'none';
       
       // Check if user wants to change password
       const currentPasswordInput = document.getElementById('currentPassword');
@@ -395,10 +401,14 @@
         const originalEmail = '<%= user ? user.email : "" %>';
         const originalFirstName = '<%= user ? user.firstName : "" %>';
         const originalLastName = '<%= user ? user.lastName : "" %>';
+        const originalPhone = '<%= user && user.phone ? user.phone : "" %>';
+        const originalAddress = '<%= user && user.address ? user.address : "" %>';
         let passwordChanged = false;
         let emailChanged = false;
         let firstNameChanged = false;
         let lastNameChanged = false;
+        let phoneChanged = false;
+        let addressChanged = false;
         
         // Handle password change separately if provided
         if (formData.currentPassword && formData.newPassword) {
@@ -443,6 +453,16 @@
           lastNameChanged = true;
         }
         
+        // Check if phone changed
+        if (!isAdmin && formData.phone !== undefined && formData.phone !== originalPhone) {
+          phoneChanged = true;
+        }
+        
+        // Check if address changed
+        if (!isAdmin && formData.address !== undefined && formData.address !== originalAddress) {
+          addressChanged = true;
+        }
+        
         // Update profile information
         const response = await fetch(`/api/users/${userId}`, {
           method: 'PUT',
@@ -476,6 +496,16 @@
             if (currentPasswordInput) currentPasswordInput.value = '';
             if (newPasswordInput) newPasswordInput.value = '';
             if (confirmPasswordInput) confirmPasswordInput.value = '';
+          }
+          
+          if (phoneChanged && phoneSuccessDiv) {
+            phoneSuccessDiv.textContent = 'Phone number updated successfully!';
+            phoneSuccessDiv.style.display = 'block';
+          }
+          
+          if (addressChanged && addressSuccessDiv) {
+            addressSuccessDiv.textContent = 'Address updated successfully!';
+            addressSuccessDiv.style.display = 'block';
           }
         } else {
           const data = await response.json();
