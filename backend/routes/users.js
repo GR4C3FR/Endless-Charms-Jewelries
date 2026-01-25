@@ -1,6 +1,42 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer for avatar uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '../../frontend/public/uploads/avatars');
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'avatar-' + req.params.id + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  // Accept images only
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed!'), false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB max file size
+  }
+});
 
 // GET all users
 router.get('/', async (req, res) => {
@@ -119,6 +155,76 @@ router.post('/:id/change-password', async (req, res) => {
     await user.save();
     
     res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST upload avatar
+router.post('/:id/avatar', upload.single('avatar'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      // Delete uploaded file if user not found
+      fs.unlinkSync(req.file.path);
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Delete old avatar if it's not the default
+    if (user.avatar && user.avatar !== '/images/profile-icon.png' && user.avatar.startsWith('/uploads/')) {
+      const oldAvatarPath = path.join(__dirname, '../../frontend/public', user.avatar);
+      if (fs.existsSync(oldAvatarPath)) {
+        fs.unlinkSync(oldAvatarPath);
+      }
+    }
+    
+    // Update user avatar path
+    const avatarPath = '/uploads/avatars/' + req.file.filename;
+    user.avatar = avatarPath;
+    await user.save();
+    
+    res.json({ 
+      message: 'Avatar uploaded successfully',
+      avatar: avatarPath
+    });
+  } catch (error) {
+    // Delete uploaded file on error
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// DELETE avatar
+router.delete('/:id/avatar', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Delete avatar file if it's not the default
+    if (user.avatar && user.avatar !== '/images/profile-icon.png' && user.avatar.startsWith('/uploads/')) {
+      const avatarPath = path.join(__dirname, '../../frontend/public', user.avatar);
+      if (fs.existsSync(avatarPath)) {
+        fs.unlinkSync(avatarPath);
+      }
+    }
+    
+    // Reset to default avatar
+    user.avatar = '/images/profile-icon.png';
+    await user.save();
+    
+    res.json({ 
+      message: 'Avatar removed successfully'
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

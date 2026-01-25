@@ -76,13 +76,6 @@
     <div class="profile-container">
       <div class="profile-sidebar">
         <div class="profile-header">
-          <div class="profile-avatar-large">
-            <% if (user && user.firstName) { %>
-              <div class="avatar-initial"><%= user.firstName.charAt(0).toUpperCase() %></div>
-            <% } else { %>
-              <div class="avatar-initial">?</div>
-            <% } %>
-          </div>
           <h2><%= user ? user.firstName + ' ' + user.lastName : 'Guest' %></h2>
           <p class="profile-email"><%= user ? user.email : '' %></p>
         </div>
@@ -268,6 +261,75 @@
       localStorage.removeItem('ec_user_email');
       localStorage.removeItem('ec_user_name');
       localStorage.removeItem('ec_bag'); // Clear bag items
+      localStorage.removeItem('ec_profile'); // Clear profile
+      // Redirect to logout endpoint
+      window.location.href = '/api/auth/logout';
+    });
+
+    // Tab switching
+    document.querySelectorAll('.profile-nav-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        if (this.classList.contains('logout')) return;
+        
+        e.preventDefault();
+        const tab = this.dataset.tab;
+        
+        // Update active nav item
+        document.querySelectorAll('.profile-nav-item').forEach(nav => nav.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update active tab
+        document.querySelectorAll('.profile-tab').forEach(content => content.classList.remove('active'));
+        document.getElementById(tab + '-tab').classList.add('active');
+        
+        // Load orders if orders tab is clicked
+        if (tab === 'orders') {
+          loadOrders();
+        }
+      });
+    });
+
+    // Toggle password visibility for all password fields
+    document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const targetId = this.dataset.target;
+        const input = document.getElementById(targetId);
+        const eyeIcon = this.querySelector('.eye-icon');
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+        } else {
+          input.type = 'password';
+          eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+        }
+      });
+    });
+
+    // Profile form submission
+    document.getElementById('profile-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const isAdmin = '<%= user && user.isAdmin ? "true" : "false" %>' === 'true';
+      const errorDiv = document.getElementById('passwordError');
+      const passwordSuccessDiv = document.getElementById('passwordSuccess');
+      const emailSuccessDiv = document.getElementById('emailSuccess');
+      const firstNameSuccessDiv = document.getElementById('firstNameSuccess');
+      const lastNameSuccessDiv = document.getElementById('lastNameSuccess');
+      
+      // Clear all messages
+      if (errorDiv) errorDiv.style.display = 'none';
+      if (passwordSuccessDiv) passwordSuccessDiv.style.display = 'none';
+      if (emailSuccessDiv) emailSuccessDiv.style.display = 'none';
+      if (firstNameSuccessDiv) firstNameSuccessDiv.style.display = 'none';
+      if (lastNameSuccessDiv) lastNameSuccessDiv.style.display = 'none';
+      
+      // Check if user wants to change password
+      const currentPasswordInput = document.getElementById('currentPassword');
+      const newPasswordInput = document.getElementById('newPassword');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+      
+      const hasPasswordChange = currentPasswordInput.value || newPasswordInput.value || confirmPasswordInput.value;
       localStorage.removeItem('ec_profile'); // Clear profile
       // Redirect to logout endpoint
       window.location.href = '/api/auth/logout';
