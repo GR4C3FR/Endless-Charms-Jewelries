@@ -1652,6 +1652,33 @@ function initializeProductSearch() {
     return; // Search elements not found on this page
   }
 
+  // Store all products globally
+  let allProducts = [];
+
+  // Fetch all products from API
+  async function fetchAllProducts() {
+    try {
+      const response = await fetch('/api/products');
+      const products = await response.json();
+      allProducts = products.map(p => ({
+        id: p._id || p.id,
+        name: p.name,
+        price: p.basePrice,
+        image: p.image,
+        category: p.category,
+        subcategory: p.subcategory,
+        bandCarat: p.bandCarat,
+        pricing: p.pricing,
+        availableOptions: p.availableOptions,
+        page: p.subcategory === 'engagement' ? 'engagement-rings' : 
+              p.subcategory === 'wedding-bands' ? 'wedding-bands' : 'accessories'
+      }));
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      allProducts = [];
+    }
+  }
+
   // Position dropdown under header
   function positionDropdown() {
     if (!dropdown || !header) return;
@@ -1662,41 +1689,55 @@ function initializeProductSearch() {
 
   // Display random items in search results (max 5)
   function displayRandomItems() {
-    const allCards = document.querySelectorAll('.weddingband-styles-grid .add-to-bag-card');
-    const cardsArray = Array.from(allCards);
-    
-    // Shuffle and get max 5 random items
-    const shuffled = cardsArray.sort(() => 0.5 - Math.random()).slice(0, 5);
-    
     resultsGrid.innerHTML = '';
     
-    shuffled.forEach(card => {
-      const resultCard = document.createElement('div');
-      resultCard.className = 'weddingband-style-card add-to-bag-card';
-      resultCard.setAttribute('data-id', card.getAttribute('data-id'));
-      resultCard.setAttribute('data-name', card.getAttribute('data-name'));
-      resultCard.setAttribute('data-price', card.getAttribute('data-price'));
-      resultCard.setAttribute('data-image', card.getAttribute('data-image'));
-      resultCard.setAttribute('data-page', card.getAttribute('data-page') || currentPage);
-      resultCard.style.cursor = 'pointer';
-
-      const imgPath = card.getAttribute('data-image');
-      resultCard.innerHTML = `
-        <div class="weddingband-style-image">
-          <img src="/images/${imgPath}" alt="${card.getAttribute('data-name')}" style="width: 100%; height: auto;">
-        </div>
-        <div class="weddingband-style-info">
-          <p class="weddingband-style-label">${card.getAttribute('data-name')}</p>
-        </div>
-      `;
+    if (allProducts.length === 0) {
+      return;
+    }
+    
+    // Shuffle and get max 5 random items
+    const shuffled = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 5);
+    
+    shuffled.forEach(product => {
+      const resultCard = createResultCard(product);
       resultsGrid.appendChild(resultCard);
     });
   }
 
-  // Perform real-time search on current page products
+  // Create result card element
+  function createResultCard(product) {
+    const resultCard = document.createElement('div');
+    resultCard.className = 'weddingband-style-card add-to-bag-card';
+    resultCard.setAttribute('data-id', product.id);
+    resultCard.setAttribute('data-name', product.name);
+    resultCard.setAttribute('data-price', product.price);
+    
+    // Handle image path - add folder prefix for accessories if not already present
+    let imagePath = product.image;
+    if (product.page === 'accessories' && !imagePath.includes('shop-other-accessories-page/')) {
+      imagePath = 'shop-other-accessories-page/' + imagePath;
+    }
+    resultCard.setAttribute('data-image', imagePath);
+    resultCard.setAttribute('data-page', product.page);
+    if (product.bandCarat) resultCard.setAttribute('data-band-carat', product.bandCarat);
+    if (product.pricing) resultCard.setAttribute('data-pricing', encodeURIComponent(JSON.stringify(product.pricing.combinations || [])));
+    if (product.availableOptions) resultCard.setAttribute('data-available-options', encodeURIComponent(JSON.stringify(product.availableOptions)));
+    resultCard.style.cursor = 'pointer';
+
+    resultCard.innerHTML = `
+      <div class="weddingband-style-image">
+        <img src="/images/${imagePath}" alt="${product.name}" style="width: 100%; height: auto;">
+      </div>
+      <div class="weddingband-style-info">
+        <p class="weddingband-style-label">${product.name}</p>
+      </div>
+    `;
+    return resultCard;
+  }
+
+  // Perform real-time search across all products
   function performSearch(searchTerm) {
     const term = searchTerm.toLowerCase().trim();
-    const allCards = document.querySelectorAll('.weddingband-styles-grid .add-to-bag-card');
     resultsGrid.innerHTML = '';
 
     // If search is empty, show random items instead
@@ -1705,41 +1746,11 @@ function initializeProductSearch() {
       return;
     }
 
-    const addedIds = new Set();
-    let resultCount = 0;
+    const matchedProducts = allProducts.filter(product => 
+      product.name.toLowerCase().includes(term)
+    );
 
-    allCards.forEach(card => {
-      const name = card.getAttribute('data-name')?.toLowerCase() || '';
-      const id = card.getAttribute('data-id');
-      
-      if (name.includes(term) && !addedIds.has(id)) {
-        addedIds.add(id);
-        resultCount++;
-        
-        const resultCard = document.createElement('div');
-        resultCard.className = 'weddingband-style-card add-to-bag-card';
-        resultCard.setAttribute('data-id', id);
-        resultCard.setAttribute('data-name', card.getAttribute('data-name'));
-        resultCard.setAttribute('data-price', card.getAttribute('data-price'));
-        resultCard.setAttribute('data-image', card.getAttribute('data-image'));
-        resultCard.setAttribute('data-page', card.getAttribute('data-page') || currentPage);
-        resultCard.style.cursor = 'pointer';
-
-        const imgPath = card.getAttribute('data-image');
-        resultCard.innerHTML = `
-          <div class="weddingband-style-image">
-            <img src="/images/${imgPath}" alt="${card.getAttribute('data-name')}" style="width: 100%; height: auto;">
-          </div>
-          <div class="weddingband-style-info">
-            <p class="weddingband-style-label">${card.getAttribute('data-name')}</p>
-          </div>
-        `;
-        resultsGrid.appendChild(resultCard);
-      }
-    });
-
-    // Show "No Results Found" message if no matches
-    if (resultCount === 0) {
+    if (matchedProducts.length === 0) {
       const noResultsMsg = document.createElement('div');
       noResultsMsg.style.cssText = `
         grid-column: 1 / -1;
@@ -1751,8 +1762,16 @@ function initializeProductSearch() {
       `;
       noResultsMsg.textContent = 'No Results Found';
       resultsGrid.appendChild(noResultsMsg);
+    } else {
+      matchedProducts.forEach(product => {
+        const resultCard = createResultCard(product);
+        resultsGrid.appendChild(resultCard);
+      });
     }
   }
+
+  // Initialize: fetch products
+  fetchAllProducts();
 
   // Position dropdown on load and resize
   positionDropdown();
@@ -1802,10 +1821,14 @@ function initializeProductSearch() {
   resultsGrid.addEventListener('click', (e) => {
     const card = e.target.closest('.add-to-bag-card');
     if (card) {
-      const productPage = card.getAttribute('data-page') || currentPage;
+      const productPage = card.getAttribute('data-page');
       const productId = card.getAttribute('data-id');
       
-      if (productPage === currentPage) {
+      // Check if we're on a shop page and if product belongs to current page
+      const onShopPage = currentPage !== 'unknown';
+      const sameShopPage = onShopPage && productPage === currentPage;
+      
+      if (sameShopPage) {
         // Same page: open modal directly
         const baseItem = {
           id: productId,
@@ -1839,57 +1862,24 @@ function initializeProductSearch() {
         input.value = '';
         openCustomizationModal(baseItem);
       } else {
-        // Different page: redirect and store product ID for auto-open
-        sessionStorage.setItem('autoOpenProductId', productId);
+        // Different page or not on shop page: redirect and store product data for auto-open
+        const productData = {
+          id: productId,
+          name: card.getAttribute('data-name'),
+          basePrice: parseFloat(card.getAttribute('data-price')),
+          image: card.getAttribute('data-image'),
+          bandCarat: card.getAttribute('data-band-carat') || null,
+          pricing: card.getAttribute('data-pricing'),
+          availableOptions: card.getAttribute('data-available-options')
+        };
+        sessionStorage.setItem('autoOpenProduct', JSON.stringify(productData));
         const pageUrls = {
           'engagement-rings': '/engagement-rings',
           'wedding-bands': '/wedding-bands',
           'accessories': '/accessories'
         };
-        window.location.href = pageUrls[productPage];
+        window.location.href = pageUrls[productPage] || '/engagement-rings';
       }
-    }
-  });
-
-  // Check for auto-open on page load (after redirect)
-  window.addEventListener('load', () => {
-    const autoOpenId = sessionStorage.getItem('autoOpenProductId');
-    if (autoOpenId) {
-      sessionStorage.removeItem('autoOpenProductId');
-      setTimeout(() => {
-        const card = document.querySelector(`.add-to-bag-card[data-id="${autoOpenId}"]`);
-        if (card) {
-          const baseItem = {
-            id: card.getAttribute('data-id'),
-            name: card.getAttribute('data-name'),
-            basePrice: parseFloat(card.getAttribute('data-price')),
-            image: card.getAttribute('data-image'),
-            bandCarat: card.getAttribute('data-band-carat') || null
-          };
-          
-          // Parse pricing combinations if available
-          const pricingData = card.getAttribute('data-pricing');
-          if (pricingData) {
-            try {
-              baseItem.pricingCombinations = JSON.parse(decodeURIComponent(pricingData));
-            } catch (e) {
-              console.warn('Failed to parse pricing data:', e);
-            }
-          }
-          
-          // Parse available options if available
-          const optionsData = card.getAttribute('data-available-options');
-          if (optionsData) {
-            try {
-              baseItem.availableOptions = JSON.parse(decodeURIComponent(optionsData));
-            } catch (e) {
-              console.warn('Failed to parse available options:', e);
-            }
-          }
-          
-          openCustomizationModal(baseItem);
-        }
-      }, 100);
     }
   });
 }
@@ -1906,4 +1896,49 @@ function detectCurrentPage() {
 // Initialize search when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
   initializeProductSearch();
+  
+  // Check for auto-open on page load (after redirect from search on different page)
+  const autoOpenData = sessionStorage.getItem('autoOpenProduct');
+  if (autoOpenData) {
+    sessionStorage.removeItem('autoOpenProduct');
+    // Wait for page to fully load and modal function to be available
+    setTimeout(() => {
+      if (typeof openCustomizationModal === 'function') {
+        try {
+          const productData = JSON.parse(autoOpenData);
+          const baseItem = {
+            id: productData.id,
+            name: productData.name,
+            basePrice: productData.basePrice,
+            image: productData.image,
+            bandCarat: productData.bandCarat
+          };
+          
+          // Parse pricing combinations if available
+          if (productData.pricing) {
+            try {
+              baseItem.pricingCombinations = JSON.parse(decodeURIComponent(productData.pricing));
+            } catch (e) {
+              console.warn('Failed to parse pricing data:', e);
+            }
+          }
+          
+          // Parse available options if available
+          if (productData.availableOptions) {
+            try {
+              baseItem.availableOptions = JSON.parse(decodeURIComponent(productData.availableOptions));
+            } catch (e) {
+              console.warn('Failed to parse available options:', e);
+            }
+          }
+          
+          openCustomizationModal(baseItem);
+        } catch (e) {
+          console.error('Failed to auto-open product:', e);
+        }
+      } else {
+        console.warn('openCustomizationModal function not available yet');
+      }
+    }, 500);
+  }
 });

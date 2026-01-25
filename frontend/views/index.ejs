@@ -29,6 +29,9 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
+          <button id="headerSearchBtn" class="icon-btn">
+            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
+          </button>
           <button class="icon-btn" onclick="handleProfileClick()">
             <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon">
           </button>
@@ -49,6 +52,25 @@
       </svg>
     </a>
   <% } %>
+
+  <!-- Search dropdown -->
+  <div id="searchDropdown" class="search-dropdown">
+    <div class="search-dropdown-inner container">
+      <div class="search-bar-row">
+        <input
+          id="headerSearchInput"
+          type="text"
+          class="header-search-input"
+          placeholder="Search products, e.g. 'moissanite'"
+        />
+        <button id="headerSearchClose" class="icon-btn">
+          &times;
+        </button>
+      </div>
+      <div id="searchResults" class="search-results-grid">
+      </div>
+    </div>
+  </div>
 
   <!-- Hero Section -->
   <section class="hero-section">
