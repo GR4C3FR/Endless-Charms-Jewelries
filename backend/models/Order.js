@@ -4,7 +4,7 @@ const orderItemSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
-    required: true
+    required: false
   },
   name: {
     type: String,
@@ -42,28 +42,22 @@ const orderSchema = new mongoose.Schema({
   items: [orderItemSchema],
   shippingAddress: {
     fullName: {
-      type: String,
-      required: true
+      type: String
     },
     address: {
-      type: String,
-      required: true
+      type: String
     },
     city: {
-      type: String,
-      required: true
+      type: String
     },
     postalCode: {
-      type: String,
-      required: true
+      type: String
     },
     country: {
-      type: String,
-      required: true
+      type: String
     },
     phone: {
-      type: String,
-      required: true
+      type: String
     }
   },
   billingAddress: {
@@ -78,6 +72,7 @@ const orderSchema = new mongoose.Schema({
       type: String,
       required: true
     },
+    receipt: String,
     transactionId: String,
     status: {
       type: String,

@@ -501,33 +501,10 @@ app.get('/profile', (req, res) => {
 });
 
 app.get('/bag', (req, res) => {
-    // Mock data based on your provided UI image
-    const bagItems = [
-        {
-            name: "1ct Round-Cut Solitaire Ring",
-            price: 32000,
-            image: "engagement1.jpg", 
-            metal: "14k White Gold",
-            stone: "Moissanite",
-            carat: "1ct",
-            size: "4.5",
-            quantity: 1
-        },
-        {
-            name: "2ct Round-Cut Solitaire Ring",
-            price: 32000,
-            image: "engagement2.jpg",
-            metal: "14k White Gold",
-            stone: "Moissanite",
-            carat: "2ct",
-            size: "4.5",
-            quantity: 1
-        }
-    ];
-
-    const subtotal = bagItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
-    res.render('bag', { bagItems, subtotal });
+  // Start with an empty bag for clarity; client will populate from localStorage or DB
+  const bagItems = [];
+  const subtotal = 0;
+  res.render('bag', { bagItems, subtotal });
 });
 
 app.get('/checkout', (req, res) => {

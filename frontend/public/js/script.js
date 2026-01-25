@@ -327,6 +327,12 @@ async function loadBagFromDatabase() {
 }
 
 function addToBag(item) {
+  // Enforce authentication: do not allow guests to add items
+  if (!isUserLoggedIn()) {
+    showLoginModal('Please log in first to add items to your bag.');
+    return;
+  }
+
   const bag = getBag();
   const existing = bag.find(i => i.id === item.id);
   if (existing) {
@@ -384,33 +390,6 @@ function renderBagPage() {
         <div class="item-info">
           <h3>${item.name}</h3>
           <p class="item-price">₱${(item.price).toLocaleString()}</p>
-          ${(() => {
-            const isBand = item.productId && String(item.productId).startsWith('band-');
-            if (isBand && item.priceBreakdown) {
-              return `
-                <div class="price-breakdown" style="margin-top: 8px; padding: 8px; background: #f9f9f9; border-radius: 4px; font-size: 12px;">
-                  <div style="font-weight: 600; margin-bottom: 4px;">Price Breakdown:</div>
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                    <span>Base Price (${item.priceBreakdown.metal}):</span>
-                    <span>₱${item.priceBreakdown.basePrice.toLocaleString()}</span>
-                  </div>
-                  ${item.priceBreakdown.stoneAdjustment !== 0 ? `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                      <span>Stone Adjustment (${item.priceBreakdown.stone}):</span>
-                      <span style="color: ${item.priceBreakdown.stoneAdjustment > 0 ? '#d32f2f' : '#388e3c'};">
-                        ${item.priceBreakdown.stoneAdjustment > 0 ? '+' : ''}₱${item.priceBreakdown.stoneAdjustment.toLocaleString()}
-                      </span>
-                    </div>
-                  ` : ''}
-                  <div style="display: flex; justify-content: space-between; margin-top: 4px; padding-top: 4px; border-top: 1px solid #ddd; font-weight: 600;">
-                    <span>Total:</span>
-                    <span>₱${item.price.toLocaleString()}</span>
-                  </div>
-                </div>
-              `;
-            }
-            return '';
-          })()}
           <div class="item-specs">
             ${(() => {
               const isAccessory = item.productId && String(item.productId).startsWith('accessory-');
@@ -1273,8 +1252,30 @@ window.addEventListener('DOMContentLoaded', () => {
     // only pass an origin button for the small visual feedback when the actual button was clicked
     const originBtn = trigger.classList.contains('add-to-bag-btn') ? trigger : null;
 
+    // Authentication guard: require login to open Add-to-Bag customization
+    if (!isUserLoggedIn()) {
+      // prefer modal UX if available
+      showLoginModal('Please log in first to add items to your bag.');
+      return;
+    }
+
     openCustomizationModal(item, originBtn);
   });
+});
+
+// If guest user, disable/hide add-to-bag buttons on page load to reflect auth guard
+window.addEventListener('DOMContentLoaded', () => {
+  if (!isUserLoggedIn()) {
+    document.querySelectorAll('.add-to-bag-btn, .add-to-bag-card').forEach(el => {
+      // visually indicate disabled state for both small buttons and whole product cards
+      el.classList.add('add-to-bag-disabled');
+      el.title = 'Log in to add items to your bag';
+      el.style.pointerEvents = 'none';
+      el.style.opacity = '0.6';
+      el.style.cursor = 'not-allowed';
+      try { if (el.tagName === 'BUTTON' || el.classList.contains('add-to-bag-btn')) el.disabled = true; } catch(e){}
+    });
+  }
 });
 
 // --- Checkout page helpers ---

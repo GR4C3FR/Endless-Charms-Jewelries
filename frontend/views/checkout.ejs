@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout - Endless Charms</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation Header (copied from home) -->
@@ -63,63 +64,127 @@
       </div>
     </div>
 
-  <main class="container" style="padding-top:140px;">
-    <h1>Checkout</h1>
-    <hr>
-    <div id="delivery-summary" style="display:none;margin-bottom:18px;"></div>
+  <main class="container checkout-page" style="padding-top:140px;">
+    <h1 class="checkout-title">Checkout</h1>
+    <hr class="thin-sep">
 
-    <div style="display:grid;grid-template-columns:1fr 420px;gap:40px;margin-top:30px;">
-      <section>
-        <h3>Delivery</h3>
-        <form id="checkout-form" class="contact-form checkout-form">
-          <input type="text" id="country" name="country" placeholder="Country/Region" class="form-input">
-          <div class="form-row">
-            <input type="text" id="firstName" name="firstName" placeholder="First Name" class="form-input">
-            <input type="text" id="lastName" name="lastName" placeholder="Last Name" class="form-input">
-          </div>
-          <input type="text" id="address" name="address" placeholder="Address" class="form-input">
-          <div class="form-row">
-            <input type="text" id="postal" name="postal" placeholder="Postal Code" class="form-input">
-            <input type="text" id="province" name="province" placeholder="Province" class="form-input">
-          </div>
-          <input type="text" id="social" name="social" placeholder="Instagram/Facebook Handle (Optional)" class="form-input">
-          <input type="text" id="phone" name="phone" placeholder="Phone Number" class="form-input">
+    <section class="delivery-card" id="deliveryCard">
+      <div class="delivery-left">
+        <div class="loc-icon">📍</div>
+        <div class="delivery-info">
+          <div class="delivery-label">Delivery Address</div>
+          <div class="delivery-name" id="deliveryName"> </div>
+          <div class="delivery-phone" id="deliveryPhone"> </div>
+          <div class="delivery-address" id="deliveryAddress">Please input your delivery address to proceed.</div>
+        </div>
+      </div>
+      <div class="delivery-right">
+        <button class="btn btn-change" id="changeAddressBtn">Change / Add</button>
+      </div>
+    </section>
 
-          <div style="margin-top:18px;">
-            <div style="display:flex;gap:12px;align-items:center;">
-              <button id="save-profile" type="button" class="send-btn save-white">Save & Continue</button>
-              <button id="clear-form-btn" type="button" class="send-btn clear-form">Clear Form</button>
+    <div class="items-and-summary">
+      <div class="items-column">
+        <!-- Make items list scrollable to prevent page from growing vertically -->
+        <div class="items-box checkout-items-container" style="max-height:400px;overflow-y:auto;">
+          <div class="items-placeholder">*Items shown here</div>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <div class="bank-choice">
+          <div class="bank-label">BANK CHOICE</div>
+          <div class="bank-dropdown" id="bankDropdown">
+            <div class="bank-selected" id="bankSelected">BPI <span class="chev">▾</span></div>
+            <div class="bank-options" id="bankOptions">
+              <div class="bank-option">BPI</div>
+              <div class="bank-option">BDO</div>
+              <div class="bank-option">GCASH</div>
             </div>
           </div>
-        </form>
-      </section>
-
-      <aside>
-        <h3>Payment</h3>
-        <div style="margin-top:12px;">
-          <label style="display:block;margin-bottom:10px;"><input type="radio" name="payment" value="bank-deposit"> Bank Deposit</label>
-          <label style="display:block;margin-bottom:10px;"><input type="radio" name="payment" value="bank-transfer"> Bank Transfer</label>
-          <label style="display:block;margin-bottom:10px;"><input type="radio" name="payment" value="qr-code"> QR Code</label>
         </div>
 
-        <div id="payment-details" style="margin-top:12px;display:block;"></div>
-
-        <div style="margin-top:30px;">
-          <div class="checkout-items-box">
-            <div id="checkout-items" style="margin-top:8px;">
-              <div class="subtotal-text">*Items shown here</div>
-            </div>
-          </div>
-          <div id="checkout-summary"></div>
-          <div style="margin-top:18px;">
-            <button id="complete-order" class="checkout-btn" disabled>Complete Order</button>
-          </div>
+        <!-- Move subtotal box directly under bank choice and left-align content -->
+        <div class="summary-box summary-right" style="margin-top:12px;text-align:left;">
+          <div class="subtotal-label">Subtotal (No. Items):</div>
+          <div class="subtotal-amount">₱0.00</div>
+          <div id="orderError" class="order-error" style="display:none;margin-top:8px;color:#b71c1c;font-size:13px"></div>
+          <button id="completeOrderBtn" class="btn btn-outline" disabled>Complete Order</button>
         </div>
       </aside>
     </div>
 
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal" aria-hidden="true">
+      <div class="modal-inner">
+        <div class="modal-left">
+          <div class="bank-card">
+            <!-- bank card image (logo, account number) -->
+            <img class="bank-card-img" src="/images/payments/bpi_card.svg" alt="Bank card" />
+              <!-- dynamic QR image pulled from /images/bank-qr/<bank>.png -->
+              <div class="qr-wrap"><img class="bank-qr-img" src="/images/bank-qr/bpi.png" alt="QR code" /></div>
+          </div>
+        </div>
+        <div class="modal-right">
+          <div class="modal-step">
+            <h4>Step 1: Choose Payment Method</h4>
+            <div class="payment-option"><label><input type="radio" name="paymethod" value="full" checked> Pay in Full</label></div>
+            <div class="payment-option"><label><input type="radio" name="paymethod" value="partial"> Partial Payment (or 50% Deposit)</label></div>
+          </div>
+          <div class="modal-step">
+            <h4>Step 2: Upload Receipt</h4>
+            <div class="upload-area" id="uploadArea">
+              <input type="file" id="receiptInput" accept="image/*" />
+              <div class="upload-placeholder">📷 Upload Receipt</div>
+            </div>
+          </div>
+          <div class="modal-step">
+            <h4>Step 3</h4>
+            <p>Go Back to Check Out and Click "Complete Order"</p>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-primary" id="paymentBackBtn">Back</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address Modal -->
+    <div class="modal-overlay" id="addressModal" aria-hidden="true">
+      <div class="address-modal">
+        <h3>New Delivery Address</h3>
+        <form id="addressForm" class="address-form">
+          <div class="form-row">
+            <input type="text" name="firstName" placeholder="First Name" required>
+            <input type="text" name="lastName" placeholder="Last Name" required>
+          </div>
+          <div class="form-row single">
+            <input type="text" name="address" placeholder="Address" required>
+          </div>
+          <div class="form-row">
+            <input type="text" name="postal" placeholder="Postal Code" required>
+            <input type="text" name="city" placeholder="City" required>
+          </div>
+          <div class="form-row single">
+            <input type="text" name="social" placeholder="Instagram/Facebook Handle (Optional)">
+          </div>
+          <div class="form-row single">
+            <input type="text" name="phone" placeholder="Phone Number" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" id="addrCancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </main>
 
+  <script>
+    // expose current user to frontend scripts
+    window.EC_USER = <%- JSON.stringify(user || null) %>;
+  </script>
   <script src="/js/script.js"></script>
   <script>
     // Checkout page-specific behavior initialized by script.js
@@ -173,5 +238,6 @@
       </div>
     </div>
   </footer>
+  <script src="/js/checkout.js"></script>
 </body>
 </html>

@@ -573,6 +573,12 @@
       }
     });
 
+      // If redirected with ?tab=orders open orders tab
+      if (window.location.search && window.location.search.indexOf('tab=orders') !== -1) {
+        const ordersNav = document.querySelector('.profile-nav-item[data-tab="orders"]');
+        if (ordersNav) ordersNav.click();
+      }
+
     // Load orders
     async function loadOrders() {
       const ordersListDiv = document.getElementById('orders-list');
