@@ -115,6 +115,7 @@
               <label for="email">Email</label>
               <input type="email" id="email" name="email" value="<%= user ? user.email : '' %>" disabled>
             </div>
+            <% if (!user.isAdmin) { %>
             <div class="form-group">
               <label for="phone">Phone Number</label>
               <input type="tel" id="phone" name="phone" value="<%= user && user.phone ? user.phone : '' %>" placeholder="+63 XXX XXX XXXX">
@@ -123,6 +124,7 @@
               <label for="address">Address</label>
               <textarea id="address" name="address" rows="3" placeholder="Enter your full address"><%= user && user.address ? user.address : '' %></textarea>
             </div>
+            <% } %>
             <% if (!user || !user.googleId) { %>
             <div class="form-group">
               <label>Change Password</label>
