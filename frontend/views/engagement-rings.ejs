@@ -116,7 +116,9 @@
                          data-name="<%= ring.name.replace(/\"/g, '&quot;') %>"
                          data-price="<%= ring.basePrice %>"
                          data-image="<%= ring.image %>"
-                         data-page="engagement-rings">
+                         data-page="engagement-rings"
+                         data-pricing="<%= ring.pricing && ring.pricing.combinations ? encodeURIComponent(JSON.stringify(ring.pricing.combinations)) : '' %>"
+                         data-available-options="<%= ring.availableOptions ? encodeURIComponent(JSON.stringify(ring.availableOptions)) : '' %>">
                         <div class="weddingband-style-image">
                           <img src="/images/<%= ring.image %>" alt="<%= ring.name %>">
                         </div>

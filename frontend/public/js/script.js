@@ -698,9 +698,9 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   }
 
   // Detect source types
-  const isRingSource = baseItem && String(baseItem.id).startsWith('ring-');
-  const isBandSource = baseItem && String(baseItem.id).startsWith('band-');
-  const isAccessorySource = baseItem && String(baseItem.id).startsWith('accessory-');
+  const isRingSource = baseItem && (String(baseItem.id).startsWith('ring-') || baseItem.page === 'engagement-rings');
+  const isBandSource = baseItem && (String(baseItem.id).startsWith('band-') || baseItem.page === 'wedding-bands');
+  const isAccessorySource = baseItem && (String(baseItem.id).startsWith('accessory-') || baseItem.page === 'accessories');
   
   // default selections - must be declared before using them
   let selectedMetal = '14k yellow gold';
@@ -1720,8 +1720,12 @@ function initializeProductSearch() {
     resultCard.setAttribute('data-image', imagePath);
     resultCard.setAttribute('data-page', product.page);
     if (product.bandCarat) resultCard.setAttribute('data-band-carat', product.bandCarat);
-    if (product.pricing) resultCard.setAttribute('data-pricing', encodeURIComponent(JSON.stringify(product.pricing.combinations || [])));
-    if (product.availableOptions) resultCard.setAttribute('data-available-options', encodeURIComponent(JSON.stringify(product.availableOptions)));
+    if (product.pricing && product.pricing.combinations) {
+      resultCard.setAttribute('data-pricing', encodeURIComponent(JSON.stringify(product.pricing.combinations)));
+    }
+    if (product.availableOptions) {
+      resultCard.setAttribute('data-available-options', encodeURIComponent(JSON.stringify(product.availableOptions)));
+    }
     resultCard.style.cursor = 'pointer';
 
     resultCard.innerHTML = `
@@ -1835,7 +1839,8 @@ function initializeProductSearch() {
           name: card.getAttribute('data-name'),
           basePrice: parseFloat(card.getAttribute('data-price')),
           image: card.getAttribute('data-image'),
-          bandCarat: card.getAttribute('data-band-carat') || null
+          bandCarat: card.getAttribute('data-band-carat') || null,
+          page: productPage
         };
         
         // Parse pricing combinations if available
@@ -1870,7 +1875,8 @@ function initializeProductSearch() {
           image: card.getAttribute('data-image'),
           bandCarat: card.getAttribute('data-band-carat') || null,
           pricing: card.getAttribute('data-pricing'),
-          availableOptions: card.getAttribute('data-available-options')
+          availableOptions: card.getAttribute('data-available-options'),
+          page: productPage
         };
         sessionStorage.setItem('autoOpenProduct', JSON.stringify(productData));
         const pageUrls = {
@@ -1911,7 +1917,8 @@ window.addEventListener('DOMContentLoaded', () => {
             name: productData.name,
             basePrice: productData.basePrice,
             image: productData.image,
-            bandCarat: productData.bandCarat
+            bandCarat: productData.bandCarat,
+            page: productData.page
           };
           
           // Parse pricing combinations if available

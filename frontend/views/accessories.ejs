@@ -110,7 +110,9 @@
                  data-name="<%= item.name.replace(/\"/g, '&quot;') %>"
                  data-price="<%= item.basePrice %>"
                  data-image="shop-other-accessories-page/<%= item.image %>"
-                 data-page="accessories">
+                 data-page="accessories"
+                 data-pricing="<%= item.pricing && item.pricing.combinations ? encodeURIComponent(JSON.stringify(item.pricing.combinations)) : '' %>"
+                 data-available-options="<%= item.availableOptions ? encodeURIComponent(JSON.stringify(item.availableOptions)) : '' %>">
               <div class="weddingband-style-image">
                 <img src="/images/shop-other-accessories-page/<%= item.image %>" alt="<%= item.name %>">
               </div>
