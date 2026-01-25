@@ -113,7 +113,10 @@
             </div>
             <div class="form-group">
               <label for="email">Email</label>
-              <input type="email" id="email" name="email" value="<%= user ? user.email : '' %>" disabled>
+              <input type="email" id="email" name="email" value="<%= user ? user.email : '' %>" <%= user && user.isAdmin ? '' : 'disabled' %>>
+              <% if (user && user.isAdmin) { %>
+              <small style="color: #8a0621; font-size: 12px;">Changing your email will update your login credentials</small>
+              <% } %>
             </div>
             <% if (!user.isAdmin) { %>
             <div class="form-group">
@@ -269,12 +272,22 @@
     document.getElementById('profile-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       
+      const isAdmin = <%= user && user.isAdmin ? 'true' : 'false' %>;
       const formData = {
         firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        phone: document.getElementById('phone').value,
-        address: document.getElementById('address').value
+        lastName: document.getElementById('lastName').value
       };
+      
+      // Include email only for admin users
+      if (isAdmin) {
+        formData.email = document.getElementById('email').value;
+      } else {
+        // Include phone and address only for non-admin users
+        const phoneInput = document.getElementById('phone');
+        const addressInput = document.getElementById('address');
+        if (phoneInput) formData.phone = phoneInput.value;
+        if (addressInput) formData.address = addressInput.value;
+      }
       
       try {
         const userId = '<%= user ? user._id : "" %>';
@@ -287,10 +300,15 @@
         });
         
         if (response.ok) {
-          alert('Profile updated successfully!');
+          if (isAdmin && formData.email) {
+            alert('Profile updated successfully! Your email has been changed. Please use your new email to log in next time.');
+          } else {
+            alert('Profile updated successfully!');
+          }
           location.reload();
         } else {
-          alert('Failed to update profile. Please try again.');
+          const data = await response.json();
+          alert(data.message || 'Failed to update profile. Please try again.');
         }
       } catch (error) {
         console.error('Error:', error);

@@ -46,6 +46,18 @@ router.put('/:id', async (req, res) => {
       delete req.body.password;
     }
     
+    // If email is being updated, check for uniqueness
+    if (req.body.email) {
+      const existingUser = await User.findOne({ 
+        email: req.body.email,
+        _id: { $ne: req.params.id }
+      });
+      
+      if (existingUser) {
+        return res.status(400).json({ message: 'Email already in use by another account' });
+      }
+    }
+    
     const user = await User.findByIdAndUpdate(
       req.params.id,
       req.body,
