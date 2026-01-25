@@ -129,10 +129,37 @@
             </div>
             <% } %>
             <% if (!user || !user.googleId) { %>
-            <div class="form-group">
-              <label>Change Password</label>
-              <button type="button" class="btn-secondary" onclick="showChangePasswordModal()">Change Password</button>
+            <div class="form-group" style="position: relative;">
+              <label for="currentPassword">Current Password (leave blank to keep unchanged)</label>
+              <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter current password" style="padding-right: 40px;">
+              <button type="button" class="toggle-password-btn" data-target="currentPassword" style="position: absolute; right: 10px; top: 65%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center;" aria-label="Toggle password visibility">
+                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
             </div>
+            <div class="form-group" style="position: relative;">
+              <label for="newPassword">New Password</label>
+              <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password" style="padding-right: 40px;">
+              <button type="button" class="toggle-password-btn" data-target="newPassword" style="position: absolute; right: 10px; top: 65%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center;" aria-label="Toggle password visibility">
+                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+            <div class="form-group" style="position: relative;">
+              <label for="confirmPassword">Confirm New Password</label>
+              <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password" style="padding-right: 40px;">
+              <button type="button" class="toggle-password-btn" data-target="confirmPassword" style="position: absolute; right: 10px; top: 65%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center;" aria-label="Toggle password visibility">
+                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+            <div id="passwordError" style="color: #dc2626; font-size: 14px; margin-bottom: 15px; display: none;"></div>
             <% } %>
             <div class="form-actions">
               <button type="submit" class="btn-primary">Save Changes</button>
@@ -268,11 +295,36 @@
       });
     });
 
+    // Toggle password visibility for all password fields
+    document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const targetId = this.dataset.target;
+        const input = document.getElementById(targetId);
+        const eyeIcon = this.querySelector('.eye-icon');
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+        } else {
+          input.type = 'password';
+          eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+        }
+      });
+    });
+
     // Profile form submission
     document.getElementById('profile-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       
-      const isAdmin = <%= user && user.isAdmin ? 'true' : 'false' %>;
+      const isAdmin = '<%= user && user.isAdmin ? "true" : "false" %>' === 'true';
+      const errorDiv = document.getElementById('passwordError');
+      if (errorDiv) errorDiv.style.display = 'none';
+      
+      // Check if user wants to change password
+      const currentPasswordInput = document.getElementById('currentPassword');
+      const newPasswordInput = document.getElementById('newPassword');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+      
       const formData = {
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value
@@ -289,8 +341,82 @@
         if (addressInput) formData.address = addressInput.value;
       }
       
+      if (currentPasswordInput && newPasswordInput && confirmPasswordInput) {
+        const currentPassword = currentPasswordInput.value;
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        
+        // If any password field is filled, validate all password fields
+        if (currentPassword || newPassword || confirmPassword) {
+          if (!currentPassword || !newPassword || !confirmPassword) {
+            if (errorDiv) {
+              errorDiv.textContent = 'All password fields are required to change password';
+              errorDiv.style.display = 'block';
+            }
+            return;
+          }
+          
+          if (newPassword !== confirmPassword) {
+            if (errorDiv) {
+              errorDiv.textContent = 'New passwords do not match!';
+              errorDiv.style.display = 'block';
+            }
+            return;
+          }
+          
+          if (newPassword.length < 6) {
+            if (errorDiv) {
+              errorDiv.textContent = 'New password must be at least 6 characters long!';
+              errorDiv.style.display = 'block';
+            }
+            return;
+          }
+          
+          if (currentPassword === newPassword) {
+            if (errorDiv) {
+              errorDiv.textContent = 'New password must be different from current password!';
+              errorDiv.style.display = 'block';
+            }
+            return;
+          }
+          
+          // Add password change request
+          formData.currentPassword = currentPassword;
+          formData.newPassword = newPassword;
+        }
+      }
+      
       try {
         const userId = '<%= user ? user._id : "" %>';
+        
+        // Handle password change separately if provided
+        if (formData.currentPassword && formData.newPassword) {
+          const passwordResponse = await fetch(`/api/users/${userId}/change-password`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              currentPassword: formData.currentPassword,
+              newPassword: formData.newPassword
+            })
+          });
+          
+          if (!passwordResponse.ok) {
+            const passwordData = await passwordResponse.json();
+            if (errorDiv) {
+              errorDiv.textContent = passwordData.message || 'Failed to change password';
+              errorDiv.style.display = 'block';
+            }
+            return;
+          }
+          
+          // Remove password fields from formData before updating profile
+          delete formData.currentPassword;
+          delete formData.newPassword;
+        }
+        
+        // Update profile information
         const response = await fetch(`/api/users/${userId}`, {
           method: 'PUT',
           headers: {
@@ -300,11 +426,13 @@
         });
         
         if (response.ok) {
+          let message = 'Profile updated successfully!';
           if (isAdmin && formData.email) {
-            alert('Profile updated successfully! Your email has been changed. Please use your new email to log in next time.');
-          } else {
-            alert('Profile updated successfully!');
+            message = 'Profile updated successfully! Your email has been changed. Please use your new email to log in next time.';
+          } else if (currentPasswordInput && currentPasswordInput.value) {
+            message = 'Profile and password updated successfully!';
           }
+          alert(message);
           location.reload();
         } else {
           const data = await response.json();
@@ -357,9 +485,7 @@
       }
     }
 
-    function showChangePasswordModal() {
-      alert('Password change functionality coming soon!');
-    }
+
   </script>
 </body>
 </html>
