@@ -105,18 +105,18 @@
               <div class="form-group">
                 <label for="firstName">First Name</label>
                 <input type="text" id="firstName" name="firstName" value="<%= user ? user.firstName : '' %>" required>
+                <div id="firstNameSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
               </div>
               <div class="form-group">
                 <label for="lastName">Last Name</label>
                 <input type="text" id="lastName" name="lastName" value="<%= user ? user.lastName : '' %>" required>
+                <div id="lastNameSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
               </div>
             </div>
             <div class="form-group">
               <label for="email">Email</label>
               <input type="email" id="email" name="email" value="<%= user ? user.email : '' %>" <%= user && user.isAdmin ? '' : 'disabled' %>>
-              <% if (user && user.isAdmin) { %>
-              <small style="color: #8a0621; font-size: 12px;">Changing your email will update your login credentials</small>
-              <% } %>
+              <div id="emailSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
             </div>
             <% if (!user.isAdmin) { %>
             <div class="form-group">
@@ -159,7 +159,8 @@
                 </svg>
               </button>
             </div>
-            <div id="passwordError" style="color: #dc2626; font-size: 14px; margin-bottom: 15px; display: none;"></div>
+            <div id="passwordError" style="color: #dc2626; font-size: 14px; margin-top: 8px; margin-bottom: 15px; display: none;"></div>
+            <div id="passwordSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; margin-bottom: 15px; display: none;"></div>
             <% } %>
             <div class="form-actions">
               <button type="submit" class="btn-primary">Save Changes</button>
@@ -318,7 +319,17 @@
       
       const isAdmin = '<%= user && user.isAdmin ? "true" : "false" %>' === 'true';
       const errorDiv = document.getElementById('passwordError');
+      const passwordSuccessDiv = document.getElementById('passwordSuccess');
+      const emailSuccessDiv = document.getElementById('emailSuccess');
+      const firstNameSuccessDiv = document.getElementById('firstNameSuccess');
+      const lastNameSuccessDiv = document.getElementById('lastNameSuccess');
+      
+      // Clear all messages
       if (errorDiv) errorDiv.style.display = 'none';
+      if (passwordSuccessDiv) passwordSuccessDiv.style.display = 'none';
+      if (emailSuccessDiv) emailSuccessDiv.style.display = 'none';
+      if (firstNameSuccessDiv) firstNameSuccessDiv.style.display = 'none';
+      if (lastNameSuccessDiv) lastNameSuccessDiv.style.display = 'none';
       
       // Check if user wants to change password
       const currentPasswordInput = document.getElementById('currentPassword');
@@ -388,6 +399,13 @@
       
       try {
         const userId = '<%= user ? user._id : "" %>';
+        const originalEmail = '<%= user ? user.email : "" %>';
+        const originalFirstName = '<%= user ? user.firstName : "" %>';
+        const originalLastName = '<%= user ? user.lastName : "" %>';
+        let passwordChanged = false;
+        let emailChanged = false;
+        let firstNameChanged = false;
+        let lastNameChanged = false;
         
         // Handle password change separately if provided
         if (formData.currentPassword && formData.newPassword) {
@@ -411,9 +429,25 @@
             return;
           }
           
+          passwordChanged = true;
           // Remove password fields from formData before updating profile
           delete formData.currentPassword;
           delete formData.newPassword;
+        }
+        
+        // Check if email changed
+        if (isAdmin && formData.email && formData.email !== originalEmail) {
+          emailChanged = true;
+        }
+        
+        // Check if first name changed
+        if (formData.firstName && formData.firstName !== originalFirstName) {
+          firstNameChanged = true;
+        }
+        
+        // Check if last name changed
+        if (formData.lastName && formData.lastName !== originalLastName) {
+          lastNameChanged = true;
         }
         
         // Update profile information
@@ -426,21 +460,43 @@
         });
         
         if (response.ok) {
-          let message = 'Profile updated successfully!';
-          if (isAdmin && formData.email) {
-            message = 'Profile updated successfully! Your email has been changed. Please use your new email to log in next time.';
-          } else if (currentPasswordInput && currentPasswordInput.value) {
-            message = 'Profile and password updated successfully!';
+          // Show success messages in appropriate places
+          if (firstNameChanged && firstNameSuccessDiv) {
+            firstNameSuccessDiv.textContent = 'First name updated successfully!';
+            firstNameSuccessDiv.style.display = 'block';
           }
-          alert(message);
-          location.reload();
+          
+          if (lastNameChanged && lastNameSuccessDiv) {
+            lastNameSuccessDiv.textContent = 'Last name updated successfully!';
+            lastNameSuccessDiv.style.display = 'block';
+          }
+          
+          if (emailChanged && emailSuccessDiv) {
+            emailSuccessDiv.textContent = 'Email updated successfully! Please use your new email to log in next time.';
+            emailSuccessDiv.style.display = 'block';
+          }
+          
+          if (passwordChanged && passwordSuccessDiv) {
+            passwordSuccessDiv.textContent = 'Password updated successfully!';
+            passwordSuccessDiv.style.display = 'block';
+            // Clear password fields
+            if (currentPasswordInput) currentPasswordInput.value = '';
+            if (newPasswordInput) newPasswordInput.value = '';
+            if (confirmPasswordInput) confirmPasswordInput.value = '';
+          }
         } else {
           const data = await response.json();
-          alert(data.message || 'Failed to update profile. Please try again.');
+          if (errorDiv) {
+            errorDiv.textContent = data.message || 'Failed to update profile. Please try again.';
+            errorDiv.style.display = 'block';
+          }
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred. Please try again.');
+        if (errorDiv) {
+          errorDiv.textContent = 'An error occurred. Please try again.';
+          errorDiv.style.display = 'block';
+        }
       }
     });
 
