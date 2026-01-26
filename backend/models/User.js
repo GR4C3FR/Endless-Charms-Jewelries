@@ -61,6 +61,19 @@ const userSchema = new mongoose.Schema({
   isAdmin: {
     type: Boolean,
     default: false
+  },
+  // Email verification fields
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  verificationToken: {
+    type: String,
+    select: false // Don't include in queries by default
+  },
+  verificationTokenExpires: {
+    type: Date,
+    select: false // Don't include in queries by default
   }
 }, {
   timestamps: true

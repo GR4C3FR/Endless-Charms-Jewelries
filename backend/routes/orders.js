@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
+// Uncomment the line below to enable email verification for order creation
+// const { requireVerification } = require('../middleware/verificationAuth');
 
 // Generate order number
 function generateOrderNumber() {
@@ -53,6 +55,8 @@ router.get('/number/:orderNumber', async (req, res) => {
 });
 
 // POST create new order
+// To require email verification for placing orders, add requireVerification middleware:
+// router.post('/', requireVerification, async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const orderData = {

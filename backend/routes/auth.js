@@ -3,6 +3,14 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const User = require('../models/User');
+const { sendVerificationEmail } = require('../utils/emailService');
+const { 
+  generateVerificationToken, 
+  hashToken, 
+  compareToken,
+  getTokenExpiration,
+  isTokenExpired 
+} = require('../utils/tokenUtils');
 
 // POST /api/auth/signup - Register new user
 router.post('/signup', async (req, res) => {
@@ -43,15 +51,32 @@ router.post('/signup', async (req, res) => {
       });
     }
 
-    // Create new user (password will be hashed by the pre-save hook)
+    // Generate verification token
+    const verificationToken = generateVerificationToken();
+    const hashedToken = await hashToken(verificationToken);
+    const tokenExpiration = getTokenExpiration();
+
+    // Create new user with isVerified = false (password will be hashed by pre-save hook)
     const user = new User({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: email.toLowerCase(),
-      password: password  // Don't hash here - let the model handle it
+      password: password,  // Don't hash here - let the model handle it
+      isVerified: false,   // User starts unverified
+      verificationToken: hashedToken,
+      verificationTokenExpires: tokenExpiration
     });
 
     await user.save();
+
+    // Send verification email
+    try {
+      await sendVerificationEmail(user.email, user.firstName, verificationToken);
+      console.log(`📧 Verification email sent to: ${user.email}`);
+    } catch (emailError) {
+      console.error('❌ Failed to send verification email:', emailError);
+      // Don't fail the signup if email fails - user can resend later
+    }
 
     // Use Passport login to establish session
     req.login(user, (err) => {
@@ -70,13 +95,15 @@ router.post('/signup', async (req, res) => {
       // Return success without password
       res.status(201).json({
         success: true,
-        message: 'User registered successfully',
+        message: 'User registered successfully. Please check your email to verify your account.',
         user: {
           id: user._id,
           firstName: user.firstName,
           lastName: user.lastName,
-          email: user.email
-        }
+          email: user.email,
+          isVerified: user.isVerified
+        },
+        requiresVerification: true
       });
     });
   } catch (error) {
@@ -119,6 +146,9 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // User can login even if not verified, but we'll inform them
+    // This allows them to access the resend verification email feature
+
     // Use Passport login to establish session
     req.login(user, (err) => {
       if (err) {
@@ -133,7 +163,7 @@ router.post('/login', async (req, res) => {
       req.session.userId = user._id;
       req.session.userEmail = user.email;
 
-      // Return success
+      // Return success with verification status
       res.json({
         success: true,
         message: 'Login successful',
@@ -142,8 +172,11 @@ router.post('/login', async (req, res) => {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          isAdmin: user.isAdmin
-        }
+          isAdmin: user.isAdmin,
+          isVerified: user.isVerified
+        },
+        // Warn if email is not verified
+        warning: !user.isVerified ? 'Please verify your email address to access all features' : null
       });
     });
   } catch (error) {
@@ -289,6 +322,151 @@ router.post('/complete-profile', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Error completing profile' 
+    });
+  }
+});
+
+// GET /api/auth/verify-email - Verify user email with token
+router.get('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    // Validate token presence
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token is required'
+      });
+    }
+
+    // Find user with unexpired verification token
+    // We need to select the token fields explicitly since they're excluded by default
+    const users = await User.find({
+      isVerified: false,
+      verificationTokenExpires: { $gt: new Date() }
+    }).select('+verificationToken +verificationTokenExpires');
+
+    if (!users || users.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token'
+      });
+    }
+
+    // Find the user whose token matches
+    let matchedUser = null;
+    for (const user of users) {
+      const isMatch = await compareToken(token, user.verificationToken);
+      if (isMatch) {
+        matchedUser = user;
+        break;
+      }
+    }
+
+    if (!matchedUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token'
+      });
+    }
+
+    // Check if token is expired
+    if (isTokenExpired(matchedUser.verificationTokenExpires)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token has expired. Please request a new one.'
+      });
+    }
+
+    // Mark user as verified and clear verification token
+    matchedUser.isVerified = true;
+    matchedUser.verificationToken = undefined;
+    matchedUser.verificationTokenExpires = undefined;
+    await matchedUser.save();
+
+    console.log(`✅ Email verified for user: ${matchedUser.email}`);
+
+    // Return success (can redirect to a success page in frontend)
+    res.json({
+      success: true,
+      message: 'Email verified successfully! You can now access all features.',
+      user: {
+        id: matchedUser._id,
+        email: matchedUser.email,
+        isVerified: matchedUser.isVerified
+      }
+    });
+
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error verifying email'
+    });
+  }
+});
+
+// POST /api/auth/resend-verification - Resend verification email
+router.post('/resend-verification', async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Please log in to resend verification email'
+      });
+    }
+
+    // Find user
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if already verified
+    if (user.isVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is already verified'
+      });
+    }
+
+    // Generate new verification token
+    const verificationToken = generateVerificationToken();
+    const hashedToken = await hashToken(verificationToken);
+    const tokenExpiration = getTokenExpiration();
+
+    // Update user with new token
+    user.verificationToken = hashedToken;
+    user.verificationTokenExpires = tokenExpiration;
+    await user.save();
+
+    // Send verification email
+    try {
+      await sendVerificationEmail(user.email, user.firstName, verificationToken);
+      console.log(`📧 Verification email resent to: ${user.email}`);
+
+      res.json({
+        success: true,
+        message: 'Verification email sent! Please check your inbox.'
+      });
+
+    } catch (emailError) {
+      console.error('❌ Failed to send verification email:', emailError);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to send verification email. Please try again later.'
+      });
+    }
+
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error resending verification email'
     });
   }
 });
