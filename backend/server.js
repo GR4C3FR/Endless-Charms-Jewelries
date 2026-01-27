@@ -493,11 +493,23 @@ app.get('/blogs/:slug', async (req, res) => {
 });
 
 // Profile page
-app.get('/profile', (req, res) => {
+app.get('/profile', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.redirect('/login');
   }
-  res.render('profile', { user: req.user });
+  
+  // Fetch fresh user data from database to ensure verification status is current
+  try {
+    const User = require('./models/User');
+    const freshUser = await User.findById(req.user._id);
+    if (!freshUser) {
+      return res.redirect('/login');
+    }
+    res.render('profile', { user: freshUser });
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    res.render('profile', { user: req.user });
+  }
 });
 
 app.get('/bag', (req, res) => {
@@ -531,6 +543,11 @@ app.get('/signup', (req, res) => {
 
 app.get('/login', (req, res) => {
   res.render('login');
+});
+
+// Email verification page
+app.get('/verify-email', (req, res) => {
+  res.render('verify-email');
 });
 
 // Admin page - requires authentication

@@ -31,6 +31,17 @@ const sendVerificationEmail = async (userEmail, userName, verificationToken) => 
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
     const verificationLink = `${baseUrl}/verify-email?token=${verificationToken}`;
     
+    // Check if running in development mode
+    const isLocalhost = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1');
+      // Add development warning if using localhost
+    const devWarning = isLocalhost ? `
+      <div class="dev-warning">
+        <strong>⚠️ Development Mode:</strong> 
+        <p style="margin: 5px 0;">Make sure your local development server is running at <strong>${baseUrl}</strong> before clicking the verification link.</p>
+        <p style="margin: 5px 0; font-size: 13px;">If you're the developer, keep your terminal/server running when testing email verification.</p>
+      </div>
+    ` : '';
+    
     // Email HTML template
     const htmlContent = `
 <!DOCTYPE html>
@@ -107,10 +118,16 @@ const sendVerificationEmail = async (userEmail, userName, verificationToken) => 
       height: 1px;
       background-color: #e0e0e0;
       margin: 20px 0;
-    }
-    .info-box {
+    }    .info-box {
       background-color: #fff9e6;
       border-left: 4px solid #d4af37;
+      padding: 15px;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    .dev-warning {
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
       padding: 15px;
       margin: 20px 0;
       font-size: 14px;
@@ -129,10 +146,11 @@ const sendVerificationEmail = async (userEmail, userName, verificationToken) => 
       <p>Thank you for joining our community of jewelry lovers. We're thrilled to have you here!</p>
       
       <p>To complete your registration and start exploring our exquisite collection of handcrafted jewelry, please verify your email address by clicking the button below:</p>
-      
-      <div class="button-container">
+        <div class="button-container">
         <a href="${verificationLink}" class="verify-button">Verify Email</a>
       </div>
+      
+      ${devWarning}
       
       <div class="info-box">
         <strong>⏰ Important:</strong> This verification link will expire in 24 hours for security reasons.
