@@ -159,16 +159,19 @@
                 <label for="city">City/Municipality</label>
                 <input type="text" id="city" name="city" value="<%= user && user.address && user.address.city ? user.address.city : '' %>" placeholder="City or Municipality" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
               </div>
-            </div>
-            <div class="form-row" style="display: flex; gap: 15px;">
+            </div>            <div class="form-row" style="display: flex; gap: 15px;">
               <div class="form-group" style="flex: 1;">
                 <label for="barangay">Barangay</label>
                 <input type="text" id="barangay" name="barangay" value="<%= user && user.address && user.address.barangay ? user.address.barangay : '' %>" placeholder="Barangay" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
               </div>
               <div class="form-group" style="flex: 1;">
-                <label for="street">Street/Building</label>
-                <input type="text" id="street" name="street" value="<%= user && user.address && user.address.street ? user.address.street : '' %>" placeholder="House/Lot No., Building, Street Name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                <label for="postalCode">Postal Code</label>
+                <input type="text" id="postalCode" name="postalCode" value="<%= user && user.address && user.address.postalCode ? user.address.postalCode : '' %>" placeholder="Postal Code" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;" maxlength="4" pattern="[0-9]{4}">
               </div>
+            </div>
+            <div class="form-group">
+              <label for="street">Street/Building</label>
+              <input type="text" id="street" name="street" value="<%= user && user.address && user.address.street ? user.address.street : '' %>" placeholder="House/Lot No., Building, Street Name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
             </div>
             <div id="addressSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
             <% if (!user.googleId) { %>
@@ -228,17 +231,17 @@
         <div id="addresses-tab" class="profile-tab">
           <h3>Saved Addresses</h3>
           <div class="addresses-list">
-            <div class="address-card">
-              <h4>Default Address</h4>
-              <% if (user && user.address && (user.address.province || user.address.city || user.address.barangay || user.address.street)) { %>
+            <div class="address-card">              <h4>Default Address</h4>
+              <% if (user && user.address && (user.address.province || user.address.city || user.address.barangay || user.address.street || user.address.postalCode)) { %>
                 <div class="address-details">
                   <% if (user.address.province) { %><p><strong>Province/Region:</strong> <%= user.address.province %></p><% } %>
                   <% if (user.address.city) { %><p><strong>City/Municipality:</strong> <%= user.address.city %></p><% } %>
                   <% if (user.address.barangay) { %><p><strong>Barangay:</strong> <%= user.address.barangay %></p><% } %>
+                  <% if (user.address.postalCode) { %><p><strong>Postal Code:</strong> <%= user.address.postalCode %></p><% } %>
                   <% if (user.address.street) { %><p><strong>Street:</strong> <%= user.address.street %></p><% } %>
                   <hr style="margin: 10px 0; border: none; border-top: 1px solid #eee;">
                   <p style="font-style: italic; color: #666;">
-                    <%= [user.address.street, user.address.barangay, user.address.city, user.address.province].filter(Boolean).join(', ') %>
+                    <%= [user.address.street, user.address.barangay, user.address.city, user.address.province, user.address.postalCode].filter(Boolean).join(', ') %>
                   </p>
                 </div>
               <% } else { %>
@@ -404,14 +407,14 @@
       
       // Include email only for admin users
       if (isAdmin) {
-        formData.email = document.getElementById('email').value;
-      } else {
+        formData.email = document.getElementById('email').value;      } else {
         // Include phone and structured address only for non-admin users
         const phoneInput = document.getElementById('phone');
         const provinceInput = document.getElementById('province');
         const cityInput = document.getElementById('city');
         const barangayInput = document.getElementById('barangay');
         const streetInput = document.getElementById('street');
+        const postalCodeInput = document.getElementById('postalCode');
         
         if (phoneInput) formData.phone = phoneInput.value;
         
@@ -420,7 +423,8 @@
           province: provinceInput ? provinceInput.value : '',
           city: cityInput ? cityInput.value : '',
           barangay: barangayInput ? barangayInput.value : '',
-          street: streetInput ? streetInput.value : ''
+          street: streetInput ? streetInput.value : '',
+          postalCode: postalCodeInput ? postalCodeInput.value : ''
         };
       }
       

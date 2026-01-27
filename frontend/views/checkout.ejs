@@ -147,29 +147,31 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Address Modal -->
+    </div>    <!-- Address Modal -->
     <div class="modal-overlay" id="addressModal" aria-hidden="true">
       <div class="address-modal">
-        <h3>New Delivery Address</h3>
+        <h3>Delivery Address</h3>
         <form id="addressForm" class="address-form">
           <div class="form-row">
             <input type="text" name="firstName" placeholder="First Name" required>
             <input type="text" name="lastName" placeholder="Last Name" required>
           </div>
-          <div class="form-row single">
-            <input type="text" name="address" placeholder="Address" required>
-          </div>
           <div class="form-row">
-            <input type="text" name="postal" placeholder="Postal Code" required>
+            <input type="text" name="province" placeholder="Province" required>
             <input type="text" name="city" placeholder="City" required>
           </div>
+          <div class="form-row">
+            <input type="text" name="barangay" placeholder="Barangay" required>
+            <input type="text" name="postalCode" placeholder="Postal Code" required>
+          </div>
           <div class="form-row single">
-            <input type="text" name="social" placeholder="Instagram/Facebook Handle (Optional)">
+            <input type="text" name="street" placeholder="Street Address" required>
           </div>
           <div class="form-row single">
             <input type="text" name="phone" placeholder="Phone Number" required>
+          </div>
+          <div class="form-row single">
+            <input type="text" name="social" placeholder="Instagram/Facebook Handle (Optional)">
           </div>
           <div class="form-actions">
             <button type="button" class="btn btn-outline" id="addrCancel">Cancel</button>

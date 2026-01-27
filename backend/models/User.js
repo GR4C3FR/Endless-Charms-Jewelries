@@ -30,8 +30,7 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     trim: true
-  },
-  address: {
+  },  address: {
     province: {
       type: String,
       trim: true
@@ -45,6 +44,10 @@ const userSchema = new mongoose.Schema({
       trim: true
     },
     street: {
+      type: String,
+      trim: true
+    },
+    postalCode: {
       type: String,
       trim: true
     }

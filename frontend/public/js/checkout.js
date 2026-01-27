@@ -59,6 +59,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderBagItems();
 
+  // Auto-fill delivery address from user profile on page load
+  const user = window.EC_USER || null;
+  if (user && user.address) {
+    const addr = user.address;
+    // Only auto-fill if user has complete address information
+    if (addr.street && addr.city && addr.province) {
+      const deliveryCard = document.getElementById('deliveryCard');
+      const fullName = (user.firstName || '') + ' ' + (user.lastName || '');
+      const phone = user.phone || '';
+      const province = addr.province || '';
+      const city = addr.city || '';
+      const barangay = addr.barangay || '';
+      const postalCode = addr.postalCode || '';
+      const street = addr.street || '';
+      const addressText = `${street}${barangay ? ', ' + barangay : ''}${city ? ', ' + city : ''}${province ? ', ' + province : ''}${postalCode ? ', ' + postalCode : ''}`;
+      
+      if (deliveryCard) {
+        deliveryCard.querySelector('.delivery-name').textContent = fullName;
+        deliveryCard.querySelector('.delivery-phone').textContent = phone;
+        deliveryCard.querySelector('.delivery-address').textContent = addressText;
+        // Store address components for order submission
+        deliveryCard.dataset.province = province;
+        deliveryCard.dataset.city = city;
+        deliveryCard.dataset.barangay = barangay;
+        deliveryCard.dataset.postalCode = postalCode;
+        deliveryCard.dataset.street = street;
+        
+        // Update complete button state after auto-filling
+        updateCompleteButtonState();
+      }
+    }
+  }
+
   // Toggle bank dropdown
   bankSelected && bankSelected.addEventListener('click', () => {
     bankOptions.classList.toggle('open');
@@ -131,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   paymentBackBtn && paymentBackBtn.addEventListener('click', closePaymentModal);
   paymentModal && paymentModal.addEventListener('click', (e) => { if (e.target === paymentModal) closePaymentModal(); });
-
   // Address modal: prefill with user profile if available
   changeAddressBtn && changeAddressBtn.addEventListener('click', () => {
     // prefill
@@ -142,9 +174,11 @@ document.addEventListener('DOMContentLoaded', () => {
         f.elements['firstName'].value = user.firstName || '';
         f.elements['lastName'].value = user.lastName || '';
         const addr = user.address || {};
-        f.elements['address'].value = addr.street || '';
+        f.elements['province'].value = addr.province || '';
         f.elements['city'].value = addr.city || '';
-        f.elements['postal'].value = addr.postalCode || addr.zip || '';
+        f.elements['barangay'].value = addr.barangay || '';
+        f.elements['postalCode'].value = addr.postalCode || '';
+        f.elements['street'].value = addr.street || '';
         f.elements['phone'].value = user.phone || '';
         f.elements['social'].value = user.social || '';
       }
@@ -161,18 +195,29 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   addressModal && addressModal.addEventListener('click', (e) => { if (e.target === addressModal) addrCancel.click(); });
-
   addressForm && addressForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = new FormData(addressForm);
     const name = data.get('firstName') + ' ' + data.get('lastName');
     const phone = data.get('phone');
-    const address = data.get('address') + ', ' + data.get('city') + ', ' + data.get('postal');
+    const province = data.get('province');
+    const city = data.get('city');
+    const barangay = data.get('barangay');
+    const postalCode = data.get('postalCode');
+    const street = data.get('street');
+    const address = `${street}, ${barangay}, ${city}, ${province}, ${postalCode}`;
+    
     const delivery = document.getElementById('deliveryCard');
     if (delivery) {
       delivery.querySelector('.delivery-name').textContent = name;
       delivery.querySelector('.delivery-phone').textContent = phone;
       delivery.querySelector('.delivery-address').textContent = address;
+      // Store address components for order submission
+      delivery.dataset.province = province;
+      delivery.dataset.city = city;
+      delivery.dataset.barangay = barangay;
+      delivery.dataset.postalCode = postalCode;
+      delivery.dataset.street = street;
     }
     addrCancel.click();
     updateCompleteButtonState();
@@ -234,18 +279,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Complete order: assemble payload, send POST, redirect to profile orders
   if (completeBtn) {
-    completeBtn.addEventListener('click', async (ev) => {
-      const bag = getBag();
+    completeBtn.addEventListener('click', async (ev) => {      const bag = getBag();
       if (!bag || bag.length === 0) { showToast('Your bag is empty'); return; }
       const items = bag.map(i => ({ productId: i.productId || null, name: i.name || i.label || 'Item', price: Number(i.price || i.basePrice || 0), quantity: Number(i.quantity || 1), image: i.image || '' }));
       const user = window.EC_USER || null;
+      const deliveryCard = document.getElementById('deliveryCard');
+      const fullName = document.querySelector('.delivery-name')?.textContent || (user ? (user.firstName + ' ' + user.lastName) : '');
+      const phone = document.querySelector('.delivery-phone')?.textContent || (user && user.phone ? user.phone : '');
+      
+      // Get address components from delivery card dataset or user profile
+      const province = deliveryCard?.dataset?.province || (user?.address?.province || '');
+      const city = deliveryCard?.dataset?.city || (user?.address?.city || '');
+      const barangay = deliveryCard?.dataset?.barangay || (user?.address?.barangay || '');
+      const postalCode = deliveryCard?.dataset?.postalCode || (user?.address?.postalCode || '');
+      const street = deliveryCard?.dataset?.street || (user?.address?.street || '');
+      const addressText = document.querySelector('.delivery-address')?.textContent || '';
+      
       const shippingAddress = {
-        fullName: (document.querySelector('.delivery-name')?.textContent || (user ? (user.firstName + ' ' + user.lastName) : '')),
-        address: (document.querySelector('.delivery-address')?.textContent || (user && user.address ? (user.address.street || '') : '')),
-        city: (user && user.address && user.address.city) ? user.address.city : '',
-        postalCode: (user && user.address && user.address.postalCode) ? user.address.postalCode : '',
+        fullName: fullName,
+        province: province,
+        city: city,
+        barangay: barangay,
+        postalCode: postalCode,
+        street: street,
+        address: addressText,
         country: 'Philippines',
-        phone: document.querySelector('.delivery-phone')?.textContent || (user && user.phone ? user.phone : '')
+        phone: phone
       };
       const payMethodRadio = document.querySelector('input[name="paymethod"]:checked');
       const bankName = (document.getElementById('bankSelected')?.textContent || 'BPI').replace('▾','').trim();
