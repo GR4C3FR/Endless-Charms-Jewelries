@@ -40,18 +40,46 @@ router.post('/signup', async (req, res) => {
         success: false, 
         message: 'Password must be at least 8 characters long' 
       });
-    }
-
-    // Check if user already exists
+    }    // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Email already registered' 
+      // If user exists and is verified, reject the sign-up
+      if (existingUser.isVerified) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Email already registered' 
+        });
+      }
+      
+      // If user exists but is NOT verified, resend verification email
+      // Do NOT create a new account, do NOT log them in
+      const verificationToken = generateVerificationToken();
+      const hashedToken = await hashToken(verificationToken);
+      const tokenExpiration = getTokenExpiration();
+      
+      // Update the existing user with new verification token
+      existingUser.verificationToken = hashedToken;
+      existingUser.verificationTokenExpires = tokenExpiration;
+      await existingUser.save();
+      
+      // Send verification email
+      try {
+        await sendVerificationEmail(existingUser.email, existingUser.firstName, verificationToken);
+        console.log(`📧 Verification email resent to existing unverified user: ${existingUser.email}`);
+      } catch (emailError) {
+        console.error('❌ Failed to send verification email:', emailError);
+      }
+      
+      // Return response indicating verification email was sent
+      return res.status(200).json({
+        success: true,
+        message: 'An account with this email already exists but is not verified. A new verification email has been sent to your inbox.',
+        requiresVerification: true,
+        isExistingUser: true
       });
     }
 
-    // Generate verification token
+    // Generate verification token for new user
     const verificationToken = generateVerificationToken();
     const hashedToken = await hashToken(verificationToken);
     const tokenExpiration = getTokenExpiration();

@@ -7,6 +7,31 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <!-- Verification Modal -->
+  <div class="verification-modal-overlay" id="verificationModal">
+    <div class="verification-modal">
+      <div class="verification-modal-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#8B4513" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      <h2>Verify Your Email</h2>
+      <p class="verification-message">
+        We've sent a verification link to your email address. 
+        Please check your inbox and click the link to verify your account.
+
+      </p>
+      <p class="verification-email" id="verificationEmail"></p>
+      <p class="verification-note">
+        <strong>Note:</strong> The verification link will expire in 24 hours. 
+        If you don't see the email, please check your spam folder.
+        You may ask to resend the verification email in the future.
+      </p>
+      <button class="verification-btn" id="closeVerificationModal">Got it!</button>
+    </div>
+  </div>
+
   <main class="profile-main">
     <div class="profile-container">
       <!-- Left: Hero Image -->
@@ -114,31 +139,51 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ firstName, lastName, email, password })
-        });
-
-        const data = await response.json();
+        });        const data = await response.json();
 
         if (data.success) {
-          // Set localStorage flag for client-side checks
-          localStorage.setItem('ec_user_logged_in', 'true');
-          localStorage.setItem('ec_user_email', data.user.email);
-          localStorage.setItem('ec_user_name', `${data.user.firstName} ${data.user.lastName}`);
-          
-          // Load bag from database after signup (should be empty for new users)
-          try {
-            const bagResponse = await fetch('/api/bag');
-            if (bagResponse.ok) {
-              const bagData = await bagResponse.json();
-              if (bagData.success && Array.isArray(bagData.bag)) {
-                localStorage.setItem('ec_bag', JSON.stringify(bagData.bag));
-              }
+          // Check if this is a new user registration that requires verification
+          if (data.requiresVerification) {
+            // Show verification modal
+            const modal = document.getElementById('verificationModal');
+            const emailDisplay = document.getElementById('verificationEmail');
+            const messageElement = modal.querySelector('.verification-message');
+            
+            emailDisplay.textContent = email;
+            
+            // Update message based on whether it's an existing user
+            if (data.isExistingUser) {
+              messageElement.textContent = 'An account with this email already exists but is not verified. We\'ve sent a new verification link to your email address. Please check your inbox and click the link to verify your account.';
+            } else {
+              messageElement.textContent = 'We\'ve sent a verification link to your email address. Please check your inbox and click the link to verify your account.';
             }
-          } catch (error) {
-            console.error('Error loading bag:', error);
+            
+            modal.classList.add('active');
+            
+            // Don't redirect yet - let user close the modal
+            // Modal close button will handle redirect
+          } else {
+            // If somehow verification is not required, proceed normally
+            localStorage.setItem('ec_user_logged_in', 'true');
+            localStorage.setItem('ec_user_email', data.user.email);
+            localStorage.setItem('ec_user_name', `${data.user.firstName} ${data.user.lastName}`);
+            
+            // Load bag from database after signup
+            try {
+              const bagResponse = await fetch('/api/bag');
+              if (bagResponse.ok) {
+                const bagData = await bagResponse.json();
+                if (bagData.success && Array.isArray(bagData.bag)) {
+                  localStorage.setItem('ec_bag', JSON.stringify(bagData.bag));
+                }
+              }
+            } catch (error) {
+              console.error('Error loading bag:', error);
+            }
+            
+            // Redirect to home page
+            window.location.href = '/';
           }
-          
-          // Redirect to home page
-          window.location.href = '/';
         } else {
           alert(data.message || 'Signup failed');
         }
@@ -146,6 +191,24 @@
         console.error('Signup error:', error);
         alert('An error occurred during signup');
       }
+    });
+
+    // Handle verification modal close button
+    document.getElementById('closeVerificationModal').addEventListener('click', () => {
+      const modal = document.getElementById('verificationModal');
+      modal.classList.remove('active');
+      
+      // Set localStorage after user acknowledges the verification email
+      const email = document.getElementById('email').value;
+      const firstName = document.getElementById('firstName').value;
+      const lastName = document.getElementById('lastName').value;
+      
+      localStorage.setItem('ec_user_logged_in', 'true');
+      localStorage.setItem('ec_user_email', email);
+      localStorage.setItem('ec_user_name', `${firstName} ${lastName}`);
+      
+      // Redirect to home page
+      window.location.href = '/';
     });
   </script>
 </body>
