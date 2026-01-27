@@ -257,17 +257,25 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
-
   function updateCompleteButtonState() {
     const orderError = document.getElementById('orderError');
     if (!completeBtn) return;
+    
+    const user = window.EC_USER || null;
     const hasReceipt = !!(uploadArea && uploadArea.dataset && uploadArea.dataset.receipt);
     const addressEl = document.getElementById('deliveryAddress');
     const hasAddress = addressEl && addressEl.textContent && addressEl.textContent.trim() !== '' && addressEl.textContent.indexOf('Please input your delivery address') === -1;
     // Ensure a bank has been chosen (strip the chevron symbol if present)
     const bankText = (document.getElementById('bankSelected')?.textContent || '').replace('▾','').trim();
     const hasBank = !!bankText && bankText.toLowerCase() !== 'select' && bankText.length > 0;
-    completeBtn.disabled = !(hasReceipt && hasAddress && hasBank);
+    
+    // Check if user is verified
+    const isVerified = user && user.isVerified === true;
+    
+    // Button is enabled only if ALL conditions are met
+    const allConditionsMet = hasReceipt && hasAddress && hasBank && isVerified;
+    completeBtn.disabled = !allConditionsMet;
+    
     if (orderError) {
       orderError.style.display = 'none';
       orderError.textContent = '';
@@ -276,13 +284,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // initialize complete button state
   updateCompleteButtonState();
-
   // Complete order: assemble payload, send POST, redirect to profile orders
   if (completeBtn) {
-    completeBtn.addEventListener('click', async (ev) => {      const bag = getBag();
-      if (!bag || bag.length === 0) { showToast('Your bag is empty'); return; }
-      const items = bag.map(i => ({ productId: i.productId || null, name: i.name || i.label || 'Item', price: Number(i.price || i.basePrice || 0), quantity: Number(i.quantity || 1), image: i.image || '' }));
+    completeBtn.addEventListener('click', async (ev) => {
+      const bag = getBag();
       const user = window.EC_USER || null;
+      const orderError = document.getElementById('orderError');
+      
+      // Validation checks with specific error messages
+      if (!bag || bag.length === 0) {
+        showToast('Your bag is empty');
+        return;
+      }
+      
+      // require login
+      if (!user || !user._id) {
+        if (orderError) {
+          orderError.textContent = 'Please log in to complete your order.';
+          orderError.style.display = 'block';
+        } else {
+          showToast('Please log in to complete your order');
+        }
+        setTimeout(() => window.location.href = '/login', 1500);
+        return;
+      }
+      
+      // Check if user is verified
+      if (!user.isVerified) {
+        if (orderError) {
+          orderError.textContent = '⚠️ Email Verification Required: Please verify your email address before completing your order. Check your inbox for the verification link or resend from your profile.';
+          orderError.style.display = 'block';
+        } else {
+          showToast('Please verify your email address before completing your order.');
+        }
+        return;
+      }
+      
+      // Check delivery address
+      const addressEl = document.getElementById('deliveryAddress');
+      const hasAddress = addressEl && addressEl.textContent && addressEl.textContent.trim() !== '' && addressEl.textContent.indexOf('Please input your delivery address') === -1;
+      if (!hasAddress) {
+        if (orderError) {
+          orderError.textContent = '📍 Delivery Address Required: Please add your delivery address by clicking the "Change / Add" button above.';
+          orderError.style.display = 'block';
+        } else {
+          showToast('Please add your delivery address.');
+        }
+        return;
+      }
+      
+      // require bank selection
+      const bankNameText = (document.getElementById('bankSelected')?.textContent || '').replace('▾','').trim();
+      if (!bankNameText || bankNameText.toLowerCase() === 'select' || bankNameText.length === 0) {
+        if (orderError) {
+          orderError.textContent = '🏦 Bank Selection Required: Please select a payment method from the Bank Choice dropdown above.';
+          orderError.style.display = 'block';
+        } else {
+          showToast('Please select a bank from the Bank Choice dropdown.');
+        }
+        return;
+      }
+      
+      // require receipt before submitting
+      const receipt = uploadArea?.dataset?.receipt || null;
+      if (!receipt) {
+        if (orderError) {
+          orderError.textContent = '📷 Receipt Upload Required: Please upload your payment receipt by selecting a bank and uploading your receipt image.';
+          orderError.style.display = 'block';
+        } else {
+          showToast('Please upload your receipt before completing the order.');
+        }
+        return;
+      }
+      
+      // All validations passed - proceed with order creation
+      const items = bag.map(i => ({ productId: i.productId || null, name: i.name || i.label || 'Item', price: Number(i.price || i.basePrice || 0), quantity: Number(i.quantity || 1), image: i.image || '' }));
       const deliveryCard = document.getElementById('deliveryCard');
       const fullName = document.querySelector('.delivery-name')?.textContent || (user ? (user.firstName + ' ' + user.lastName) : '');
       const phone = document.querySelector('.delivery-phone')?.textContent || (user && user.phone ? user.phone : '');
@@ -307,38 +383,9 @@ document.addEventListener('DOMContentLoaded', () => {
         phone: phone
       };
       const payMethodRadio = document.querySelector('input[name="paymethod"]:checked');
-      const bankName = (document.getElementById('bankSelected')?.textContent || 'BPI').replace('▾','').trim();
+      const bankName = bankNameText;
       const subtotal = Number(document.querySelector('.items-box')?.dataset.subtotal || items.reduce((s,it)=>s+it.price*it.quantity,0));
       const total = subtotal;
-      const receipt = uploadArea?.dataset?.receipt || null;
-      const orderError = document.getElementById('orderError');
-      // require receipt before submitting
-      if (!receipt) {
-        if (orderError) {
-          orderError.textContent = 'Please upload your receipt before completing the order.';
-          orderError.style.display = 'block';
-        } else {
-          showToast('Please upload your receipt before completing the order.');
-        }
-        return;
-      }
-      // require bank selection
-      const bankNameText = (document.getElementById('bankSelected')?.textContent || '').replace('▾','').trim();
-      if (!bankNameText) {
-        if (orderError) {
-          orderError.textContent = 'Please select a bank from the Bank Choice dropdown.';
-          orderError.style.display = 'block';
-        } else {
-          showToast('Please select a bank from the Bank Choice dropdown.');
-        }
-        return;
-      }
-      // require login
-      if (!user || !user._id) {
-        showToast('Please log in to complete your order');
-        setTimeout(() => window.location.href = '/login', 900);
-        return;
-      }
 
       const payload = { userId: user._id, items, shippingAddress, paymentInfo: { method: bankName + ' - ' + (payMethodRadio ? payMethodRadio.value : 'full'), status: 'pending', receipt: receipt || undefined }, subtotal, total };
 

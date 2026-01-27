@@ -112,13 +112,16 @@
                                         </div>
                 </div>
             <% }) %>
+        </div>        <div class="bag-summary">
+            <p class="subtotal-text">Subtotal: ₱<span id="bagSubtotal">0</span></p>
+            <button class="checkout-btn" id="checkoutBtn" disabled>Checkout</button>
         </div>
+    </main>
 
-        <div class="bag-summary">
-            <p class="subtotal-text">Subtotal: <%= subtotal.toLocaleString() %></p>
-            <a class="checkout-btn" href="/checkout">Checkout</a>
-        </div>
-        </main>
+    <script>
+        // Expose current user to frontend scripts
+        window.EC_USER = <%- JSON.stringify(user || null) %>;
+    </script>
 
     <!-- Footer -->
     <footer class="main-footer">
@@ -179,10 +182,10 @@
           <button class="primary-btn" onclick="window.location.href='/login'">Log In</button>
           <button class="secondary-btn" onclick="window.location.href='/signup'">Sign Up</button>
         </div>
-      </div>
-    </div>
+      </div>    </div>
 
     <script src="/js/script.js"></script>
+    <script src="/js/bag.js"></script>
 
 </body>
 </html>
