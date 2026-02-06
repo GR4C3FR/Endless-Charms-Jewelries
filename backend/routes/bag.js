@@ -18,9 +18,12 @@ router.get('/', isAuthenticated, async (req, res) => {
   try {
     let bag = await Bag.findOne({ userId: req.session.userId });
     
+    // If no bag exists, return empty array without creating a bag document
     if (!bag) {
-      // Create empty bag if it doesn't exist
-      bag = await Bag.create({ userId: req.session.userId, items: [] });
+      return res.json({ 
+        success: true, 
+        bag: [] 
+      });
     }
     
     res.json({ 
@@ -51,6 +54,17 @@ router.post('/', isAuthenticated, async (req, res) => {
       });
     }
 
+    // If bag is empty, delete the bag document
+    if (bag.length === 0) {
+      await Bag.findOneAndDelete({ userId: req.session.userId });
+      console.log('Bag deleted (empty)');
+      return res.json({ 
+        success: true, 
+        message: 'Bag cleared successfully',
+        bag: [] 
+      });
+    }
+
     // Find and update or create new bag document
     const updatedBag = await Bag.findOneAndUpdate(
       { userId: req.session.userId },
@@ -76,11 +90,8 @@ router.post('/', isAuthenticated, async (req, res) => {
 // DELETE /api/bag - Clear user's bag
 router.delete('/', isAuthenticated, async (req, res) => {
   try {
-    await Bag.findOneAndUpdate(
-      { userId: req.session.userId },
-      { items: [] },
-      { new: true, upsert: true }
-    );
+    // Delete the bag document instead of just clearing items
+    await Bag.findOneAndDelete({ userId: req.session.userId });
 
     res.json({ 
       success: true, 
