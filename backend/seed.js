@@ -398,7 +398,7 @@ const products = [
   { 
     name: '.30 ct Tennis Necklace', 
     basePrice: 195000,
-    image: 'diamond-tennis-necklace.jpg', 
+    image: 'shop-other-accessories-page/diamond-tennis-necklace.jpg', 
     category: 'necklaces', 
     subcategory: 'accessories', 
     inStock: true, 
@@ -434,7 +434,7 @@ const products = [
   { 
     name: 'Stud Earrings', 
     basePrice: 29000,
-    image: 'diamond-stud-earrings.jpg', 
+    image: 'shop-other-accessories-page/diamond-stud-earrings.jpg', 
     category: 'earrings', 
     subcategory: 'accessories', 
     inStock: true, 
@@ -517,7 +517,7 @@ const products = [
   { 
     name: '.30 ct Tennis Bracelet', 
     basePrice: 149000,
-    image: 'diamond-tennis-bracelet.jpg', 
+    image: 'shop-other-accessories-page/diamond-tennis-bracelet.jpg', 
     category: 'bracelets', 
     subcategory: 'accessories', 
     inStock: true, 

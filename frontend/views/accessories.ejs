@@ -109,12 +109,12 @@
                  data-id="accessory-<%= idx %>"
                  data-name="<%= item.name.replace(/\"/g, '&quot;') %>"
                  data-price="<%= item.basePrice %>"
-                 data-image="shop-other-accessories-page/<%= item.image %>"
+                 data-image="<%= item.image %>"
                  data-page="accessories"
                  data-pricing="<%= item.pricing && item.pricing.combinations ? encodeURIComponent(JSON.stringify(item.pricing.combinations)) : '' %>"
                  data-available-options="<%= item.availableOptions ? encodeURIComponent(JSON.stringify(item.availableOptions)) : '' %>">
               <div class="weddingband-style-image">
-                <img src="/images/shop-other-accessories-page/<%= item.image %>" alt="<%= item.name %>">
+                <img src="/images/<%= item.image %>" alt="<%= item.name %>">
               </div>
               <div class="weddingband-style-info">
                 <p class="weddingband-style-label"><%= item.name %></p>
