@@ -4314,6 +4314,7 @@ h1, h2, h3 {
   position: sticky;
   top: 120px;
   align-self: flex-start;
+  margin-left: -50px;
 }
 
 .toc-container {
@@ -4366,7 +4367,7 @@ h1, h2, h3 {
   color: #620814;
   background-color: transparent;
   border: none;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .toc-h2 .toc-link {
