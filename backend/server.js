@@ -37,7 +37,7 @@ app.use(session({
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     httpOnly: true,
-    secure: false, // Set to false for localhost (http), true for production (https)
+    secure: process.env.NODE_ENV === 'production', // true for production (https), false for development
     sameSite: 'lax'
   }
 }));
