@@ -205,6 +205,10 @@ function updateBagTotals() {
 function initQuantityButtons() {
     const bagContainer = document.querySelector('.bag-items-list');
     if (!bagContainer) return;
+    
+    // Prevent multiple event listeners - check if already initialized
+    if (bagContainer.dataset.initialized === 'true') return;
+    bagContainer.dataset.initialized = 'true';
 
     bagContainer.addEventListener('click', (e) => {
         const btn = e.target;
