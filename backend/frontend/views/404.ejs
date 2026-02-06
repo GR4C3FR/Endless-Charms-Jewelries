@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found | Endless Charms</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .error-container {
+      text-align: center;
+      padding: 300px 20px;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .error-code {
+      font-size: 120px;
+      font-weight: bold;
+      color: #620418;
+      margin: 0;
+      line-height: 1;
+    }
+    .error-message {
+      font-size: 24px;
+      color: #333;
+      margin: 20px 0;
+    }
+    .error-description {
+      font-size: 16px;
+      color: #666;
+      max-width: 600px;
+      margin: 20px auto;
+      line-height: 1.6;
+    }
+    .back-home-btn {
+      display: inline-block;
+      background-color: #620418;
+      color: white;
+      padding: 15px 40px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 30px;
+      transition: background-color 0.3s;
+      font-weight: 600;
+    }
+    .back-home-btn:hover {
+      background-color: #620418;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Header -->
+  <header class="main-header">
+    <div class="container">
+      <nav class="navbar">
+        <a href="/" class="logo">
+          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+          <a href="/" class="nav-link">HOME</a>
+          <a href="/blogs" class="nav-link">BLOGS</a>
+          <div class="nav-item">
+            <span class="nav-link">SHOP</span>
+            <div class="dropdown-menu">
+              <a href="/engagement-rings">Engagement Rings</a>
+              <a href="/wedding-bands">Wedding Bands</a>
+              <a href="/accessories">Other Accessories</a>
+            </div>
+          </div>
+          <a href="/contact" class="nav-link">CONTACT</a>
+          <a href="/about" class="nav-link">ABOUT</a>
+        </div>
+        <div class="nav-icons">
+          <button id="headerSearchBtn" class="icon-btn">
+            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
+          </button>
+          <button class="icon-btn" onclick="window.location.href='/login'">
+            <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon">
+          </button>
+          <button class="icon-btn" onclick="window.location.href='/bag'">
+            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon">
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Search dropdown (hidden by default). Toggled by the header search button -->
+  <div id="searchDropdown" class="search-dropdown">
+    <div class="search-dropdown-inner container">
+      <div class="search-bar-row">
+        <input
+          id="headerSearchInput"
+          type="text"
+          class="header-search-input"
+          placeholder="Search products, e.g. 'moissanite'"
+        />
+        <button id="headerSearchClose" class="icon-btn">
+          &times;
+        </button>
+      </div>
+      <div id="searchResults" class="search-results-grid">
+        <!-- Placeholder for search results; items should use the same card layout as product tiles -->
+      </div>
+    </div>
+  </div>
+  
+  <div class="error-container">
+    <h1 class="error-code">404</h1>
+    <h2 class="error-message">Page Not Found</h2>
+    <p class="error-description">
+      The page you're looking for doesn't exist. It might have been moved or deleted.
+    </p>
+    <a href="/" class="back-home-btn">Return to Home</a>
+  </div>
+  
+  <script src="/js/script.js"></script>
+</body>
+</html>

@@ -54,10 +54,20 @@ app.use((req, res, next) => {
 
 // Set view engine
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '../frontend/views'));
+
+// Handle both local development and production deployment paths
+const fs = require('fs');
+const viewsPath = fs.existsSync(path.join(__dirname, '../frontend/views')) 
+  ? path.join(__dirname, '../frontend/views')
+  : path.join(__dirname, 'views');
+const publicPath = fs.existsSync(path.join(__dirname, '../frontend/public'))
+  ? path.join(__dirname, '../frontend/public')
+  : path.join(__dirname, 'public');
+
+app.set('views', viewsPath);
 
 // Static files
-app.use(express.static(path.join(__dirname, '../frontend/public')));
+app.use(express.static(publicPath));
 
 // API Routes
 app.use('/api/auth', authRoutes);
