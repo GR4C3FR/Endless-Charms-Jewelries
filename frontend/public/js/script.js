@@ -23,6 +23,63 @@ function showToast(message) {
   }, 3000);
 }
 
+// Confirmation modal function
+function showConfirm(message) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      max-width: 400px;
+      width: 90%;
+    `;
+    
+    modal.innerHTML = `
+      <p style="margin: 0 0 20px 0; color: #620418; font-size: 16px; text-align: center;">${message}</p>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button id="confirm-yes" style="background: #620418; color: #fff; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 14px;">Yes</button>
+        <button id="confirm-no" style="background: #ccc; color: #333; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 14px;">No</button>
+      </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    modal.querySelector('#confirm-yes').addEventListener('click', () => {
+      overlay.remove();
+      resolve(true);
+    });
+    
+    modal.querySelector('#confirm-no').addEventListener('click', () => {
+      overlay.remove();
+      resolve(false);
+    });
+    
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.remove();
+        resolve(false);
+      }
+    });
+  });
+}
+
 // Add CSS animations if not present
 if (!document.querySelector('style[data-toast-animations]')) {
   const style = document.createElement('style');
@@ -210,7 +267,7 @@ function initQuantityButtons() {
     if (bagContainer.dataset.initialized === 'true') return;
     bagContainer.dataset.initialized = 'true';
 
-    bagContainer.addEventListener('click', (e) => {
+    bagContainer.addEventListener('click', async (e) => {
         const btn = e.target;
         const row = btn.closest('.bag-item');
         if (!row) return;
@@ -219,6 +276,13 @@ function initQuantityButtons() {
         if (btn.classList.contains('remove-btn')) {
           const id = btn.dataset.id || row.dataset.id;
           if (!id) return;
+          
+          // Confirm before removing
+          const confirmed = await showConfirm('Are you sure you want to remove this item from your bag?');
+          if (!confirmed) {
+            return;
+          }
+          
           let bag = getBag();
           bag = bag.filter(i => i.id !== id);
           saveBag(bag);
@@ -255,8 +319,26 @@ function initQuantityButtons() {
 
         if (btn.textContent === '+') {
             currentQty++;
-        } else if (btn.textContent === '—' && currentQty > 1) {
-            currentQty--;
+        } else if (btn.textContent === '—') {
+            if (currentQty === 1) {
+              // Confirm before removing when quantity is 1
+              const confirmed = await showConfirm('This will remove the item from your bag. Are you sure?');
+              if (!confirmed) {
+                return;
+              }
+              // Remove the item
+              const id = row.dataset.id;
+              if (id) {
+                let bag = getBag();
+                bag = bag.filter(i => i.id !== id);
+                saveBag(bag);
+                updateBadge();
+                renderBagPage();
+              }
+              return;
+            } else if (currentQty > 1) {
+              currentQty--;
+            }
         }
 
         input.value = currentQty;
