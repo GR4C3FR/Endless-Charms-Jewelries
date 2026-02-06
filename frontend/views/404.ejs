@@ -8,7 +8,7 @@
   <style>
     .error-container {
       text-align: center;
-      padding: 100px 20px;
+      padding: 300px 20px;
       min-height: 60vh;
       display: flex;
       flex-direction: column;
@@ -18,7 +18,7 @@
     .error-code {
       font-size: 120px;
       font-weight: bold;
-      color: #d4af37;
+      color: #620418;
       margin: 0;
       line-height: 1;
     }
@@ -36,7 +36,7 @@
     }
     .back-home-btn {
       display: inline-block;
-      background-color: #d4af37;
+      background-color: #620418;
       color: white;
       padding: 15px 40px;
       text-decoration: none;
@@ -46,7 +46,7 @@
       font-weight: 600;
     }
     .back-home-btn:hover {
-      background-color: #b8941f;
+      background-color: #620418;
     }
   </style>
 </head>
@@ -73,6 +73,9 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
+          <button id="headerSearchBtn" class="icon-btn">
+            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
+          </button>
           <button class="icon-btn" onclick="window.location.href='/login'">
             <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon">
           </button>
@@ -83,6 +86,26 @@
       </nav>
     </div>
   </header>
+
+  <!-- Search dropdown (hidden by default). Toggled by the header search button -->
+  <div id="searchDropdown" class="search-dropdown">
+    <div class="search-dropdown-inner container">
+      <div class="search-bar-row">
+        <input
+          id="headerSearchInput"
+          type="text"
+          class="header-search-input"
+          placeholder="Search products, e.g. 'moissanite'"
+        />
+        <button id="headerSearchClose" class="icon-btn">
+          &times;
+        </button>
+      </div>
+      <div id="searchResults" class="search-results-grid">
+        <!-- Placeholder for search results; items should use the same card layout as product tiles -->
+      </div>
+    </div>
+  </div>
   
   <div class="error-container">
     <h1 class="error-code">404</h1>
