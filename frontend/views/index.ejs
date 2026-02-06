@@ -146,7 +146,7 @@
     <div class="container">
       <div class="ring-styles-grid">
         <% ringStyles.forEach((style, idx) => { %>
-          <div class="ring-style-card add-to-bag-card"
+          <div class="ring-style-card"
                data-id="ring-<%= idx %>"
                data-name="<%= (style.name || style.label).replace(/\"/g, '&quot;') %>"
                data-price="<%= style.basePrice || style.price || 0 %>"
