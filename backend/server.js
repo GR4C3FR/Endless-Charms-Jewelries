@@ -59,10 +59,10 @@ app.set('view engine', 'ejs');
 const fs = require('fs');
 const viewsPath = fs.existsSync(path.join(__dirname, '../frontend/views')) 
   ? path.join(__dirname, '../frontend/views')
-  : path.join(__dirname, 'views');
+  : path.join(__dirname, 'frontend/views');
 const publicPath = fs.existsSync(path.join(__dirname, '../frontend/public'))
   ? path.join(__dirname, '../frontend/public')
-  : path.join(__dirname, 'public');
+  : path.join(__dirname, 'frontend/public');
 
 app.set('views', viewsPath);
 
