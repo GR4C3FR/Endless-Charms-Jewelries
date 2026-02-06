@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const checkoutBtn = document.getElementById('checkoutBtn');
   const subtotalEl = document.getElementById('bagSubtotal');
+  const bagError = document.getElementById('bagError');
   const user = window.EC_USER || null;
 
   // Helper: read bag from localStorage
@@ -11,6 +12,34 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
       return [];
     }
+  }
+
+  // Helper: show error message
+  function showBagError(message) {
+    if (bagError) {
+      bagError.textContent = message;
+      bagError.style.display = 'block';
+    }
+  }
+
+  // Helper: hide error message
+  function hideBagError() {
+    if (bagError) {
+      bagError.textContent = '';
+      bagError.style.display = 'none';
+    }
+  }
+
+  // Helper: validate phone number format
+  function isValidPhoneNumber(phone) {
+    if (!phone) return false;
+    // Philippine phone number formats:
+    // +639xxxxxxxxx (with country code)
+    // 09xxxxxxxxx (mobile)
+    // Remove spaces and dashes for validation
+    const cleaned = phone.replace(/[\s\-]/g, '');
+    const mobilePattern = /^(09|\+639)\d{9}$/;
+    return mobilePattern.test(cleaned);
   }
 
   // Update checkout button state based on bag contents
@@ -48,17 +77,20 @@ document.addEventListener('DOMContentLoaded', () => {
     checkoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
       
+      // Hide any previous error messages
+      hideBagError();
+      
       const bag = getBag();
       
       // Check if bag is empty
       if (!bag || bag.length === 0) {
-        showToast('Your bag is empty. Add items before checking out.');
+        showBagError('Your bag is empty. Add items before checking out.');
         return;
       }
       
       // Check if user is logged in
       if (!user || !user._id) {
-        showToast('Please log in to proceed to checkout.');
+        showBagError('Please log in to proceed to checkout.');
         setTimeout(() => {
           window.location.href = '/login';
         }, 1500);
@@ -67,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Check if user email is verified
       if (!user.isVerified) {
-        showToast('Please verify your email address before checking out. Check your inbox for the verification link.');
+        showBagError('Please complete your profile first.');
         setTimeout(() => {
           window.location.href = '/profile';
         }, 3000);
@@ -81,7 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         user.address.province;
       
       if (!hasAddress) {
-        showToast('Please add your delivery address in your profile before checking out.');
+        showBagError('Please complete your profile first.');
+        setTimeout(() => {
+          window.location.href = '/profile';
+        }, 3000);
+        return;
+      }
+      
+      // Check if user has a valid phone number
+      const userPhone = user.address?.phone || user.phone;
+      if (!userPhone || !isValidPhoneNumber(userPhone)) {
+        showBagError('Please complete your profile first.');
         setTimeout(() => {
           window.location.href = '/profile';
         }, 3000);
