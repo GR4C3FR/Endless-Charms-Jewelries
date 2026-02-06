@@ -12,6 +12,24 @@ function generateOrderNumber() {
   return `EC${year}${random}`;
 }
 
+// GET all orders (with optional userId query parameter)
+router.get('/', async (req, res) => {
+  try {
+    const { userId } = req.query;
+    
+    if (!userId) {
+      return res.status(400).json({ message: 'userId query parameter is required' });
+    }
+    
+    const orders = await Order.find({ userId })
+      .populate('items.productId')
+      .sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // GET all orders for a user
 router.get('/user/:userId', async (req, res) => {
   try {

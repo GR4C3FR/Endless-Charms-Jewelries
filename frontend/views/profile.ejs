@@ -622,10 +622,15 @@
       try {
         const userId = '<%= user ? user._id : "" %>';
         const response = await fetch(`/api/orders?userId=${userId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch orders');
+        }
+        
         const orders = await response.json();
         
-        if (orders.length === 0) {
-          ordersListDiv.innerHTML = '<p class="no-orders">You haven\'t placed any orders yet.</p>';
+        if (!orders || orders.length === 0) {
+          ordersListDiv.innerHTML = '<p class="no-orders">No orders yet.</p>';
           return;
         }
         
