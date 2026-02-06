@@ -150,55 +150,13 @@
     </div>    <!-- Address Modal -->
     <div class="modal-overlay" id="addressModal" aria-hidden="true">
       <div class="address-modal">
-        <h3>Delivery Address</h3>
-        <form id="addressForm" class="address-form">
-          <div class="form-row">
-            <div style="flex:1;">
-              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">First Name <span style="color:#b71c1c;">*</span></label>
-              <input type="text" name="firstName" placeholder="" required>
-            </div>
-            <div style="flex:1;">
-              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Last Name <span style="color:#b71c1c;">*</span></label>
-              <input type="text" name="lastName" placeholder="" required>
-            </div>
-          </div>
-          <div class="form-row">
-            <div style="flex:1;">
-              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Province <span style="color:#b71c1c;">*</span></label>
-              <input type="text" name="province" placeholder="" required>
-            </div>
-            <div style="flex:1;">
-              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">City <span style="color:#b71c1c;">*</span></label>
-              <input type="text" name="city" placeholder="" required>
-            </div>
-          </div>
-          <div class="form-row">
-            <div style="flex:1;">
-              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Barangay <span style="color:#b71c1c;">*</span></label>
-              <input type="text" name="barangay" placeholder="" required>
-            </div>
-            <div style="flex:1;">
-              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Postal Code <span style="color:#b71c1c;">*</span></label>
-              <input type="text" name="postalCode" placeholder="" required>
-            </div>
-          </div>
-          <div class="form-row single">
-            <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Street Address <span style="color:#b71c1c;">*</span></label>
-            <input type="text" name="street" placeholder="" required>
-          </div>
-          <div class="form-row single">
-            <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Phone Number <span style="color:#b71c1c;">*</span></label>
-            <input type="text" name="phone" placeholder="" required>
-          </div>
-          <div class="form-row single">
-            <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Instagram/Facebook Handle (Optional)</label>
-            <input type="text" name="social" placeholder="">
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn btn-outline" id="addrCancel">Cancel</button>
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
+        <h3>Select Delivery Address</h3>
+        <div id="addressesList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+          <p class="loading-text">Loading addresses...</p>
+        </div>
+        <div style="text-align: center; margin-top: 15px;">
+          <button type="button" class="btn btn-outline" id="addrCancel">Cancel</button>
+        </div>
       </div>
     </div>
 

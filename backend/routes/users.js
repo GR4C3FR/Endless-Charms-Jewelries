@@ -265,4 +265,138 @@ router.delete('/:id/avatar', async (req, res) => {
   }
 });
 
+// POST add new address
+router.post('/:id/addresses', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // If this is set as default, unset other defaults
+    if (req.body.isDefault) {
+      user.addresses.forEach(addr => {
+        addr.isDefault = false;
+      });
+    } else if (user.addresses.length === 0) {
+      // First address is always default
+      req.body.isDefault = true;
+    }
+    
+    user.addresses.push(req.body);
+    await user.save();
+    
+    res.status(201).json({ 
+      message: 'Address added successfully',
+      addresses: user.addresses
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// PUT update address
+router.put('/:id/addresses/:addressId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    const address = user.addresses.id(req.params.addressId);
+    
+    if (!address) {
+      return res.status(404).json({ message: 'Address not found' });
+    }
+    
+    // If this is set as default, unset other defaults
+    if (req.body.isDefault && !address.isDefault) {
+      user.addresses.forEach(addr => {
+        addr.isDefault = false;
+      });
+    }
+    
+    // Update address fields
+    Object.keys(req.body).forEach(key => {
+      address[key] = req.body[key];
+    });
+    
+    await user.save();
+    
+    res.json({ 
+      message: 'Address updated successfully',
+      addresses: user.addresses
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// DELETE address
+router.delete('/:id/addresses/:addressId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    const address = user.addresses.id(req.params.addressId);
+    
+    if (!address) {
+      return res.status(404).json({ message: 'Address not found' });
+    }
+    
+    // Don't allow deleting default address if there are other addresses
+    if (address.isDefault && user.addresses.length > 1) {
+      return res.status(400).json({ message: 'Cannot delete default address. Set another address as default first.' });
+    }
+    
+    address.remove();
+    await user.save();
+    
+    res.json({ 
+      message: 'Address deleted successfully',
+      addresses: user.addresses
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// PUT set address as default
+router.put('/:id/addresses/:addressId/default', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    const address = user.addresses.id(req.params.addressId);
+    
+    if (!address) {
+      return res.status(404).json({ message: 'Address not found' });
+    }
+    
+    // Unset all defaults
+    user.addresses.forEach(addr => {
+      addr.isDefault = false;
+    });
+    
+    // Set this one as default
+    address.isDefault = true;
+    await user.save();
+    
+    res.json({ 
+      message: 'Default address updated successfully',
+      addresses: user.addresses
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

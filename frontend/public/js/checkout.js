@@ -1,4 +1,4 @@
-// Checkout page interactions: dropdown, modals, address form
+// Checkout page interactions: dropdown, modals, address selection
 document.addEventListener('DOMContentLoaded', () => {
   const bankDropdown = document.getElementById('bankDropdown');
   const bankSelected = document.getElementById('bankSelected');
@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const addressModal = document.getElementById('addressModal');
   const changeAddressBtn = document.getElementById('changeAddressBtn');
   const addrCancel = document.getElementById('addrCancel');
-  const addressForm = document.getElementById('addressForm');
   const receiptInput = document.getElementById('receiptInput');
   const uploadArea = document.getElementById('uploadArea');
   const completeBtn = document.getElementById('completeOrderBtn');
@@ -164,29 +163,111 @@ document.addEventListener('DOMContentLoaded', () => {
 
   paymentBackBtn && paymentBackBtn.addEventListener('click', closePaymentModal);
   paymentModal && paymentModal.addEventListener('click', (e) => { if (e.target === paymentModal) closePaymentModal(); });
-  // Address modal: prefill with user profile if available
-  changeAddressBtn && changeAddressBtn.addEventListener('click', () => {
-    // prefill
+  
+  // Address modal: load and display user's saved addresses
+  changeAddressBtn && changeAddressBtn.addEventListener('click', async () => {
     const user = window.EC_USER || null;
-    if (user) {
-      const f = addressForm;
-      if (f) {
-        f.elements['firstName'].value = user.firstName || '';
-        f.elements['lastName'].value = user.lastName || '';
-        const addr = user.address || {};
-        f.elements['province'].value = addr.province || '';
-        f.elements['city'].value = addr.city || '';
-        f.elements['barangay'].value = addr.barangay || '';
-        f.elements['postalCode'].value = addr.postalCode || '';
-        f.elements['street'].value = addr.street || '';
-        f.elements['phone'].value = user.phone || '';
-        f.elements['social'].value = user.social || '';
-      }
+    if (!user || !user._id) {
+      showToast('Please log in to select an address');
+      return;
     }
+    
+    try {
+      // Load user's addresses
+      const response = await fetch(`/api/users/${user._id}`);
+      if (!response.ok) {
+        throw new Error('Failed to load addresses');
+      }
+      
+      const userData = await response.json();
+      const addresses = userData.addresses || [];
+      const addressesList = document.getElementById('addressesList');
+      
+      if (addresses.length === 0) {
+        addressesList.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: #666;">
+            <p style="margin-bottom: 15px;">No saved addresses found.</p>
+            <p>Please add an address in your <a href="/profile" style="color: #620418; text-decoration: underline;">profile page</a>.</p>
+          </div>
+        `;
+      } else {
+        addressesList.innerHTML = addresses.map(addr => `
+          <div class="address-card" style="background: white; padding: 15px; border-radius: 8px; border: 2px solid #ddd; margin-bottom: 12px; cursor: pointer; transition: all 0.2s;" data-address-id="${addr._id}">
+            ${addr.isDefault ? '<span style="background: #620418; color: white; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 8px;">DEFAULT</span>' : ''}
+            <h4 style="margin: 0 0 8px 0; color: #620418; font-size: 16px;">${addr.firstName} ${addr.lastName}</h4>
+            <p style="margin: 4px 0; font-size: 14px;"><strong>Phone:</strong> ${addr.phone}</p>
+            ${addr.social ? `<p style="margin: 4px 0; font-size: 14px;"><strong>Social:</strong> ${addr.social}</p>` : ''}
+            <p style="margin: 8px 0 0 0; font-size: 13px; color: #666; line-height: 1.6;">
+              ${[addr.street, addr.barangay, addr.city, addr.province, addr.postalCode].filter(Boolean).join(', ')}
+            </p>
+          </div>
+        `).join('');
+        
+        // Add click listeners to address cards
+        document.querySelectorAll('#addressesList .address-card').forEach(card => {
+          card.addEventListener('click', function() {
+            const addressId = this.dataset.addressId;
+            const address = addresses.find(a => a._id === addressId);
+            if (address) {
+              selectAddress(address);
+            }
+          });
+          
+          // Hover effect
+          card.addEventListener('mouseenter', function() {
+            this.style.borderColor = '#620418';
+            this.style.backgroundColor = '#fef3f4';
+          });
+          
+          card.addEventListener('mouseleave', function() {
+            this.style.borderColor = '#ddd';
+            this.style.backgroundColor = 'white';
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Error loading addresses:', error);
+      const addressesList = document.getElementById('addressesList');
+      addressesList.innerHTML = '<p class="error-text">Failed to load addresses. Please try again.</p>';
+    }
+    
     addressModal.setAttribute('aria-hidden', 'false');
     addressModal.classList.add('active');
     document.body.style.overflow = 'hidden';
   });
+  
+  // Function to select and apply an address
+  function selectAddress(address) {
+    const name = `${address.firstName} ${address.lastName}`;
+    const phone = address.phone;
+    const province = address.province;
+    const city = address.city;
+    const barangay = address.barangay;
+    const postalCode = address.postalCode;
+    const street = address.street;
+    const addressText = `${street}, ${barangay}, ${city}, ${province}, ${postalCode}`;
+    
+    const delivery = document.getElementById('deliveryCard');
+    if (delivery) {
+      delivery.querySelector('.delivery-name').textContent = name;
+      delivery.querySelector('.delivery-phone').textContent = phone;
+      delivery.querySelector('.delivery-address').textContent = addressText;
+      // Store address components for order submission
+      delivery.dataset.province = province;
+      delivery.dataset.city = city;
+      delivery.dataset.barangay = barangay;
+      delivery.dataset.postalCode = postalCode;
+      delivery.dataset.street = street;
+    }
+    
+    // Close modal
+    addressModal.setAttribute('aria-hidden', 'true');
+    addressModal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+    
+    updateCompleteButtonState();
+    showToast('Address selected successfully');
+  }
 
   addrCancel && addrCancel.addEventListener('click', () => {
     addressModal.setAttribute('aria-hidden', 'true');
@@ -195,33 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   addressModal && addressModal.addEventListener('click', (e) => { if (e.target === addressModal) addrCancel.click(); });
-  addressForm && addressForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(addressForm);
-    const name = data.get('firstName') + ' ' + data.get('lastName');
-    const phone = data.get('phone');
-    const province = data.get('province');
-    const city = data.get('city');
-    const barangay = data.get('barangay');
-    const postalCode = data.get('postalCode');
-    const street = data.get('street');
-    const address = `${street}, ${barangay}, ${city}, ${province}, ${postalCode}`;
-    
-    const delivery = document.getElementById('deliveryCard');
-    if (delivery) {
-      delivery.querySelector('.delivery-name').textContent = name;
-      delivery.querySelector('.delivery-phone').textContent = phone;
-      delivery.querySelector('.delivery-address').textContent = address;
-      // Store address components for order submission
-      delivery.dataset.province = province;
-      delivery.dataset.city = city;
-      delivery.dataset.barangay = barangay;
-      delivery.dataset.postalCode = postalCode;
-      delivery.dataset.street = street;
-    }
-    addrCancel.click();
-    updateCompleteButtonState();
-  });
 
   // clicking the delivery address placeholder opens the address modal
   const deliveryAddressEl = document.getElementById('deliveryAddress');
