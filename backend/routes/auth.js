@@ -146,7 +146,7 @@ router.post('/signup', async (req, res) => {
 // POST /api/auth/login - Login user
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, remember } = req.body;
 
     // Validate input
     if (!email || !password) {
@@ -190,6 +190,15 @@ router.post('/login', async (req, res) => {
       // Set additional session data
       req.session.userId = user._id;
       req.session.userEmail = user.email;
+      
+      // Handle "Remember Me" - adjust cookie expiration
+      if (remember === true || remember === 'true' || remember === 'on') {
+        // Remember me: 30 days
+        req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30;
+      } else {
+        // Don't remember: 24 hours
+        req.session.cookie.maxAge = 1000 * 60 * 60 * 24;
+      }
 
       // Save session explicitly before sending response
       req.session.save((saveErr) => {
