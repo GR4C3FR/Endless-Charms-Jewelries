@@ -451,6 +451,39 @@ app.get('/contact', (req, res) => {
   res.render('contact');
 });
 
+// Contact form submission
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, phone, message } = req.body;
+    
+    // Validate required fields
+    if (!name || !email || !message) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please fill in all required fields.' 
+      });
+    }
+    
+    // Import email service
+    const { sendContactFormEmail } = require('./utils/emailService');
+    
+    // Send email
+    await sendContactFormEmail(name, email, phone || 'Not provided', message);
+    
+    res.json({ 
+      success: true, 
+      message: 'Thank you for contacting us! We will get back to you soon.' 
+    });
+    
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to send message. Please try again later.' 
+    });
+  }
+});
+
 app.get('/about', (req, res) => {
   res.render('about');
 });
