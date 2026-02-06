@@ -784,20 +784,17 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   else if (isRingSource) {
     while (caratSel.firstChild) caratSel.removeChild(caratSel.firstChild);
     ['1','2','3'].forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c + ' ct'; caratSel.appendChild(o); });
-    // add contact note below ring size and price; include contact-page button
+    // add contact note below ring size and price
     const sizeGroup = sizeSel && sizeSel.parentElement;
     const noteWrap = document.createElement('div');
     noteWrap.className = 'ec-contact-note';
     noteWrap.style.marginTop = '10px';
     noteWrap.innerHTML = `
       <p style="margin:0 0 8px 0;color:#8a0621;font-size:13px;">
-        For carats 4+, or ring sizes outside 3–7, please contact us for a custom quote.
+        For carats 4+, or ring sizes outside 3–7, please <a href="/contact" style="color:#8a0621;text-decoration:underline;">contact us</a> for a custom quote.
       </p>
-      <button id="contact-page-btn" style="background:#620418;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;">Go to Contact Page</button>
     `;
     if (sizeGroup) sizeGroup.parentElement.insertBefore(noteWrap, sizeGroup.nextSibling);
-    const contactBtn = noteWrap.querySelector('#contact-page-btn');
-    if (contactBtn) contactBtn.addEventListener('click', ()=> { window.location.href = '/contact'; });
   }
 
   // If this customization is for an existing bag item, prefill selections
