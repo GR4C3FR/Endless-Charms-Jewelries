@@ -1222,6 +1222,22 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   }
 }
 
+// Simple image preview modal for homepage products
+function openImagePreviewModal(item) {
+  const overlay = document.createElement('div');
+  overlay.className = 'ec-overlay';
+  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; cursor: pointer;';
+  
+  overlay.innerHTML = `
+    <img src="/images/${item.image}" alt="${item.name}" style="width: 600px; height: 600px; object-fit: contain;" />
+  `;
+  
+  document.body.appendChild(overlay);
+  
+  // Close when clicking anywhere on the overlay
+  overlay.addEventListener('click', () => overlay.remove());
+}
+
 // Delegate add-to-bag button clicks -> open modal
 window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
@@ -1237,6 +1253,20 @@ window.addEventListener('DOMContentLoaded', () => {
       image: trigger.dataset.image || trigger.getAttribute('data-image') || '',
       bandCarat: trigger.dataset.bandCarat || trigger.getAttribute('data-band-carat') || null
     };
+    
+    console.log('Clicked item:', item);
+    
+    // Check if this is a homepage product (starts with 'product-')
+    const isHomepageProduct = item.id && String(item.id).startsWith('product-');
+    
+    console.log('Is homepage product?', isHomepageProduct, 'ID:', item.id);
+    
+    if (isHomepageProduct) {
+      // Show simple image preview for homepage products
+      console.log('Opening image preview modal');
+      openImagePreviewModal(item);
+      return;
+    }
     
     // Parse pricing combinations if available (for wedding bands)
     const pricingData = trigger.dataset.pricing || trigger.getAttribute('data-pricing');
