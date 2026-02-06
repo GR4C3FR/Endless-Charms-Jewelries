@@ -379,19 +379,19 @@ router.put('/:id/addresses/:addressId/default', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    const address = user.addresses.id(req.params.addressId);
+    // Check if address exists
+    const addressExists = user.addresses.some(addr => addr._id.toString() === req.params.addressId);
     
-    if (!address) {
+    if (!addressExists) {
       return res.status(404).json({ message: 'Address not found' });
     }
     
-    // Unset all defaults
-    user.addresses.forEach(addr => {
-      addr.isDefault = false;
+    // Update all addresses: set isDefault to false for all, then true for the selected one
+    user.addresses = user.addresses.map(addr => {
+      addr.isDefault = addr._id.toString() === req.params.addressId;
+      return addr;
     });
     
-    // Set this one as default
-    address.isDefault = true;
     await user.save();
     
     res.json({ 
