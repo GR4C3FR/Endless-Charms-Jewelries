@@ -235,7 +235,14 @@ function initQuantityButtons() {
           const item = bag.find(i => i.id === id);
           if (item) {
             // open customization with existing item to edit
-            openCustomizationModal({ id: item.productId || String(item.id).split('::')[0], name: item.name, image: item.image }, null, item);
+            const baseItem = {
+              id: item.productId || String(item.id).split('::')[0],
+              name: item.name,
+              image: item.image,
+              bandCarat: item.bandCarat || null,
+              availableOptions: item.availableOptions || null
+            };
+            openCustomizationModal(baseItem, null, item);
           }
           return;
         }
@@ -1181,7 +1188,9 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
       image: baseItem.image,
       price: perUnit,
       quantity: qty,
-      options: opts
+      options: opts,
+      bandCarat: baseItem.bandCarat || null,
+      availableOptions: baseItem.availableOptions || null
     };
     
     // Add price breakdown for wedding bands
