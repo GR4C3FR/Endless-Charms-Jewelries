@@ -525,6 +525,7 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   const nameEl = overlay.querySelector('#modal-product-name');
   const priceEl = overlay.querySelector('#modal-product-price');
   img.src = baseItem.image ? `/images/${baseItem.image}` : '';
+  img.alt = baseItem.name || 'Product';
   nameEl.textContent = baseItem.name || 'Item';
   if (priceEl) {
     priceEl.style.fontSize = '18px';
