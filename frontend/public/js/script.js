@@ -435,9 +435,9 @@ function renderBagPage() {
       <div class="item-total-col">
         <div class="total-actions">
           <p class="row-price">₱${total.toLocaleString()}</p>
-          <div class="item-actions">
-            <button class="edit-btn" data-id="${item.id}" style="background:none;border:none;color:#620418;cursor:pointer;padding:6px;margin-left:10px;">Edit</button>
-            <button class="remove-btn" data-id="${item.id}" style="background:none;border:none;color:#8a0621;cursor:pointer;padding:6px;margin-left:6px;">Remove</button>
+          <div class="item-actions" style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+            <button class="edit-btn" data-id="${item.id}" style="background:none;border:none;color:#620418;cursor:pointer;padding:6px;margin:0;">Edit</button>
+            <button class="remove-btn" data-id="${item.id}" style="background:none;border:none;color:#8a0621;cursor:pointer;padding:6px;margin:0;">Remove</button>
           </div>
         </div>
       </div>
