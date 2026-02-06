@@ -145,7 +145,7 @@
     
     <div class="container">
       <div class="ring-styles-grid">
-        <% ringStyles.forEach((style, idx) => { %>
+        <% ringStyles.slice(0, 4).forEach((style, idx) => { %>
           <div class="ring-style-card"
                data-id="ring-<%= idx %>"
                data-name="<%= (style.name || style.label).replace(/\"/g, '&quot;') %>"
