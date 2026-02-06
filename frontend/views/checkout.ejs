@@ -153,25 +153,46 @@
         <h3>Delivery Address</h3>
         <form id="addressForm" class="address-form">
           <div class="form-row">
-            <input type="text" name="firstName" placeholder="First Name" required>
-            <input type="text" name="lastName" placeholder="Last Name" required>
+            <div style="flex:1;">
+              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">First Name <span style="color:#b71c1c;">*</span></label>
+              <input type="text" name="firstName" placeholder="" required>
+            </div>
+            <div style="flex:1;">
+              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Last Name <span style="color:#b71c1c;">*</span></label>
+              <input type="text" name="lastName" placeholder="" required>
+            </div>
           </div>
           <div class="form-row">
-            <input type="text" name="province" placeholder="Province" required>
-            <input type="text" name="city" placeholder="City" required>
+            <div style="flex:1;">
+              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Province <span style="color:#b71c1c;">*</span></label>
+              <input type="text" name="province" placeholder="" required>
+            </div>
+            <div style="flex:1;">
+              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">City <span style="color:#b71c1c;">*</span></label>
+              <input type="text" name="city" placeholder="" required>
+            </div>
           </div>
           <div class="form-row">
-            <input type="text" name="barangay" placeholder="Barangay" required>
-            <input type="text" name="postalCode" placeholder="Postal Code" required>
+            <div style="flex:1;">
+              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Barangay <span style="color:#b71c1c;">*</span></label>
+              <input type="text" name="barangay" placeholder="" required>
+            </div>
+            <div style="flex:1;">
+              <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Postal Code <span style="color:#b71c1c;">*</span></label>
+              <input type="text" name="postalCode" placeholder="" required>
+            </div>
           </div>
           <div class="form-row single">
-            <input type="text" name="street" placeholder="Street Address" required>
+            <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Street Address <span style="color:#b71c1c;">*</span></label>
+            <input type="text" name="street" placeholder="" required>
           </div>
           <div class="form-row single">
-            <input type="text" name="phone" placeholder="Phone Number" required>
+            <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Phone Number <span style="color:#b71c1c;">*</span></label>
+            <input type="text" name="phone" placeholder="" required>
           </div>
           <div class="form-row single">
-            <input type="text" name="social" placeholder="Instagram/Facebook Handle (Optional)">
+            <label style="display:block;margin-bottom:4px;color:#620418;font-size:13px;font-weight:600;">Instagram/Facebook Handle (Optional)</label>
+            <input type="text" name="social" placeholder="">
           </div>
           <div class="form-actions">
             <button type="button" class="btn btn-outline" id="addrCancel">Cancel</button>
