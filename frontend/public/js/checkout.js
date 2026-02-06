@@ -266,7 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = 'auto';
     
     updateCompleteButtonState();
-    showToast('Address selected successfully');
   }
 
   addrCancel && addrCancel.addEventListener('click', () => {

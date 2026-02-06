@@ -679,7 +679,7 @@
             </p>
             <div style="margin-top: 15px; display: flex; gap: 10px;">
               <button class="btn btn-outline edit-address-btn" data-id="${addr._id}" style="padding: 6px 12px; font-size: 13px;">Edit</button>
-              ${!addr.isDefault ? `<button class="btn btn-outline delete-address-btn" data-id="${addr._id}" style="padding: 6px 12px; font-size: 13px; color: #dc2626; border-color: #dc2626;">Delete</button>` : ''}
+              <button class="btn btn-outline delete-address-btn" data-id="${addr._id}" style="padding: 6px 12px; font-size: 13px; color: #dc2626; border-color: #dc2626;">Delete</button>
               ${!addr.isDefault ? `<button class="btn btn-outline set-default-btn" data-id="${addr._id}" style="padding: 6px 12px; font-size: 13px;">Set as Default</button>` : ''}
             </div>
           </div>
@@ -796,7 +796,6 @@
         if (response.ok) {
           closeAddressModal();
           await loadAddresses();
-          showToast(addressId ? 'Address updated successfully!' : 'Address added successfully!');
         } else {
           const data = await response.json();
           alert(data.message || 'Failed to save address');
@@ -817,7 +816,6 @@
         
         if (response.ok) {
           await loadAddresses();
-          showToast('Address deleted successfully!');
         } else {
           const data = await response.json();
           alert(data.message || 'Failed to delete address');
@@ -838,7 +836,6 @@
         
         if (response.ok) {
           await loadAddresses();
-          showToast('Default address updated!');
         } else {
           const data = await response.json();
           alert(data.message || 'Failed to set default address');

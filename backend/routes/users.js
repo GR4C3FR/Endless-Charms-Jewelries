@@ -349,12 +349,16 @@ router.delete('/:id/addresses/:addressId', async (req, res) => {
       return res.status(404).json({ message: 'Address not found' });
     }
     
-    // Don't allow deleting default address if there are other addresses
-    if (address.isDefault && user.addresses.length > 1) {
-      return res.status(400).json({ message: 'Cannot delete default address. Set another address as default first.' });
+    const wasDefault = address.isDefault;
+    
+    // Remove the address using pull
+    user.addresses.pull(req.params.addressId);
+    
+    // If the deleted address was default and there are other addresses, set the first one as default
+    if (wasDefault && user.addresses.length > 0) {
+      user.addresses[0].isDefault = true;
     }
     
-    address.remove();
     await user.save();
     
     res.json({ 
