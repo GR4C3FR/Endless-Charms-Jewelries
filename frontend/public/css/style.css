@@ -3247,7 +3247,7 @@ h1, h2, h3 {
   text-decoration: none; /* remove underline on anchor-based buttons */
 }
 
-.checkout-btn:hover {
+.checkout-btn:hover:not(:disabled) {
   background: #620418;
   color: white;
   text-decoration: none;
