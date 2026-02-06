@@ -1092,7 +1092,14 @@ function openCustomizationModal(baseItem, originBtn, existingItem) {
   });
   qtyInput.addEventListener('input', ()=>{ if (!qtyInput.value || isNaN(parseInt(qtyInput.value))) qtyInput.value='1'; computePrice(); });
 
-  // cancel
+  // Close modal when clicking outside (on overlay)
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.remove();
+    }
+  });
+
+  // cancel button
   overlay.querySelector('#modal-cancel').addEventListener('click', ()=>{ overlay.remove(); });
 
   // add / save changes
