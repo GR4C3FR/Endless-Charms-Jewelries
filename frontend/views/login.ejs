@@ -91,6 +91,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify({ email, password })
         });
 
@@ -102,9 +103,12 @@
           localStorage.setItem('ec_user_email', data.user.email);
           localStorage.setItem('ec_user_name', `${data.user.firstName} ${data.user.lastName}`);
           
+          // Set flag to skip session verification on next page load
+          sessionStorage.setItem('ec_just_logged_in', 'true');
+          
           // Load bag from database after login
           try {
-            const bagResponse = await fetch('/api/bag');
+            const bagResponse = await fetch('/api/bag', { credentials: 'include' });
             if (bagResponse.ok) {
               const bagData = await bagResponse.json();
               if (bagData.success && Array.isArray(bagData.bag)) {

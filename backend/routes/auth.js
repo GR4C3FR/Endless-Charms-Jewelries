@@ -191,20 +191,31 @@ router.post('/login', async (req, res) => {
       req.session.userId = user._id;
       req.session.userEmail = user.email;
 
-      // Return success with verification status
-      res.json({
-        success: true,
-        message: 'Login successful',
-        user: {
-          id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          isAdmin: user.isAdmin,
-          isVerified: user.isVerified
-        },
-        // Warn if email is not verified
-        warning: !user.isVerified ? 'Please verify your email address to access all features' : null
+      // Save session explicitly before sending response
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error('Session save error:', saveErr);
+          return res.status(500).json({ 
+            success: false, 
+            message: 'Error saving session' 
+          });
+        }
+
+        // Return success with verification status
+        res.json({
+          success: true,
+          message: 'Login successful',
+          user: {
+            id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            isAdmin: user.isAdmin,
+            isVerified: user.isVerified
+          },
+          // Warn if email is not verified
+          warning: !user.isVerified ? 'Please verify your email address to access all features' : null
+        });
       });
     });
   } catch (error) {
@@ -230,6 +241,29 @@ router.post('/logout', (req, res) => {
       message: 'Logged out successfully' 
     });
   });
+});
+
+// GET /api/auth/check-session - Check if user is authenticated
+router.get('/check-session', (req, res) => {
+  console.log('Session check - isAuthenticated:', req.isAuthenticated());
+  console.log('Session ID:', req.sessionID);
+  console.log('Session data:', req.session);
+  
+  if (req.isAuthenticated()) {
+    return res.json({
+      authenticated: true,
+      user: {
+        id: req.user._id,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        email: req.user.email,
+        isAdmin: req.user.isAdmin,
+        isVerified: req.user.isVerified
+      }
+    });
+  }
+  
+  res.json({ authenticated: false });
 });
 
 // GET /api/auth/logout - Logout user (for direct navigation)

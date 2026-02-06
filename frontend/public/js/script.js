@@ -269,6 +269,7 @@ function initQuantityButtons() {
 // Add to your existing DOMContentLoaded listener
 window.addEventListener('DOMContentLoaded', () => {
     initQuantityButtons(); // Initialize the bag functionality
+    verifyLoginStatus(); // Verify user session with server
 });
 // Bag persistence and badge handling (localStorage)
 function getBag() {
@@ -1584,9 +1585,46 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
 // Authentication Check Functions
 function isUserLoggedIn() {
-  // Check if user is logged in (you can modify this to check session/token)
-  const user = localStorage.getItem('ec_user_logged_in');
-  return user === 'true';
+  // Check localStorage first for immediate feedback
+  const localUser = localStorage.getItem('ec_user_logged_in');
+  return localUser === 'true';
+}
+
+// Verify login status with server (call this on page load)
+async function verifyLoginStatus() {
+  // Don't verify if user just logged in (within last 2 seconds)
+  const justLoggedIn = sessionStorage.getItem('ec_just_logged_in');
+  if (justLoggedIn) {
+    sessionStorage.removeItem('ec_just_logged_in');
+    return; // Skip verification if user just logged in
+  }
+  
+  try {
+    const response = await fetch('/api/auth/check-session', { 
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      console.log('Session check failed, but keeping localStorage for now');
+      return; // Don't clear localStorage on error
+    }
+    
+    const data = await response.json();
+    
+    if (data.authenticated) {
+      localStorage.setItem('ec_user_logged_in', 'true');
+      localStorage.setItem('ec_user_email', data.user.email);
+      localStorage.setItem('ec_user_name', `${data.user.firstName} ${data.user.lastName}`);
+    } else {
+      // Only clear if server explicitly says not authenticated
+      localStorage.removeItem('ec_user_logged_in');
+      localStorage.removeItem('ec_user_email');
+      localStorage.removeItem('ec_user_name');
+    }
+  } catch (error) {
+    console.error('Error verifying login status:', error);
+    // Don't clear localStorage on network error
+  }
 }
 
 function showLoginModal(message = 'Please log in to continue.') {
