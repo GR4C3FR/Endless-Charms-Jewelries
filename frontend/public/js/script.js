@@ -1253,31 +1253,12 @@ window.addEventListener('DOMContentLoaded', () => {
     // only pass an origin button for the small visual feedback when the actual button was clicked
     const originBtn = trigger.classList.contains('add-to-bag-btn') ? trigger : null;
 
-    // Authentication guard: require login to open Add-to-Bag customization
-    if (!isUserLoggedIn()) {
-      // prefer modal UX if available
-      showLoginModal('Please log in first to add items to your bag.');
-      return;
-    }
-
+    // Open modal for everyone - login check happens when clicking "Add to bag" button
     openCustomizationModal(item, originBtn);
   });
 });
 
-// If guest user, disable/hide add-to-bag buttons on page load to reflect auth guard
-window.addEventListener('DOMContentLoaded', () => {
-  if (!isUserLoggedIn()) {
-    document.querySelectorAll('.add-to-bag-btn, .add-to-bag-card').forEach(el => {
-      // visually indicate disabled state for both small buttons and whole product cards
-      el.classList.add('add-to-bag-disabled');
-      el.title = 'Log in to add items to your bag';
-      el.style.pointerEvents = 'none';
-      el.style.opacity = '0.6';
-      el.style.cursor = 'not-allowed';
-      try { if (el.tagName === 'BUTTON' || el.classList.contains('add-to-bag-btn')) el.disabled = true; } catch(e){}
-    });
-  }
-});
+// Note: Products are always visible and clickable. Login is only required when adding to bag.
 
 // --- Checkout page helpers ---
 function getProfile() {
