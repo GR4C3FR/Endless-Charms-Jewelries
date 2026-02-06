@@ -242,5 +242,18 @@
     </div>
   </footer>
   <script src="/js/checkout.js"></script>
+  <script>
+    // Redirect to bag page if bag is empty
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const bag = JSON.parse(localStorage.getItem('ec_bag') || '[]');
+        if (!bag || bag.length === 0) {
+          window.location.href = '/bag';
+        }
+      } catch (e) {
+        window.location.href = '/bag';
+      }
+    });
+  </script>
 </body>
 </html>
