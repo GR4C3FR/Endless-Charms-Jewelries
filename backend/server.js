@@ -83,6 +83,20 @@ app.set('views', viewsPath);
 // Static files
 app.use(express.static(publicPath));
 
+// DEBUG ENDPOINT - Remove after testing
+app.get('/api/debug/env', (req, res) => {
+  res.json({
+    NODE_ENV: process.env.NODE_ENV || 'NOT SET',
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ? 'Set ✅' : 'NOT SET ❌',
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? 'Set ✅' : 'NOT SET ❌',
+    GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || 'NOT SET ❌',
+    SESSION_SECRET: process.env.SESSION_SECRET ? 'Set ✅' : 'NOT SET ❌',
+    MONGODB_URI: process.env.MONGODB_URI ? 'Set ✅' : 'NOT SET ❌',
+    CORS_ALLOWED_ORIGINS: process.env.CORS_ALLOWED_ORIGINS || 'NOT SET ❌',
+    allEnvKeys: Object.keys(process.env).filter(k => !k.includes('PATH') && !k.includes('HOME'))
+  });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
