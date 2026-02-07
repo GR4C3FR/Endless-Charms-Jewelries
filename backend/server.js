@@ -33,17 +33,27 @@ app.use(express.urlencoded({ extended: true }));
 const corsMiddleware = require('./middleware/cors');
 app.use(corsMiddleware);
 
+// Trust proxy - CRITICAL for production (Hostinger uses reverse proxy)
+// Without this, Express can't detect HTTPS and secure cookies will fail
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET || 'endless-charms-secret-key-2026',
   resave: false,
   saveUninitialized: false,
+  name: 'connect.sid', // Keep default name
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // true for production (https), false for development
-    sameSite: 'lax'
-  }
+    httpOnly: true, // Prevents JavaScript access
+    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    sameSite: process.env.COOKIE_SAMESITE || 'lax', // 'lax' for same-domain (most secure)
+    domain: process.env.COOKIE_DOMAIN || undefined, // Leave empty for same domain
+    path: '/' // Ensure cookie works for all paths
+  },
+  proxy: process.env.NODE_ENV === 'production' // Trust reverse proxy
 }));
 
 // Initialize Passport
