@@ -28,7 +28,7 @@ const sendVerificationEmail = async (userEmail, userName, verificationToken) => 
     const transporter = createTransporter();
     
     // Get base URL from environment or use default
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.BASE_URL || 'https://endlesscharms.store';
     const verificationLink = `${baseUrl}/verify-email?token=${verificationToken}`;
     
     // Check if running in development mode
