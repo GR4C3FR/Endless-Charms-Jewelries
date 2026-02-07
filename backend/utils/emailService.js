@@ -10,8 +10,8 @@ const createTransporter = () => {
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,     // endlesscharmsofficial@gmail.com
-      pass: process.env.EMAIL_PASSWORD  // Gmail App Password
+      user: process.env.EMAIL_USER || 'endlesscharmsofficial@gmail.com',     // endlesscharmsofficial@gmail.com
+      pass: process.env.EMAIL_PASSWORD || 'cygf hxwe ebqx lrkc' // Gmail App Password
     }
   });
 };
@@ -205,7 +205,7 @@ Crafting Memories, One Charm at a Time
     const mailOptions = {
       from: {
         name: 'Endless Charms',
-        address: process.env.EMAIL_USER
+        address: process.env.EMAIL_USER || 'endlesscharmsofficial@gmail.com'
       },
       to: userEmail,
       subject: 'Verify Your Email - Endless Charms',
@@ -308,9 +308,9 @@ This message was sent from the Endless Charms contact form.
     const mailOptions = {
       from: {
         name: 'Endless Charms Contact Form',
-        address: process.env.EMAIL_USER
+        address: process.env.EMAIL_USER || 'endlesscharmsofficial@gmail.com'
       },
-      to: process.env.EMAIL_USER, // Send to Endless Charms email
+      to: process.env.EMAIL_USER || 'endlesscharmsofficial@gmail.com', // Send to Endless Charms email
       replyTo: email, // Allow replying directly to the customer
       subject: `Contact Form: Message from ${name}`,
       text: textContent,
