@@ -23,7 +23,8 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID || 'your-google-client-id',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'your-google-client-secret',
-      callbackURL: '/api/auth/google/callback'
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback',
+      proxy: true  // CRITICAL: Trust reverse proxy for HTTPS callback URL
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
