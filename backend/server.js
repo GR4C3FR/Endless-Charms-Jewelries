@@ -29,6 +29,10 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// CORS middleware (configured via backend/middleware/cors.js)
+const corsMiddleware = require('./middleware/cors');
+app.use(corsMiddleware);
+
 // Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET || 'endless-charms-secret-key-2026',
