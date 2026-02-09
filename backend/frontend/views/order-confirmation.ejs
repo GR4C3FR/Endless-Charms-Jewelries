@@ -108,27 +108,118 @@
 
   <script src="/js/script.js"></script>
   <script>
-    (function(){
+    (async function(){
+      const el = document.getElementById('order-summary');
+      
       try {
-        const raw = localStorage.getItem('ec_last_order');
-        const el = document.getElementById('order-summary');
-        if (!raw) {
-          if (el) el.innerHTML = '<p>No recent order found.</p>';
+        // Get order number from URL query param or sessionStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderNumber = urlParams.get('order');
+        const sessionData = sessionStorage.getItem('ec_last_order');
+        let orderInfo = sessionData ? JSON.parse(sessionData) : null;
+        
+        if (!orderNumber && !orderInfo) {
+          if (el) el.innerHTML = '<p>No recent order found. <a href="/">Return to homepage</a></p>';
           return;
         }
-        const order = JSON.parse(raw);
-        let html = `<p><strong>Order ID:</strong> ${order.id}</p>`;
-        html += `<p><strong>Placed:</strong> ${new Date(order.created).toLocaleString()}</p>`;
-        if (order.profile) html += `<p><strong>Deliver to:</strong> ${order.profile.firstName} ${order.profile.lastName || ''}, ${order.profile.address}</p>`;
+        
+        // Show loading state
+        if (el) el.innerHTML = '<p>Loading your order details...</p>';
+        
+        // Fetch order details from backend API
+        const orderIdToFetch = orderNumber || orderInfo?.orderNumber || orderInfo?.orderId;
+        
+        try {
+          const response = await fetch(`/api/orders/number/${orderIdToFetch}`, {
+            credentials: 'include'
+          });
+          
+          if (response.ok) {
+            const order = await response.json();
+            displayOrder(order);
+            // Clear sessionStorage after successful display
+            sessionStorage.removeItem('ec_last_order');
+          } else {
+            // Fallback to sessionStorage data if API fails
+            if (orderInfo) {
+              displayBasicOrder(orderInfo);
+            } else {
+              if (el) el.innerHTML = '<p>Could not load order details. Please check your orders in your <a href="/profile?tab=orders">profile</a>.</p>';
+            }
+          }
+        } catch (fetchErr) {
+          console.error('Fetch error:', fetchErr);
+          // Fallback to sessionStorage data
+          if (orderInfo) {
+            displayBasicOrder(orderInfo);
+          } else {
+            if (el) el.innerHTML = '<p>Could not connect to server. Please check your orders in your <a href="/profile?tab=orders">profile</a>.</p>';
+          }
+        }
+        
+      } catch(e) { 
+        console.error('Order confirmation error:', e); 
+        if (el) el.innerHTML = '<p>An error occurred. Please check your orders in your <a href="/profile?tab=orders">profile</a>.</p>';
+      }
+      
+      function displayOrder(order) {
+        let html = '<div class="order-confirmation-details">';
+        html += `<p class="order-number"><strong>Order Number:</strong> <span class="highlight">${order.orderNumber || order._id}</span></p>`;
+        html += `<p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>`;
+        html += `<p><strong>Status:</strong> <span class="status-badge ${order.status}">${order.status || 'Processing'}</span></p>`;
+        
+        // Shipping address
+        if (order.shippingAddress) {
+          const addr = order.shippingAddress;
+          html += '<div class="shipping-info" style="margin-top:16px; padding:12px; background:#f9f9f9; border-radius:8px;">';
+          html += '<strong>📦 Shipping To:</strong><br>';
+          html += `<span>${addr.fullName || ''}</span><br>`;
+          html += `<span>${addr.address || [addr.street, addr.barangay, addr.city, addr.province].filter(Boolean).join(', ')}</span><br>`;
+          if (addr.phone) html += `<span>📞 ${addr.phone}</span>`;
+          html += '</div>';
+        }
+        
+        // Order items
         if (order.items && order.items.length) {
-          html += '<div style="margin-top:12px;"><strong>Items</strong><ul>';
-          order.items.forEach(it=>{ html += `<li>${it.name} — ${it.quantity} × ₱${(it.price||0).toLocaleString()}</li>`; });
+          html += '<div class="items-ordered" style="margin-top:16px;">';
+          html += '<strong>🛍️ Items Ordered:</strong>';
+          html += '<ul style="list-style:none; padding:0; margin-top:8px;">';
+          order.items.forEach(it => {
+            const itemTotal = (it.price || 0) * (it.quantity || 1);
+            html += `<li style="padding:8px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">`;
+            html += `<span>${it.name} × ${it.quantity}</span>`;
+            html += `<span>₱${itemTotal.toLocaleString()}</span>`;
+            html += `</li>`;
+          });
           html += '</ul></div>';
         }
+        
+        // Total
+        html += `<div class="order-total" style="margin-top:16px; padding-top:12px; border-top:2px solid #333; font-size:1.2em;">`;
+        html += `<strong>Total:</strong> <span style="color:#8B4513;">₱${(order.total || 0).toLocaleString()}</span>`;
+        html += '</div>';
+        
+        // Payment info
+        if (order.paymentInfo) {
+          html += `<p style="margin-top:12px; color:#666;"><small>Payment Method: ${order.paymentInfo.method || 'N/A'}</small></p>`;
+        }
+        
+        html += '</div>';
+        
         if (el) el.innerHTML = html;
-        // clear last order to avoid duplicate page later
-        // localStorage.removeItem('ec_last_order');
-      } catch(e) { console.error(e); }
+      }
+      
+      function displayBasicOrder(orderInfo) {
+        let html = '<div class="order-confirmation-details">';
+        html += `<p class="order-number"><strong>Order Number:</strong> <span class="highlight">${orderInfo.orderNumber || orderInfo.orderId}</span></p>`;
+        html += `<p><strong>Order Date:</strong> ${new Date(orderInfo.createdAt).toLocaleString()}</p>`;
+        html += `<p><strong>Total:</strong> <span style="color:#8B4513;">₱${(orderInfo.total || 0).toLocaleString()}</span></p>`;
+        html += '<p style="margin-top:16px;">View full order details in your <a href="/profile?tab=orders">profile</a>.</p>';
+        html += '</div>';
+        
+        if (el) el.innerHTML = html;
+        sessionStorage.removeItem('ec_last_order');
+      }
     })();
   </script>
 </body>

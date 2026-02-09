@@ -752,7 +752,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #620418;
 }
 
 .ring-style-image img {
@@ -853,8 +852,8 @@ body {
 }
 
 .carousel-card {
-  min-width: 220px;
-  width: 220px;
+  min-width: calc(25% - 15px);
+  width: calc(25% - 15px);
   height: 280px;
   flex-shrink: 0;
   border-radius: 8px;
@@ -2712,8 +2711,10 @@ h1, h2, h3 {
 }
 
 .blog-cards-section {
-  padding: 200px 0 60px;
+  padding: 280px 0 60px;
   background: white;
+  position: relative;
+  z-index: 0;
 }
 
 .blog-cards-section .container {
@@ -5302,4 +5303,163 @@ h1, h2, h3 {
   background: #d1d5db;
   cursor: not-allowed;
   transform: none;
+}
+/* ========================================
+   SCROLL-TRIGGERED ANIMATIONS (Home Page)
+   ======================================== */
+
+/* Animation base states - elements start hidden */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+/* Slide from left - for Why Choose section */
+.scroll-animate.slide-from-left {
+  transform: translateX(-80px);
+}
+
+/* Slide from right - for Testimonies section */
+.scroll-animate.slide-from-right {
+  transform: translateX(80px);
+}
+
+/* Fade up animation */
+.scroll-animate.fade-up {
+  transform: translateY(40px);
+}
+
+.scroll-animate.scale-in {
+  transform: scale(0.9);
+}
+
+/* Animated state - when element enters viewport */
+.scroll-animate.animate-in {
+  opacity: 1;
+  transform: translateY(0) translateX(0) scale(1);
+}
+
+/* Staggered animation delays for grid items */
+.scroll-animate.delay-1 { transition-delay: 0.1s; }
+.scroll-animate.delay-2 { transition-delay: 0.2s; }
+.scroll-animate.delay-3 { transition-delay: 0.3s; }
+.scroll-animate.delay-4 { transition-delay: 0.4s; }
+
+/* ========================================
+   IMPROVED PRODUCT CAROUSEL
+   ======================================== */
+.carousel-container {
+  position: relative;
+}
+
+.carousel-viewport {
+  overflow: hidden;
+}
+
+.carousel-content {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.35s ease-out;
+}
+
+/* Carousel dots navigation */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ddd;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.carousel-dot.active {
+  background: #620418;
+  transform: scale(1.2);
+}
+
+/* ========================================
+   FOOTER - ENSURE COMPLETELY STATIC
+   ======================================== */
+.main-footer,
+.main-footer * {
+  animation: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Re-enable only color transitions for links */
+.main-footer a {
+  transition: color 0.3s !important;
+}
+
+.main-footer .social-icon {
+  transition: background 0.3s !important;
+}
+
+/* ========================================
+   ANIMATION EXCLUSIONS - Static Pages
+   ======================================== */
+/* Disable all scroll animations on excluded pages */
+body.no-scroll-animations .scroll-animate {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Make ALL hero sections completely static (no animations) */
+.hero-section,
+.hero-section *,
+.blogs-hero,
+.blogs-hero *,
+.contact-hero,
+.contact-hero *,
+.all-blogs-header,
+.all-blogs-header * {
+  animation: none !important;
+}
+
+/* Static styles for excluded pages - disable ALL animations */
+body.page-bag,
+body.page-profile,
+body.page-signup,
+body.page-login,
+body.page-checkout,
+body.page-order-confirmation,
+body.page-shop,
+body.page-blog-detail {
+  /* Ensure scroll-animate elements are visible and static */
+}
+
+body.page-bag .scroll-animate,
+body.page-profile .scroll-animate,
+body.page-signup .scroll-animate,
+body.page-login .scroll-animate,
+body.page-checkout .scroll-animate,
+body.page-order-confirmation .scroll-animate,
+body.page-shop .scroll-animate,
+body.page-blog-detail .scroll-animate {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+body.page-bag *,
+body.page-profile *,
+body.page-signup *,
+body.page-login *,
+body.page-checkout *,
+body.page-order-confirmation *,
+body.page-shop *,
+body.page-blog-detail * {
+  animation: none !important;
 }

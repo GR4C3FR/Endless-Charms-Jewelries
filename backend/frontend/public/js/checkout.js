@@ -12,6 +12,92 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadArea = document.getElementById('uploadArea');
   const completeBtn = document.getElementById('completeOrderBtn');
 
+  // ========================================
+  // VALIDATION HELPER FUNCTIONS
+  // ========================================
+  
+  // Add CSS for validation highlighting if not present
+  if (!document.querySelector('style[data-checkout-validation]')) {
+    const style = document.createElement('style');
+    style.setAttribute('data-checkout-validation', 'true');
+    style.textContent = `
+      .validation-error {
+        border: 2px solid #dc2626 !important;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+        animation: shake 0.4s ease-in-out;
+      }
+      .validation-error-text {
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+        font-weight: 500;
+      }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        75% { transform: translateX(8px); }
+      }
+      .field-valid {
+        border: 2px solid #16a34a !important;
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15) !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  // Mark a field as having an error
+  function setFieldError(element, message) {
+    if (!element) return;
+    element.classList.remove('field-valid');
+    element.classList.add('validation-error');
+    
+    // Remove existing error message
+    const existingError = element.parentElement?.querySelector('.validation-error-text');
+    if (existingError) existingError.remove();
+    
+    // Add new error message
+    if (message) {
+      const errorEl = document.createElement('span');
+      errorEl.className = 'validation-error-text';
+      errorEl.textContent = message;
+      element.parentElement?.appendChild(errorEl);
+    }
+  }
+  
+  // Clear field error
+  function clearFieldError(element) {
+    if (!element) return;
+    element.classList.remove('validation-error');
+    const existingError = element.parentElement?.querySelector('.validation-error-text');
+    if (existingError) existingError.remove();
+  }
+  
+  // Mark field as valid
+  function setFieldValid(element) {
+    if (!element) return;
+    clearFieldError(element);
+    element.classList.add('field-valid');
+  }
+  
+  // Clear all validation states
+  function clearAllValidation() {
+    document.querySelectorAll('.validation-error').forEach(el => {
+      el.classList.remove('validation-error');
+    });
+    document.querySelectorAll('.validation-error-text').forEach(el => {
+      el.remove();
+    });
+    document.querySelectorAll('.field-valid').forEach(el => {
+      el.classList.remove('field-valid');
+    });
+    const orderError = document.getElementById('orderError');
+    if (orderError) {
+      orderError.style.display = 'none';
+      orderError.textContent = '';
+    }
+  }
+
   // Helper: read bag from localStorage
   function getBag() {
     try { return JSON.parse(localStorage.getItem('ec_bag') || '[]'); } catch (e) { return []; }
@@ -60,23 +146,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auto-fill delivery address from user profile on page load
   const user = window.EC_USER || null;
-  if (user && user.address) {
-    const addr = user.address;
-    // Only auto-fill if user has complete address information
-    if (addr.street && addr.city && addr.province) {
+  if (user) {
+    let addrToUse = null;
+    let addrFullName = (user.firstName || '') + ' ' + (user.lastName || '');
+    let addrPhone = user.phone || '';
+    
+    // First try user.address (single address) - require all fields
+    if (user.address && user.address.street && user.address.city && user.address.province && user.address.barangay && user.address.postalCode) {
+      addrToUse = user.address;
+    }
+    // Then try user.addresses array (multiple addresses) - use default or first
+    else if (user.addresses && user.addresses.length > 0) {
+      const defaultAddr = user.addresses.find(a => a.isDefault);
+      const firstAddr = user.addresses[0];
+      const selected = defaultAddr || firstAddr;
+      // Require all address fields: street, city, province, barangay, postalCode
+      if (selected && selected.street && selected.city && selected.province && selected.barangay && selected.postalCode) {
+        addrToUse = selected;
+        // Use name/phone from the address entry if available
+        if (selected.firstName && selected.lastName) {
+          addrFullName = selected.firstName + ' ' + selected.lastName;
+        }
+        if (selected.phone) {
+          addrPhone = selected.phone;
+        }
+      }
+    }
+    
+    if (addrToUse) {
       const deliveryCard = document.getElementById('deliveryCard');
-      const fullName = (user.firstName || '') + ' ' + (user.lastName || '');
-      const phone = user.phone || '';
-      const province = addr.province || '';
-      const city = addr.city || '';
-      const barangay = addr.barangay || '';
-      const postalCode = addr.postalCode || '';
-      const street = addr.street || '';
+      const province = addrToUse.province || '';
+      const city = addrToUse.city || '';
+      const barangay = addrToUse.barangay || '';
+      const postalCode = addrToUse.postalCode || '';
+      const street = addrToUse.street || '';
       const addressText = `${street}${barangay ? ', ' + barangay : ''}${city ? ', ' + city : ''}${province ? ', ' + province : ''}${postalCode ? ', ' + postalCode : ''}`;
       
       if (deliveryCard) {
-        deliveryCard.querySelector('.delivery-name').textContent = fullName;
-        deliveryCard.querySelector('.delivery-phone').textContent = phone;
+        deliveryCard.querySelector('.delivery-name').textContent = addrFullName;
+        deliveryCard.querySelector('.delivery-phone').textContent = addrPhone;
         deliveryCard.querySelector('.delivery-address').textContent = addressText;
         // Store address components for order submission
         deliveryCard.dataset.province = province;
@@ -272,9 +380,106 @@ document.addEventListener('DOMContentLoaded', () => {
     addressModal.setAttribute('aria-hidden', 'true');
     addressModal.classList.remove('active');
     document.body.style.overflow = 'auto';
+    // Reset to list view
+    const listView = document.getElementById('addressListView');
+    const formView = document.getElementById('addressFormView');
+    if (listView) listView.style.display = 'block';
+    if (formView) formView.style.display = 'none';
   });
 
   addressModal && addressModal.addEventListener('click', (e) => { if (e.target === addressModal) addrCancel.click(); });
+
+  // Show Add Address Form
+  const showAddAddressBtn = document.getElementById('showAddAddressBtn');
+  const backToAddressList = document.getElementById('backToAddressList');
+  const checkoutAddressForm = document.getElementById('checkoutAddressForm');
+  const addressListView = document.getElementById('addressListView');
+  const addressFormView = document.getElementById('addressFormView');
+
+  showAddAddressBtn && showAddAddressBtn.addEventListener('click', () => {
+    if (addressListView) addressListView.style.display = 'none';
+    if (addressFormView) addressFormView.style.display = 'block';
+    // Pre-fill with user data if available
+    const user = window.EC_USER || null;
+    if (user && checkoutAddressForm) {
+      checkoutAddressForm.querySelector('[name="firstName"]').value = user.firstName || '';
+      checkoutAddressForm.querySelector('[name="lastName"]').value = user.lastName || '';
+      checkoutAddressForm.querySelector('[name="phone"]').value = user.phone || '';
+    }
+  });
+
+  backToAddressList && backToAddressList.addEventListener('click', () => {
+    if (addressListView) addressListView.style.display = 'block';
+    if (addressFormView) addressFormView.style.display = 'none';
+  });
+
+  // Handle Add Address Form Submit
+  checkoutAddressForm && checkoutAddressForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const user = window.EC_USER || null;
+    if (!user || !user._id) {
+      showToast('Please log in to add an address');
+      return;
+    }
+
+    const formData = new FormData(checkoutAddressForm);
+    const addressData = {
+      firstName: formData.get('firstName'),
+      lastName: formData.get('lastName'),
+      province: formData.get('province'),
+      city: formData.get('city'),
+      barangay: formData.get('barangay'),
+      postalCode: formData.get('postalCode'),
+      street: formData.get('street'),
+      phone: formData.get('phone'),
+      social: formData.get('social') || '',
+      isDefault: formData.get('isDefault') === 'on'
+    };
+
+    // Validate required fields
+    const required = ['firstName', 'lastName', 'province', 'city', 'barangay', 'postalCode', 'street', 'phone'];
+    const missing = required.filter(field => !addressData[field]);
+    const errorEl = document.getElementById('addressFormError');
+    
+    if (missing.length > 0) {
+      if (errorEl) {
+        errorEl.textContent = 'Please fill in all required fields';
+        errorEl.style.display = 'block';
+      }
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/users/${user._id}/addresses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(addressData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        // Use the newly added address
+        selectAddress(addressData);
+        // Reset form
+        checkoutAddressForm.reset();
+        if (errorEl) errorEl.style.display = 'none';
+        showToast('Address added successfully');
+      } else {
+        const err = await response.json();
+        if (errorEl) {
+          errorEl.textContent = err.message || 'Failed to add address';
+          errorEl.style.display = 'block';
+        }
+      }
+    } catch (err) {
+      console.error('Error adding address:', err);
+      if (errorEl) {
+        errorEl.textContent = 'Network error. Please try again.';
+        errorEl.style.display = 'block';
+      }
+    }
+  });
 
   // clicking the delivery address placeholder opens the address modal
   const deliveryAddressEl = document.getElementById('deliveryAddress');
@@ -312,7 +517,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function updateCompleteButtonState() {
     const orderError = document.getElementById('orderError');
-    if (!completeBtn) return;
+    if (!completeBtn) {
+      console.error('Complete button not found!');
+      return;
+    }
     
     const user = window.EC_USER || null;
     const hasReceipt = !!(uploadArea && uploadArea.dataset && uploadArea.dataset.receipt);
@@ -325,133 +533,258 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if user is verified
     const isVerified = user && user.isVerified === true;
     
-    // Button is enabled only if ALL conditions are met
+    // Button is enabled only if ALL conditions are met - but keep it clickable for validation display
     const allConditionsMet = hasReceipt && hasAddress && hasBank && isVerified;
-    completeBtn.disabled = !allConditionsMet;
+    
+    // Visual feedback only - don't disable the button
+    if (allConditionsMet) {
+      completeBtn.style.opacity = '1';
+      completeBtn.style.cursor = 'pointer';
+    } else {
+      completeBtn.style.opacity = '0.8';
+      completeBtn.style.cursor = 'pointer';
+    }
     
     if (orderError) {
       orderError.style.display = 'none';
-      orderError.textContent = '';
+      orderError.innerHTML = '';
     }
   }
 
   // initialize complete button state
   updateCompleteButtonState();
-  // Complete order: assemble payload, send POST, redirect to profile orders
+  // Complete order: assemble payload, send POST, redirect to confirmation page
   if (completeBtn) {
     completeBtn.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      
       const bag = getBag();
       const user = window.EC_USER || null;
       const orderError = document.getElementById('orderError');
       
-      // Validation checks with specific error messages
+      // Clear all previous validation errors
+      clearAllValidation();
+      
+      // Track validation errors
+      let hasErrors = false;
+      let firstErrorElement = null;
+      
+      // ========================================
+      // STRICT VALIDATION - All fields required
+      // ========================================
+      
+      // 1. Check if bag has items
       if (!bag || bag.length === 0) {
+        const itemsBox = document.querySelector('.items-box');
+        if (itemsBox) setFieldError(itemsBox, 'Your shopping bag is empty');
+        if (orderError) {
+          orderError.innerHTML = '<strong>⚠️ Empty Cart</strong><br>Your shopping bag is empty. Please add items before checking out.';
+          orderError.style.display = 'block';
+        }
         showToast('Your bag is empty');
         return;
       }
       
-      // require login
+      // 2. Check user is logged in
       if (!user || !user._id) {
         if (orderError) {
-          orderError.textContent = 'Please log in to complete your order.';
+          orderError.innerHTML = '<strong>⚠️ Login Required</strong><br>Please log in to complete your order.';
           orderError.style.display = 'block';
-        } else {
-          showToast('Please log in to complete your order');
         }
+        showToast('Please log in to complete your order');
         setTimeout(() => window.location.href = '/login', 1500);
         return;
       }
       
-      // Check if user is verified
+      // 3. Check if user email is verified
       if (!user.isVerified) {
         if (orderError) {
-          orderError.textContent = '⚠️ Email Verification Required: Please verify your email address before completing your order. Check your inbox for the verification link or resend from your profile.';
+          orderError.innerHTML = '<strong>⚠️ Email Verification Required</strong><br>Please verify your email address before completing your order. Check your inbox for the verification link or resend from your profile.';
           orderError.style.display = 'block';
-        } else {
-          showToast('Please verify your email address before completing your order.');
         }
+        showToast('Please verify your email address before completing your order.');
         return;
       }
       
-      // Check delivery address
-      const addressEl = document.getElementById('deliveryAddress');
-      const hasAddress = addressEl && addressEl.textContent && addressEl.textContent.trim() !== '' && addressEl.textContent.indexOf('Please input your delivery address') === -1;
-      if (!hasAddress) {
-        if (orderError) {
-          orderError.textContent = '📍 Delivery Address Required: Please add your delivery address by clicking the "Change / Add" button above.';
-          orderError.style.display = 'block';
-        } else {
-          showToast('Please add your delivery address.');
-        }
-        return;
-      }
-      
-      // require bank selection
-      const bankNameText = (document.getElementById('bankSelected')?.textContent || '').replace('▾','').trim();
-      if (!bankNameText || bankNameText.toLowerCase() === 'select' || bankNameText.length === 0) {
-        if (orderError) {
-          orderError.textContent = '🏦 Bank Selection Required: Please select a payment method from the Bank Choice dropdown above.';
-          orderError.style.display = 'block';
-        } else {
-          showToast('Please select a bank from the Bank Choice dropdown.');
-        }
-        return;
-      }
-      
-      // require receipt before submitting
-      const receipt = uploadArea?.dataset?.receipt || null;
-      if (!receipt) {
-        if (orderError) {
-          orderError.textContent = '📷 Receipt Upload Required: Please upload your payment receipt by selecting a bank and uploading your receipt image.';
-          orderError.style.display = 'block';
-        } else {
-          showToast('Please upload your receipt before completing the order.');
-        }
-        return;
-      }
-      
-      // All validations passed - proceed with order creation
-      const items = bag.map(i => ({ productId: i.productId || null, name: i.name || i.label || 'Item', price: Number(i.price || i.basePrice || 0), quantity: Number(i.quantity || 1), image: i.image || '' }));
+      // 4. Check delivery address
       const deliveryCard = document.getElementById('deliveryCard');
-      const fullName = document.querySelector('.delivery-name')?.textContent || (user ? (user.firstName + ' ' + user.lastName) : '');
-      const phone = document.querySelector('.delivery-phone')?.textContent || (user && user.phone ? user.phone : '');
+      const addressEl = document.getElementById('deliveryAddress');
+      const addressText = addressEl?.textContent?.trim() || '';
+      const hasAddress = addressText !== '' && !addressText.includes('Please input your delivery address');
       
-      // Get address components from delivery card dataset or user profile
-      const province = deliveryCard?.dataset?.province || (user?.address?.province || '');
-      const city = deliveryCard?.dataset?.city || (user?.address?.city || '');
-      const barangay = deliveryCard?.dataset?.barangay || (user?.address?.barangay || '');
-      const postalCode = deliveryCard?.dataset?.postalCode || (user?.address?.postalCode || '');
-      const street = deliveryCard?.dataset?.street || (user?.address?.street || '');
-      const addressText = document.querySelector('.delivery-address')?.textContent || '';
+      if (!hasAddress) {
+        setFieldError(deliveryCard, 'Delivery address is required');
+        if (!firstErrorElement) firstErrorElement = deliveryCard;
+        hasErrors = true;
+      } else {
+        setFieldValid(deliveryCard);
+      }
       
-      const shippingAddress = {
-        fullName: fullName,
-        province: province,
-        city: city,
-        barangay: barangay,
-        postalCode: postalCode,
-        street: street,
-        address: addressText,
-        country: 'Philippines',
-        phone: phone
-      };
-      const payMethodRadio = document.querySelector('input[name="paymethod"]:checked');
-      const bankName = bankNameText;
-      const subtotal = Number(document.querySelector('.items-box')?.dataset.subtotal || items.reduce((s,it)=>s+it.price*it.quantity,0));
-      const total = subtotal;
-
-      const payload = { userId: user._id, items, shippingAddress, paymentInfo: { method: bankName + ' - ' + (payMethodRadio ? payMethodRadio.value : 'full'), status: 'pending', receipt: receipt || undefined }, subtotal, total };
-
-      try {
-        const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        if (res.ok) {
-          localStorage.removeItem('ec_bag');
-          window.location.href = '/profile?tab=orders';
-        } else {
-          const err = await res.json();
-          showToast(err.message || 'Failed to create order');
+      // 5. Check bank/payment method selection
+      const bankNameText = (document.getElementById('bankSelected')?.textContent || '').replace('▾','').trim();
+      const hasBank = bankNameText && bankNameText.toLowerCase() !== 'select' && bankNameText.length > 0;
+      
+      if (!hasBank) {
+        setFieldError(bankDropdown, 'Please select a payment method');
+        if (!firstErrorElement) firstErrorElement = bankDropdown;
+        hasErrors = true;
+      } else {
+        setFieldValid(bankDropdown);
+      }
+      
+      // 6. Check receipt upload
+      const receipt = uploadArea?.dataset?.receipt || null;
+      
+      if (!receipt) {
+        setFieldError(uploadArea, 'Payment receipt is required');
+        if (!firstErrorElement) firstErrorElement = uploadArea;
+        hasErrors = true;
+      } else {
+        setFieldValid(uploadArea);
+      }
+      
+      // If any validation errors, show summary and scroll to first error
+      if (hasErrors) {
+        if (orderError) {
+          const errorMessages = [];
+          if (!hasAddress) errorMessages.push('📍 Add your delivery address');
+          if (!hasBank) errorMessages.push('🏦 Select a payment method');
+          if (!receipt) errorMessages.push('📷 Upload your payment receipt');
+          
+          orderError.innerHTML = '<strong>Please complete the following:</strong><br>' + errorMessages.join('<br>');
+          orderError.style.display = 'block';
         }
-      } catch (err) { console.error(err); showToast('Network error'); }
+        
+        // Scroll to first error field
+        if (firstErrorElement) {
+          firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+      
+      // ========================================
+      // ALL VALIDATIONS PASSED - Submit Order
+      // ========================================
+      
+      // Disable button and show loading state
+      const originalBtnText = completeBtn.textContent;
+      completeBtn.disabled = true;
+      completeBtn.textContent = 'Processing...';
+      completeBtn.style.opacity = '0.7';
+      
+      try {
+        // Prepare order items
+        const items = bag.map(i => ({
+          productId: i.productId || null,
+          name: i.name || i.label || 'Item',
+          price: Number(i.price || i.basePrice || 0),
+          quantity: Number(i.quantity || 1),
+          image: i.image || ''
+        }));
+        
+        // Get address details
+        const fullName = document.querySelector('.delivery-name')?.textContent || `${user.firstName} ${user.lastName}`;
+        const phone = document.querySelector('.delivery-phone')?.textContent || user.phone || '';
+        const province = deliveryCard?.dataset?.province || user?.address?.province || '';
+        const city = deliveryCard?.dataset?.city || user?.address?.city || '';
+        const barangay = deliveryCard?.dataset?.barangay || user?.address?.barangay || '';
+        const postalCode = deliveryCard?.dataset?.postalCode || user?.address?.postalCode || '';
+        const street = deliveryCard?.dataset?.street || user?.address?.street || '';
+        
+        const shippingAddress = {
+          fullName,
+          province,
+          city,
+          barangay,
+          postalCode,
+          street,
+          address: addressText,
+          country: 'Philippines',
+          phone
+        };
+        
+        // Get payment info
+        const payMethodRadio = document.querySelector('input[name="paymethod"]:checked');
+        const paymentMethod = bankNameText + ' - ' + (payMethodRadio ? payMethodRadio.value : 'full');
+        const subtotal = Number(document.querySelector('.items-box')?.dataset.subtotal || items.reduce((s, it) => s + it.price * it.quantity, 0));
+        
+        const payload = {
+          userId: user._id,
+          items,
+          shippingAddress,
+          paymentInfo: {
+            method: paymentMethod,
+            status: 'pending',
+            receipt: receipt
+          },
+          subtotal,
+          total: subtotal
+        };
+        
+        // Submit order to backend
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data._id) {
+          // Order created successfully - verify it has an order number
+          const orderNumber = data.orderNumber || data._id;
+          
+          // Clear the bag from localStorage
+          localStorage.removeItem('ec_bag');
+          
+          // Clear the bag from database
+          try {
+            await fetch('/api/bag', {
+              method: 'DELETE',
+              credentials: 'include'
+            });
+          } catch (bagErr) {
+            console.error('Failed to clear bag from database:', bagErr);
+          }
+          
+          // Store order info for confirmation page
+          sessionStorage.setItem('ec_last_order', JSON.stringify({
+            orderId: data._id,
+            orderNumber: orderNumber,
+            total: data.total || subtotal,
+            createdAt: data.createdAt || new Date().toISOString()
+          }));
+          
+          // Redirect to order confirmation page
+          window.location.href = '/order-confirmation?order=' + orderNumber;
+        } else {
+          // Order creation failed
+          const errorMsg = data.message || 'Failed to create order. Please try again.';
+          if (orderError) {
+            orderError.innerHTML = `<strong>⚠️ Order Failed</strong><br>${errorMsg}`;
+            orderError.style.display = 'block';
+          }
+          showToast(errorMsg);
+          
+          // Re-enable button
+          completeBtn.disabled = false;
+          completeBtn.textContent = originalBtnText;
+          completeBtn.style.opacity = '1';
+        }
+      } catch (err) {
+        console.error('Order submission error:', err);
+        if (orderError) {
+          orderError.innerHTML = '<strong>⚠️ Network Error</strong><br>Could not connect to server. Please check your connection and try again.';
+          orderError.style.display = 'block';
+        }
+        showToast('Network error. Please try again.');
+        
+        // Re-enable button
+        completeBtn.disabled = false;
+        completeBtn.textContent = originalBtnText;
+        completeBtn.style.opacity = '1';
+      }
     });
   }
 

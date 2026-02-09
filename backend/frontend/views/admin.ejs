@@ -72,6 +72,7 @@
         <div class="admin-tabs">
             <button class="admin-tab active" data-tab="create">Create Blog</button>
             <button class="admin-tab" data-tab="manage">Manage Blogs</button>
+            <button class="admin-tab" data-tab="orders">Manage Orders</button>
         </div>
 
         <!-- Create Blog Tab -->
@@ -239,7 +240,46 @@
                 <div class="loading">Loading blogs...</div>
             </div>
         </div>
-    </div>    <script>
+
+        <!-- Manage Orders Tab -->
+        <div id="orders-tab" class="tab-content">
+            <h2>Manage Orders</h2>
+            <div id="orders-alert" class="alert"></div>
+            
+            <div class="orders-filter" style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <label style="font-weight: 600;">Filter by Status:</label>
+                <select id="orderStatusFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <option value="all">All Orders</option>
+                    <option value="pending" selected>Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <button type="button" class="btn btn-secondary" onclick="loadAdminOrders()" style="padding: 8px 16px;">Refresh</button>
+            </div>
+            
+            <div id="orders-list">
+                <div class="loading">Loading orders...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal-overlay" id="orderDetailModal" style="display: none;">
+        <div class="order-detail-modal" style="background: white; padding: 30px; border-radius: 12px; max-width: 800px; width: 95%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #620418;">Order Details</h3>
+                <button type="button" onclick="closeOrderModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+            <div id="orderDetailContent">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+    <script>
         // Insert formatting helper function
         function insertFormatting(type) {
             const textarea = document.getElementById('content');
@@ -840,6 +880,253 @@
         if (document.getElementById('manage-tab').classList.contains('active')) {
             loadBlogs();
         }
+
+        // =============================================
+        // ORDER MANAGEMENT FUNCTIONS
+        // =============================================
+        
+        let allOrders = [];
+        
+        async function loadAdminOrders() {
+            const ordersList = document.getElementById('orders-list');
+            const statusFilter = document.getElementById('orderStatusFilter').value;
+            
+            ordersList.innerHTML = '<div class="loading">Loading orders...</div>';
+            
+            try {
+                const response = await fetch('/api/admin/orders', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) throw new Error('Failed to load orders');
+                
+                allOrders = await response.json();
+                
+                // Filter orders
+                let filteredOrders = allOrders;
+                if (statusFilter !== 'all') {
+                    filteredOrders = allOrders.filter(o => o.status === statusFilter);
+                }
+                
+                if (filteredOrders.length === 0) {
+                    ordersList.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No orders found with this status.</p>';
+                    return;
+                }
+                
+                ordersList.innerHTML = filteredOrders.map(order => `
+                    <div class="order-card" style="background: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+                            <div>
+                                <h4 style="margin: 0 0 8px 0; color: #620418;">Order #${order.orderNumber}</h4>
+                                <p style="margin: 4px 0; font-size: 14px;"><strong>Customer:</strong> ${order.userId?.firstName || ''} ${order.userId?.lastName || ''}</p>
+                                <p style="margin: 4px 0; font-size: 14px;"><strong>Email:</strong> ${order.userId?.email || 'N/A'}</p>
+                                <p style="margin: 4px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+                                <p style="margin: 4px 0; font-size: 14px;"><strong>Total:</strong> ₱${(order.total || 0).toLocaleString()}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="status-badge status-${order.status}" style="display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; background: ${getStatusColor(order.status)}; color: white;">
+                                    ${order.status}
+                                </span>
+                                ${order.trackingNumber ? `<p style="margin: 8px 0 0 0; font-size: 13px;"><strong>Tracking:</strong> ${order.trackingNumber}</p>` : ''}
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" onclick="viewOrderDetails('${order._id}')" style="padding: 8px 16px; font-size: 13px;">View Details</button>
+                            ${order.status === 'pending' ? `
+                                <button class="btn btn-primary" onclick="confirmOrder('${order._id}')" style="padding: 8px 16px; font-size: 13px; background: #16a34a;">Confirm Payment</button>
+                                <button class="btn btn-danger" onclick="cancelOrder('${order._id}')" style="padding: 8px 16px; font-size: 13px; background: #dc2626;">Cancel</button>
+                            ` : ''}
+                            ${order.status === 'confirmed' ? `
+                                <button class="btn btn-primary" onclick="processOrder('${order._id}')" style="padding: 8px 16px; font-size: 13px;">Start Processing</button>
+                            ` : ''}
+                            ${order.status === 'processing' ? `
+                                <button class="btn btn-primary" onclick="showShipOrderModal('${order._id}')" style="padding: 8px 16px; font-size: 13px;">Ship Order</button>
+                            ` : ''}
+                            ${order.status === 'shipped' ? `
+                                <button class="btn btn-primary" onclick="markDelivered('${order._id}')" style="padding: 8px 16px; font-size: 13px;">Mark Delivered</button>
+                            ` : ''}
+                            ${order.status === 'delivered' ? `
+                                <button class="btn btn-primary" onclick="completeOrder('${order._id}')" style="padding: 8px 16px; font-size: 13px; background: #620418;">Complete Order</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                ordersList.innerHTML = '<p style="text-align: center; color: #dc2626; padding: 40px;">Failed to load orders. Please try again.</p>';
+            }
+        }
+        
+        function getStatusColor(status) {
+            const colors = {
+                'pending': '#f59e0b',
+                'confirmed': '#3b82f6',
+                'processing': '#8b5cf6',
+                'shipped': '#06b6d4',
+                'delivered': '#10b981',
+                'completed': '#16a34a',
+                'cancelled': '#ef4444'
+            };
+            return colors[status] || '#6b7280';
+        }
+        
+        async function viewOrderDetails(orderId) {
+            const modal = document.getElementById('orderDetailModal');
+            const content = document.getElementById('orderDetailContent');
+            
+            modal.style.display = 'flex';
+            content.innerHTML = '<p>Loading order details...</p>';
+            
+            try {
+                const response = await fetch(`/api/orders/${orderId}`, { credentials: 'include' });
+                if (!response.ok) throw new Error('Failed to load order');
+                
+                const order = await response.json();
+                
+                content.innerHTML = `
+                    <div class="order-detail-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="color: #620418; margin-bottom: 10px;">Order Information</h4>
+                            <p><strong>Order #:</strong> ${order.orderNumber}</p>
+                            <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+                            <p><strong>Status:</strong> <span style="color: ${getStatusColor(order.status)}; font-weight: 600;">${order.status.toUpperCase()}</span></p>
+                            <p><strong>Payment:</strong> ${order.paymentInfo?.method || 'N/A'}</p>
+                            ${order.trackingNumber ? `<p><strong>Tracking #:</strong> ${order.trackingNumber}</p>` : ''}
+                        </div>
+                        <div>
+                            <h4 style="color: #620418; margin-bottom: 10px;">Customer Details</h4>
+                            <p><strong>Name:</strong> ${order.userId?.firstName || ''} ${order.userId?.lastName || ''}</p>
+                            <p><strong>Email:</strong> ${order.userId?.email || 'N/A'}</p>
+                            <p><strong>Phone:</strong> ${order.shippingAddress?.phone || 'N/A'}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4 style="color: #620418; margin-bottom: 10px;">Shipping Address</h4>
+                        <p>${order.shippingAddress?.fullName || ''}</p>
+                        <p>${order.shippingAddress?.address || [order.shippingAddress?.street, order.shippingAddress?.barangay, order.shippingAddress?.city, order.shippingAddress?.province, order.shippingAddress?.postalCode].filter(Boolean).join(', ')}</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4 style="color: #620418; margin-bottom: 10px;">Items Ordered</h4>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f3f4f6;">
+                                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Item</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 1px solid #ddd;">Qty</th>
+                                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${order.items.map(item => `
+                                    <tr>
+                                        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
+                                        <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${item.quantity}</td>
+                                        <td style="padding: 10px; text-align: right; border-bottom: 1px solid #eee;">₱${(item.price * item.quantity).toLocaleString()}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                            <tfoot>
+                                <tr style="font-weight: 600;">
+                                    <td colspan="2" style="padding: 10px; text-align: right;">Total:</td>
+                                    <td style="padding: 10px; text-align: right; color: #620418;">₱${(order.total || 0).toLocaleString()}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    ${order.paymentInfo?.receipt ? `
+                        <div style="margin-top: 20px;">
+                            <h4 style="color: #620418; margin-bottom: 10px;">Payment Receipt</h4>
+                            <img src="${order.paymentInfo.receipt}" alt="Payment Receipt" style="max-width: 100%; max-height: 400px; border: 1px solid #ddd; border-radius: 8px;">
+                        </div>
+                    ` : ''}
+                `;
+                
+            } catch (error) {
+                console.error('Error loading order details:', error);
+                content.innerHTML = '<p style="color: #dc2626;">Failed to load order details.</p>';
+            }
+        }
+        
+        function closeOrderModal() {
+            document.getElementById('orderDetailModal').style.display = 'none';
+        }
+        
+        async function updateOrderStatus(orderId, newStatus, extraData = {}) {
+            try {
+                const payload = { status: newStatus, ...extraData };
+                
+                const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    showAlert('orders-alert', `Order status updated to ${newStatus}`, 'success');
+                    loadAdminOrders();
+                    closeOrderModal();
+                } else {
+                    const err = await response.json();
+                    showAlert('orders-alert', err.message || 'Failed to update order', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating order:', error);
+                showAlert('orders-alert', 'Network error. Please try again.', 'error');
+            }
+        }
+        
+        function confirmOrder(orderId) {
+            if (confirm('Confirm that payment receipt is valid?')) {
+                updateOrderStatus(orderId, 'confirmed');
+            }
+        }
+        
+        function processOrder(orderId) {
+            updateOrderStatus(orderId, 'processing');
+        }
+        
+        function showShipOrderModal(orderId) {
+            const trackingNumber = prompt('Enter LBC tracking number:');
+            if (trackingNumber && trackingNumber.trim()) {
+                updateOrderStatus(orderId, 'shipped', { trackingNumber: trackingNumber.trim() });
+            }
+        }
+        
+        function markDelivered(orderId) {
+            if (confirm('Mark this order as delivered?')) {
+                updateOrderStatus(orderId, 'delivered');
+            }
+        }
+        
+        function completeOrder(orderId) {
+            if (confirm('Complete this order? This will send a notification to the customer.')) {
+                updateOrderStatus(orderId, 'completed');
+            }
+        }
+        
+        function cancelOrder(orderId) {
+            const reason = prompt('Reason for cancellation (optional):');
+            if (confirm('Are you sure you want to cancel this order?')) {
+                updateOrderStatus(orderId, 'cancelled', { adminNotes: reason || 'Cancelled by admin' });
+            }
+        }
+        
+        // Filter change listener
+        document.getElementById('orderStatusFilter')?.addEventListener('change', loadAdminOrders);
+        
+        // Load orders when orders tab is clicked
+        document.querySelectorAll('.admin-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                if (this.dataset.tab === 'orders') {
+                    loadAdminOrders();
+                }
+            });
+        });
+
     </script>
     <script src="/js/script.js"></script>
 </body>

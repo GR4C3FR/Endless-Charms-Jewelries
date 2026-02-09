@@ -533,9 +533,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if user is verified
     const isVerified = user && user.isVerified === true;
     
-    // Debug logging
-    console.log('Button State Check:', { hasReceipt, hasAddress, hasBank, isVerified, user: user ? user.email : 'none' });
-    
     // Button is enabled only if ALL conditions are met - but keep it clickable for validation display
     const allConditionsMet = hasReceipt && hasAddress && hasBank && isVerified;
     
@@ -558,9 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCompleteButtonState();
   // Complete order: assemble payload, send POST, redirect to confirmation page
   if (completeBtn) {
-    console.log('Complete button found, adding click listener');
     completeBtn.addEventListener('click', async (ev) => {
-      console.log('Complete Order button clicked!');
       ev.preventDefault();
       
       const bag = getBag();
@@ -726,8 +721,6 @@ document.addEventListener('DOMContentLoaded', () => {
           total: subtotal
         };
         
-        console.log('Submitting order payload:', { ...payload, paymentInfo: { ...payload.paymentInfo, receipt: '(base64 image)' } });
-        
         // Submit order to backend
         const response = await fetch('/api/orders', {
           method: 'POST',
@@ -736,9 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify(payload)
         });
         
-        console.log('Order API response status:', response.status);
         const data = await response.json();
-        console.log('Order API response data:', data);
         
         if (response.ok && data._id) {
           // Order created successfully - verify it has an order number
