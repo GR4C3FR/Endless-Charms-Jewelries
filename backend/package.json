@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Endless Charms jewelry e-commerce website with Node.js",
   "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "node --env-file=.env server.js",
     "dev": "nodemon --env-file=.env server.js",

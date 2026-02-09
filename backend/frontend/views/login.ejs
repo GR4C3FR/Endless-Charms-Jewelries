@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/images/logo.png" type="image/png">
+    <title>Log In - Endless Charms</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <main class="profile-main">
+    <div class="profile-container">
+      <!-- Left: Hero Image -->
+      <div class="profile-hero">
+        <img src="/images/profile-hero-image.png" alt="Profile Hero">
+      </div>
+      <!-- Right: Profile Card -->
+      <div class="profile-card">
+        <div class="profile-avatar">
+          <img src="/images/logo.png" alt="Endless Charms Logo">
+        </div>
+        <h2>Welcome!</h2>
+        <p>Please enter your details.</p>
+        <form class="profile-form">
+          <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email">
+          </div>
+          <div style="position: relative;">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter password" style="padding-right: 40px;">
+            <button type="button" id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); margin-top: 12px; background: none; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center;" aria-label="Toggle password visibility">
+              <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <div class="login-options-row">
+            <label class="remember-me-label">
+              <input type="checkbox" name="remember"> Remember me
+            </label>
+            <a href="#" class="forgot-password-link">Forgot password?</a>
+          </div>
+          <p class="signup-prompt">Don't have an account yet? <a href="/signup">Sign Up</a></p>
+          <button type="submit">Log In</button>
+        </form>
+        <div class="or-divider">
+          <span class="or-divider-line"></span>
+          <span>or</span>
+          <span class="or-divider-line"></span>
+        </div>
+        <button class="google-btn">
+          <img class="google-icon" src="/images/google_logo.png" alt="Google"> Log in with Google
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.type === 'password' ? 'text' : 'password';
+      passwordInput.type = type;
+      
+      // Toggle eye icon
+      if (type === 'text') {
+        eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+      } else {
+        eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+      }
+    });
+
+    // Google Sign In
+    document.querySelector('.google-btn').addEventListener('click', () => {
+      window.location.href = '/api/auth/google';
+    });
+
+    document.querySelector('.profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Set localStorage flag for client-side checks
+          localStorage.setItem('ec_user_logged_in', 'true');
+          localStorage.setItem('ec_user_email', data.user.email);
+          localStorage.setItem('ec_user_name', `${data.user.firstName} ${data.user.lastName}`);
+          
+          // Set flag to skip session verification on next page load
+          sessionStorage.setItem('ec_just_logged_in', 'true');
+          
+          // Load bag from database after login
+          try {
+            const bagResponse = await fetch('/api/bag', { credentials: 'include' });
+            if (bagResponse.ok) {
+              const bagData = await bagResponse.json();
+              if (bagData.success && Array.isArray(bagData.bag)) {
+                localStorage.setItem('ec_bag', JSON.stringify(bagData.bag));
+              }
+            }
+          } catch (error) {
+            console.error('Error loading bag:', error);
+          }
+          
+          // Redirect to home page
+          window.location.href = '/';
+        } else {
+          alert(data.message || 'Login failed');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('An error occurred during login');
+      }
+    });
+  </script>
+</body>
+</html>

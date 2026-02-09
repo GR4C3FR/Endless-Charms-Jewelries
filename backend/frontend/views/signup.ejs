@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/images/logo.png" type="image/png">
+    <title>Profile - Endless Charms</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Verification Modal -->
+  <div class="verification-modal-overlay" id="verificationModal">
+    <div class="verification-modal">
+      <div class="verification-modal-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#8B4513" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      <h2>Verify Your Email</h2>
+      <p class="verification-message">
+        We've sent a verification link to your email address. 
+        Please check your inbox and click the link to verify your account.
+
+      </p>
+      <p class="verification-email" id="verificationEmail"></p>
+      <p class="verification-note">
+        <strong>Note:</strong> The verification link will expire in 24 hours. 
+        If you don't see the email, please check your spam folder.
+        You may ask to resend the verification email in the future.
+      </p>
+      <button class="verification-btn" id="closeVerificationModal">Got it!</button>
+    </div>
+  </div>
+
+  <main class="profile-main">
+    <div class="profile-container">
+      <!-- Left: Hero Image -->
+      <div class="profile-hero">
+        <img src="/images/profile-hero-image.png" alt="Profile Hero">
+      </div>
+      <!-- Right: Profile Card -->
+      <div class="profile-card">
+        <div class="profile-avatar">
+          <img src="/images/logo.png" alt="Endless Charms Logo">
+        </div>
+        <h2>Welcome!</h2>
+        <p>Please enter your details.</p>
+        <form class="profile-form">
+          <div>
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" placeholder="Enter your first name">
+          </div>
+          <div>
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Enter your last name">
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email">
+          </div>
+          <div style="position: relative;">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter password" style="padding-right: 40px;">
+            <button type="button" id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); margin-top: 12px; background: none; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center;" aria-label="Toggle password visibility">
+              <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <p class="signup-prompt">Already have an account? <a href="/login">Log In</a></p>
+          <button type="submit">Sign Up</button>
+        </form>
+        <div class="or-divider">
+          <span class="or-divider-line"></span>
+          <span>or</span>
+          <span class="or-divider-line"></span>
+        </div>
+        <button class="google-btn">
+          <img class="google-icon" src="/images/google_logo.png" alt="Google"> Sign up with Google
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.type === 'password' ? 'text' : 'password';
+      passwordInput.type = type;
+      
+      // Toggle eye icon
+      if (type === 'text') {
+        eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+      } else {
+        eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+      }
+    });
+
+    // Google Sign Up
+    document.querySelector('.google-btn').addEventListener('click', () => {
+      window.location.href = '/api/auth/google';
+    });
+
+    document.querySelector('.profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const firstName = document.getElementById('firstName').value;
+      const lastName = document.getElementById('lastName').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      // Basic validation
+      if (!firstName || !lastName || !email || !password) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        alert('Please enter a valid email address');
+        return;
+      }
+
+      if (password.length < 8) {
+        alert('Password must be at least 8 characters long');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ firstName, lastName, email, password })
+        });        const data = await response.json();
+
+        if (data.success) {
+          // Check if this is a new user registration that requires verification
+          if (data.requiresVerification) {
+            // Show verification modal
+            const modal = document.getElementById('verificationModal');
+            const emailDisplay = document.getElementById('verificationEmail');
+            const messageElement = modal.querySelector('.verification-message');
+            
+            emailDisplay.textContent = email;
+            
+            // Update message based on whether it's an existing user
+            if (data.isExistingUser) {
+              messageElement.textContent = 'An account with this email already exists but is not verified. We\'ve sent a new verification link to your email address. Please check your inbox and click the link to verify your account.';
+            } else {
+              messageElement.textContent = 'We\'ve sent a verification link to your email address. Please check your inbox and click the link to verify your account.';
+            }
+            
+            modal.classList.add('active');
+            
+            // Don't redirect yet - let user close the modal
+            // Modal close button will handle redirect
+          } else {
+            // If somehow verification is not required, proceed normally
+            localStorage.setItem('ec_user_logged_in', 'true');
+            localStorage.setItem('ec_user_email', data.user.email);
+            localStorage.setItem('ec_user_name', `${data.user.firstName} ${data.user.lastName}`);
+            
+            // Load bag from database after signup
+            try {
+              const bagResponse = await fetch('/api/bag');
+              if (bagResponse.ok) {
+                const bagData = await bagResponse.json();
+                if (bagData.success && Array.isArray(bagData.bag)) {
+                  localStorage.setItem('ec_bag', JSON.stringify(bagData.bag));
+                }
+              }
+            } catch (error) {
+              console.error('Error loading bag:', error);
+            }
+            
+            // Redirect to home page
+            window.location.href = '/';
+          }
+        } else {
+          alert(data.message || 'Signup failed');
+        }
+      } catch (error) {
+        console.error('Signup error:', error);
+        alert('An error occurred during signup');
+      }
+    });
+
+    // Handle verification modal close button
+    document.getElementById('closeVerificationModal').addEventListener('click', () => {
+      const modal = document.getElementById('verificationModal');
+      modal.classList.remove('active');
+      
+      // Set localStorage after user acknowledges the verification email
+      const email = document.getElementById('email').value;
+      const firstName = document.getElementById('firstName').value;
+      const lastName = document.getElementById('lastName').value;
+      
+      localStorage.setItem('ec_user_logged_in', 'true');
+      localStorage.setItem('ec_user_email', email);
+      localStorage.setItem('ec_user_name', `${firstName} ${lastName}`);
+      
+      // Redirect to home page
+      window.location.href = '/';
+    });
+  </script>
+</body>
+</html>
