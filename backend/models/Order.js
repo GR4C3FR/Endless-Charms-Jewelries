@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
   productId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    type: String,
     required: false
   },
   name: {
@@ -98,16 +97,26 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+    enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'],
     default: 'pending'
   },
-  trackingNumber: String
+  trackingNumber: String,
+  trackingCarrier: {
+    type: String,
+    default: 'LBC'
+  },
+  adminNotes: String,
+  statusHistory: [{
+    status: String,
+    changedAt: { type: Date, default: Date.now },
+    changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    notes: String
+  }]
 }, {
   timestamps: true
 });
 
 // Index for faster queries
 orderSchema.index({ userId: 1, createdAt: -1 });
-orderSchema.index({ orderNumber: 1 });
 
 module.exports = mongoose.model('Order', orderSchema);

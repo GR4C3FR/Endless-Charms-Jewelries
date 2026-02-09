@@ -607,6 +607,11 @@ app.get('/verify-email', (req, res) => {
   res.render('verify-email');
 });
 
+// Password reset page
+app.get('/reset-password', (req, res) => {
+  res.render('reset-password');
+});
+
 // Admin page - requires authentication
 app.get('/admin', (req, res) => {
   // Check if user is authenticated and is admin
@@ -644,6 +649,7 @@ app.get('/signin', (req, res) => {
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack);
   res.status(500).json({ 
+    success: false,
     error: 'Internal Server Error',
     message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
   });

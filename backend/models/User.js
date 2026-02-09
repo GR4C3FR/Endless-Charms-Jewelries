@@ -135,13 +135,19 @@ const userSchema = new mongoose.Schema({
   verificationTokenExpires: {
     type: Date,
     select: false // Don't include in queries by default
+  },
+  // Password reset fields
+  resetPasswordToken: {
+    type: String,
+    select: false
+  },
+  resetPasswordExpires: {
+    type: Date,
+    select: false
   }
 }, {
   timestamps: true
 });
-
-// Index for faster queries
-userSchema.index({ email: 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function() {

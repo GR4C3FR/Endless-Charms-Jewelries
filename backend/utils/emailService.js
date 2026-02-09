@@ -227,8 +227,92 @@ Crafting Memories, One Charm at a Time
  * Send password reset email (for future implementation)
  */
 const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
-  // TODO: Implement password reset email
-  console.log('Password reset email functionality - to be implemented');
+  try {
+    const transporter = createTransporter();
+    
+    const baseUrl = process.env.BASE_URL || 'https://endlesscharms.store';
+    const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
+    
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Your Password - Endless Charms</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+    .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #620418 0%, #8a0621 100%); padding: 30px; text-align: center; }
+    .header h1 { margin: 0; color: #ffffff; font-size: 28px; }
+    .content { padding: 40px 30px; }
+    .content h2 { color: #620418; margin-top: 0; }
+    .content p { margin: 15px 0; font-size: 16px; }
+    .reset-button { display: inline-block; margin: 30px 0; padding: 15px 40px; background-color: #620418; color: #ffffff !important; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; }
+    .reset-button:hover { background-color: #8a0621; }
+    .button-container { text-align: center; }
+    .footer { background-color: #f8f8f8; padding: 20px 30px; text-align: center; font-size: 14px; color: #666; }
+    .warning-box { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>🔐 Endless Charms</h1>
+    </div>
+    <div class="content">
+      <h2>Password Reset Request</h2>
+      <p>Hello ${userName},</p>
+      <p>We received a request to reset your password for your Endless Charms account. Click the button below to create a new password:</p>
+      <div class="button-container">
+        <a href="${resetLink}" class="reset-button">Reset Password</a>
+      </div>
+      <div class="warning-box">
+        <strong>⏰ Important:</strong> This link will expire in 1 hour for security reasons.
+      </div>
+      <p style="font-size: 14px; color: #666;">If you didn't request a password reset, please ignore this email. Your password will remain unchanged.</p>
+      <p style="font-size: 14px; color: #666; word-break: break-all;">If the button doesn't work, copy this link: ${resetLink}</p>
+    </div>
+    <div class="footer">
+      <p><strong>Endless Charms</strong></p>
+      <p>© ${new Date().getFullYear()} Endless Charms. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+    
+    const textContent = `
+Password Reset Request - Endless Charms
+
+Hello ${userName},
+
+We received a request to reset your password. Visit this link to create a new password:
+${resetLink}
+
+This link will expire in 1 hour.
+
+If you didn't request this, please ignore this email.
+
+---
+Endless Charms
+    `;
+    
+    const mailOptions = {
+      from: { name: 'Endless Charms', address: process.env.EMAIL_USER || 'endlesscharmsofficial@gmail.com' },
+      to: userEmail,
+      subject: 'Reset Your Password - Endless Charms',
+      text: textContent,
+      html: htmlContent
+    };
+    
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Password reset email sent:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Error sending password reset email:', error);
+    throw error;
+  }
 };
 
 /**
@@ -327,9 +411,139 @@ This message was sent from the Endless Charms contact form.
   }
 };
 
+/**
+ * Send order status update email
+ * @param {string} userEmail - Recipient email address
+ * @param {string} userName - User's first name
+ * @param {string} orderNumber - Order number
+ * @param {string} status - New order status
+ * @param {string} message - Status message
+ * @param {string} trackingNumber - Optional tracking number
+ */
+const sendOrderStatusEmail = async (userEmail, userName, orderNumber, status, message, trackingNumber = null) => {
+  try {
+    const transporter = createTransporter();
+    
+    const statusColors = {
+      'confirmed': '#3b82f6',
+      'processing': '#8b5cf6',
+      'shipped': '#06b6d4',
+      'delivered': '#10b981',
+      'completed': '#16a34a',
+      'cancelled': '#ef4444'
+    };
+    
+    const statusColor = statusColors[status] || '#d4af37';
+    
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Update - Endless Charms</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+    .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #d4af37 0%, #f4e5c3 100%); padding: 30px; text-align: center; }
+    .header h1 { margin: 0; color: #ffffff; font-size: 28px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+    .content { padding: 40px 30px; }
+    .status-badge { display: inline-block; padding: 10px 20px; background-color: ${statusColor}; color: white; border-radius: 25px; font-weight: bold; text-transform: uppercase; margin: 15px 0; }
+    .order-number { background: #f8f8f8; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0; }
+    .tracking-info { background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7; }
+    .footer { background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>✨ Endless Charms ✨</h1>
+    </div>
+    <div class="content">
+      <h2 style="color: #d4af37;">Order Update</h2>
+      <p>Hi ${userName || 'Valued Customer'},</p>
+      
+      <div class="order-number">
+        <strong>Order #${orderNumber}</strong>
+      </div>
+      
+      <p><strong>Status:</strong> <span class="status-badge">${status.toUpperCase()}</span></p>
+      
+      <p>${message}</p>
+      
+      ${trackingNumber ? `
+        <div class="tracking-info">
+          <strong>📦 Tracking Information</strong>
+          <p style="margin: 10px 0;"><strong>Carrier:</strong> LBC Express</p>
+          <p style="margin: 10px 0;"><strong>Tracking Number:</strong> ${trackingNumber}</p>
+          <p style="margin: 10px 0;"><a href="https://www.lbcexpress.com/tracking?TrackingNo=${trackingNumber}" target="_blank" style="color: #0284c7;">Track Your Package →</a></p>
+        </div>
+      ` : ''}
+      
+      <p>If you have any questions about your order, feel free to contact us:</p>
+      <ul>
+        <li>Email: endlesscharmsofficial@gmail.com</li>
+        <li>Phone: +63 916 430 5638</li>
+        <li>Facebook: @endlesscharmsph</li>
+      </ul>
+      
+      <p>Thank you for choosing Endless Charms! 💍</p>
+    </div>
+    <div class="footer">
+      <p>© ${new Date().getFullYear()} Endless Charms. All rights reserved.</p>
+      <p>This is an automated message. Please do not reply directly to this email.</p>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+    
+    const textContent = `
+Order Update - Endless Charms
+
+Hi ${userName || 'Valued Customer'},
+
+Your order #${orderNumber} has been updated.
+
+Status: ${status.toUpperCase()}
+
+${message}
+
+${trackingNumber ? `Tracking Number: ${trackingNumber}
+Track your package: https://www.lbcexpress.com/tracking?TrackingNo=${trackingNumber}` : ''}
+
+If you have any questions, contact us:
+- Email: endlesscharmsofficial@gmail.com
+- Phone: +63 916 430 5638
+
+Thank you for choosing Endless Charms!
+    `;
+    
+    const mailOptions = {
+      from: {
+        name: 'Endless Charms',
+        address: process.env.EMAIL_USER || 'endlesscharmsofficial@gmail.com'
+      },
+      to: userEmail,
+      subject: `Order Update: #${orderNumber} - ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+      text: textContent,
+      html: htmlContent
+    };
+    
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Order status email sent:', info.messageId);
+    return { success: true, messageId: info.messageId };
+    
+  } catch (error) {
+    console.error('❌ Error sending order status email:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendOrderConfirmationEmail,
-  sendContactFormEmail
+  sendContactFormEmail,
+  sendOrderStatusEmail
 };

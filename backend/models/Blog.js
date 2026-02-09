@@ -50,7 +50,6 @@ const blogSchema = new mongoose.Schema({
 });
 
 // Index for faster queries
-blogSchema.index({ slug: 1 });
 blogSchema.index({ published: 1, publishedAt: -1 });
 
 module.exports = mongoose.model('Blog', blogSchema);

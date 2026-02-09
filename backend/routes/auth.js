@@ -542,4 +542,133 @@ router.post('/resend-verification', async (req, res) => {
   }
 });
 
+// POST /api/auth/forgot-password - Request password reset
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your email address'
+      });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email: email.toLowerCase() });
+    
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return res.json({
+        success: true,
+        message: 'If an account with that email exists, a password reset link has been sent.'
+      });
+    }
+
+    // Check if user signed up with Google (no password)
+    if (user.googleId && !user.password) {
+      return res.json({
+        success: true,
+        message: 'If an account with that email exists, a password reset link has been sent.'
+      });
+    }
+
+    // Generate reset token
+    const resetToken = generateVerificationToken();
+    const hashedToken = await hashToken(resetToken);
+
+    // Set reset token and expiration (1 hour)
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000);
+    await user.save();
+
+    // Send password reset email
+    const { sendPasswordResetEmail } = require('../utils/emailService');
+    await sendPasswordResetEmail(user.email, user.firstName, resetToken);
+    console.log(`📧 Password reset email sent to: ${user.email}`);
+
+    res.json({
+      success: true,
+      message: 'If an account with that email exists, a password reset link has been sent.'
+    });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error processing password reset request'
+    });
+  }
+});
+
+// POST /api/auth/reset-password - Reset password with token
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token and new password are required'
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long'
+      });
+    }
+
+    // Find users with unexpired reset tokens
+    const users = await User.find({
+      resetPasswordExpires: { $gt: new Date() }
+    }).select('+resetPasswordToken +resetPasswordExpires');
+
+    if (!users || users.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    // Find the user whose token matches
+    let matchedUser = null;
+    for (const user of users) {
+      const isMatch = await compareToken(token, user.resetPasswordToken);
+      if (isMatch) {
+        matchedUser = user;
+        break;
+      }
+    }
+
+    if (!matchedUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    // Update password and clear reset token
+    matchedUser.password = password;
+    matchedUser.resetPasswordToken = undefined;
+    matchedUser.resetPasswordExpires = undefined;
+    await matchedUser.save();
+
+    console.log(`✅ Password reset successful for: ${matchedUser.email}`);
+
+    res.json({
+      success: true,
+      message: 'Password has been reset successfully. You can now log in with your new password.'
+    });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error resetting password'
+    });
+  }
+});
+
 module.exports = router;

@@ -97,6 +97,155 @@ if (!document.querySelector('style[data-toast-animations]')) {
   document.head.appendChild(style);
 }
 
+// ========================================
+// SCROLL-TRIGGERED ANIMATIONS (Intersection Observer)
+// ========================================
+
+// Check if current page should have animations disabled
+function shouldDisableAnimations() {
+  const path = window.location.pathname;
+  // Excluded pages: shop pages, blog articles, login/signup, checkout, confirmation, profile
+  const excludedPages = [
+    '/bag', '/profile', '/signup', '/login', '/checkout', '/order-confirmation',
+    '/accessories', '/wedding-bands', '/engagement-rings', // Shop pages
+    '/blog/' // Blog article pages (detail pages start with /blog/)
+  ];
+  // Check exact matches and prefix matches
+  return excludedPages.some(page => {
+    if (page.endsWith('/')) {
+      return path.startsWith(page); // For /blog/ - matches /blog/any-article
+    }
+    return path === page || path.startsWith(page + '/');
+  });
+}
+
+// Add page-specific body classes for CSS animation exclusions
+function addPageBodyClasses() {
+  const path = window.location.pathname;
+  if (path === '/bag' || path.startsWith('/bag')) document.body.classList.add('page-bag');
+  if (path === '/profile' || path.startsWith('/profile')) document.body.classList.add('page-profile');
+  if (path === '/signup') document.body.classList.add('page-signup');
+  if (path === '/login') document.body.classList.add('page-login');
+  if (path === '/checkout') document.body.classList.add('page-checkout');
+  if (path === '/order-confirmation' || path.startsWith('/order-confirmation')) document.body.classList.add('page-order-confirmation');
+  // Shop pages
+  if (path === '/accessories' || path === '/wedding-bands' || path === '/engagement-rings') {
+    document.body.classList.add('page-shop');
+  }
+  // Blog detail pages (individual articles)
+  if (path.startsWith('/blog/')) document.body.classList.add('page-blog-detail');
+}
+
+// Initialize scroll animations on home page
+function initScrollAnimations() {
+  // Skip on excluded pages
+  if (shouldDisableAnimations()) {
+    document.body.classList.add('no-scroll-animations');
+    return;
+  }
+  
+  // Apply animations to all allowed pages (not just home)
+  // Generic elements that can be animated across pages
+  const sections = document.querySelectorAll('section:not(.hero-section):not(.blogs-hero):not(.contact-hero)');
+  const sectionTitles = document.querySelectorAll('.section-title, h2.section-title');
+  const cards = document.querySelectorAll('.feature-card, .ring-style-card, .blog-card, .contact-card, .about-card');
+  const contentBlocks = document.querySelectorAll('.content-block, .story-section, .engagement-section, .why-choose, .reviews-section');
+  
+  // Page-specific elements on home page
+  const engagementSection = document.querySelector('.engagement-section');
+  const storySection = document.querySelector('.story-section');
+  const ringStyleCards = document.querySelectorAll('.ring-style-card');
+  const whyChooseSection = document.querySelector('.why-choose');
+  const featureCards = document.querySelectorAll('.features-grid .feature-card');
+  const reviewsSection = document.querySelector('.reviews-section');
+  
+  // Home page specific animations
+  if (engagementSection) {
+    engagementSection.classList.add('scroll-animate', 'fade-up');
+  }
+  
+  if (storySection) {
+    storySection.classList.add('scroll-animate', 'fade-up');
+  }
+  
+  ringStyleCards.forEach((card, index) => {
+    card.classList.add('scroll-animate', 'fade-up', `delay-${(index % 4) + 1}`);
+  });
+  
+  if (whyChooseSection) {
+    const whyChooseTitle = whyChooseSection.querySelector('h2');
+    if (whyChooseTitle) {
+      whyChooseTitle.classList.add('scroll-animate', 'fade-up');
+    }
+  }
+  
+  featureCards.forEach((card, index) => {
+    card.classList.add('scroll-animate', 'fade-up', `delay-${(index % 3) + 1}`);
+  });
+  
+  if (reviewsSection) {
+    const reviewsTitle = reviewsSection.querySelector('h2');
+    if (reviewsTitle) {
+      reviewsTitle.classList.add('scroll-animate', 'fade-up');
+    }
+  }
+  
+  // Blogs listing page animations
+  const blogCards = document.querySelectorAll('.blog-card');
+  blogCards.forEach((card, index) => {
+    if (!card.classList.contains('scroll-animate')) {
+      card.classList.add('scroll-animate', 'fade-up', `delay-${(index % 4) + 1}`);
+    }
+  });
+  
+  // About page animations
+  const aboutSections = document.querySelectorAll('.about-section, .team-section, .mission-section');
+  aboutSections.forEach((section) => {
+    if (!section.classList.contains('scroll-animate')) {
+      section.classList.add('scroll-animate', 'fade-up');
+    }
+  });
+  
+  // Contact page animations
+  const contactForm = document.querySelector('.contact-form');
+  const contactInfo = document.querySelector('.contact-info');
+  if (contactForm && !contactForm.classList.contains('scroll-animate')) {
+    contactForm.classList.add('scroll-animate', 'fade-up');
+  }
+  if (contactInfo && !contactInfo.classList.contains('scroll-animate')) {
+    contactInfo.classList.add('scroll-animate', 'fade-up', 'delay-1');
+  }
+  
+  // Create Intersection Observer
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.15
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-in');
+      } else {
+        // Re-trigger animation when scrolling back up
+        entry.target.classList.remove('animate-in');
+      }
+    });
+  }, observerOptions);
+  
+  // Observe all animated elements
+  document.querySelectorAll('.scroll-animate').forEach(el => {
+    observer.observe(el);
+  });
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  addPageBodyClasses();
+  initScrollAnimations();
+});
+
 // Review carousel functionality - completely rewritten for infinite loop
 let carouselCurrentIndex = 0;
 
@@ -123,7 +272,7 @@ function scrollCarousel(direction) {
   const visibleCards = Math.floor(viewportWidth / slideWidth);
   
   // Maximum positions we can scroll to
-  const maxPosition = totalCards - visibleCards;
+  const maxPosition = Math.max(0, totalCards - visibleCards);
   
   // Update index based on direction
   // direction: 1 = prev (left arrow), -1 = next (right arrow)
@@ -146,19 +295,51 @@ function scrollCarousel(direction) {
   // Calculate the translateX value
   const translateValue = -(carouselCurrentIndex * slideWidth);
   
-  // Apply transform with smooth transition
-  carouselContent.style.transition = 'transform 0.5s ease-in-out';
+  // Apply transform with faster, smoother transition
+  carouselContent.style.transition = 'transform 0.35s ease-out';
   carouselContent.style.transform = `translateX(${translateValue}px)`;
   
-  console.log('Carousel Debug:', {
-    direction,
-    currentIndex: carouselCurrentIndex,
-    maxPosition,
-    totalCards,
-    visibleCards,
-    translateValue
+  // Update carousel dots if they exist
+  updateCarouselDots();
+}
+
+// Update carousel dots to reflect current position
+function updateCarouselDots() {
+  const dots = document.querySelectorAll('.carousel-dots .carousel-dot');
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('active', i === carouselCurrentIndex);
   });
 }
+
+// Initialize reviews carousel with swipe support (no dots)
+function initReviewsCarousel() {
+  const container = document.querySelector('.carousel-container');
+  const carouselContent = document.getElementById('carouselContent');
+  if (!container || !carouselContent) return;
+  
+  const allCards = carouselContent.children;
+  if (allCards.length === 0) return;
+  
+  // Remove any existing dots
+  const existingDots = container.querySelector('.carousel-dots');
+  if (existingDots) existingDots.remove();
+  
+  // Add touch/swipe support
+  let touchStartX = 0;
+  container.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  
+  container.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 50) {
+      scrollCarousel(diff > 0 ? -1 : 1);
+    }
+  }, { passive: true });
+}
+
+// Initialize carousel on load
+document.addEventListener('DOMContentLoaded', initReviewsCarousel);
 
 function openImageModal(imagePath) {
   const modal = document.getElementById('imageModal');

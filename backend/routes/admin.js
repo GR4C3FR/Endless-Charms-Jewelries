@@ -307,4 +307,100 @@ router.use((error, req, res, next) => {
   next();
 });
 
+// =============================================
+// ORDER MANAGEMENT ROUTES
+// =============================================
+const Order = require('../models/Order');
+const User = require('../models/User');
+const { sendOrderStatusEmail } = require('../utils/emailService');
+
+// GET all orders for admin
+router.get('/orders', isAdmin, async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate('userId', 'firstName lastName email phone')
+      .sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// PUT update order status
+router.put('/orders/:id/status', isAdmin, async (req, res) => {
+  try {
+    const { status, trackingNumber, adminNotes } = req.body;
+    const orderId = req.params.id;
+    
+    const order = await Order.findById(orderId).populate('userId', 'firstName lastName email');
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    const oldStatus = order.status;
+    
+    // Update order fields
+    order.status = status;
+    if (trackingNumber) {
+      order.trackingNumber = trackingNumber;
+    }
+    if (adminNotes) {
+      order.adminNotes = adminNotes;
+    }
+    
+    // Add to status history
+    order.statusHistory = order.statusHistory || [];
+    order.statusHistory.push({
+      status: status,
+      changedAt: new Date(),
+      notes: adminNotes || `Status changed from ${oldStatus} to ${status}`
+    });
+    
+    // Update payment status if order is confirmed
+    if (status === 'confirmed' && order.paymentInfo) {
+      order.paymentInfo.status = 'completed';
+    }
+    
+    await order.save();
+    
+    // Send email notification for certain status changes
+    if (order.userId && order.userId.email) {
+      const statusMessages = {
+        'confirmed': 'Your payment has been verified! Your order is now being prepared.',
+        'processing': 'Your order is now being prepared.',
+        'shipped': `Your order has been shipped! Tracking number: ${trackingNumber || 'N/A'}. You can track your package via LBC.`,
+        'delivered': 'Your order has been delivered! Thank you for shopping with us.',
+        'completed': 'Your order is complete! Thank you for choosing Endless Charms. We hope you love your purchase!',
+        'cancelled': 'Your order has been cancelled. If you have any questions, please contact us.'
+      };
+      
+      if (statusMessages[status]) {
+        try {
+          await sendOrderStatusEmail(
+            order.userId.email,
+            order.userId.firstName,
+            order.orderNumber,
+            status,
+            statusMessages[status],
+            trackingNumber
+          );
+        } catch (emailError) {
+          console.error('Failed to send order status email:', emailError);
+          // Don't fail the request if email fails
+        }
+      }
+    }
+    
+    res.json({ 
+      message: `Order status updated to ${status}`,
+      order: order 
+    });
+    
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

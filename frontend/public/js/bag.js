@@ -84,49 +84,69 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Check if bag is empty
       if (!bag || bag.length === 0) {
-        showBagError('Your bag is empty. Add items before checking out.');
+        showBagError('🛒 Your bag is empty. Add items before checking out.');
         return;
       }
       
       // Check if user is logged in
       if (!user || !user._id) {
-        showBagError('Please log in to proceed to checkout.');
+        showBagError('🔐 Please log in to proceed to checkout.');
         setTimeout(() => {
           window.location.href = '/login';
         }, 1500);
         return;
       }
       
+      // Collect all missing requirements
+      const missingItems = [];
+      
       // Check if user email is verified
       if (!user.isVerified) {
-        showBagError('Please complete your profile first.');
-        setTimeout(() => {
-          window.location.href = '/profile';
-        }, 3000);
-        return;
+        missingItems.push('✉️ Verify your email address');
       }
       
-      // Check if user has a delivery address
-      const hasAddress = user.address && 
-                        user.address.street && 
-                        user.address.city && 
-                        user.address.province;
+      // Check if user has a delivery address (same logic as checkout.js)
+      // First check user.address (single/legacy), then user.addresses array
+      let hasAddress = false;
+      let addressToUse = null;
+      
+      if (user.address && user.address.street && user.address.city && user.address.province && user.address.barangay && user.address.postalCode) {
+        hasAddress = true;
+        addressToUse = user.address;
+      } else if (user.addresses && user.addresses.length > 0) {
+        // Check for a complete address in the addresses array
+        const defaultAddr = user.addresses.find(a => a.isDefault);
+        const firstAddr = user.addresses[0];
+        addressToUse = defaultAddr || firstAddr;
+        
+        if (addressToUse && addressToUse.street && addressToUse.city && addressToUse.province && addressToUse.barangay && addressToUse.postalCode) {
+          hasAddress = true;
+        }
+      }
       
       if (!hasAddress) {
-        showBagError('Please complete your profile first.');
-        setTimeout(() => {
-          window.location.href = '/profile';
-        }, 3000);
-        return;
+        missingItems.push('📍 Add a delivery address (street, barangay, city, province, postal code)');
       }
       
-      // Check if user has a valid phone number
-      const userPhone = user.address?.phone || user.phone;
+      // Check if user has a valid phone number (from address or profile)
+      const userPhone = addressToUse?.phone || user.phone;
       if (!userPhone || !isValidPhoneNumber(userPhone)) {
-        showBagError('Please complete your profile first.');
+        missingItems.push('📞 Add a valid phone number');
+      }
+      
+      // If there are missing requirements, show them all
+      if (missingItems.length > 0) {
+        const errorHtml = '<strong>Please complete your profile:</strong><br>' + missingItems.join('<br>');
+        if (bagError) {
+          bagError.innerHTML = errorHtml;
+          bagError.style.display = 'block';
+        }
+        // Add a link to profile
         setTimeout(() => {
-          window.location.href = '/profile';
-        }, 3000);
+          if (bagError && bagError.style.display === 'block') {
+            bagError.innerHTML += '<br><br><a href="/profile" style="color:#8B4513; text-decoration:underline;">Go to Profile →</a>';
+          }
+        }, 500);
         return;
       }
       

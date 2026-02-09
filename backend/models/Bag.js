@@ -15,7 +15,4 @@ const bagSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for faster queries
-bagSchema.index({ userId: 1 });
-
 module.exports = mongoose.model('Bag', bagSchema);
