@@ -584,8 +584,13 @@ router.post('/forgot-password', async (req, res) => {
 
     // Send password reset email
     const { sendPasswordResetEmail } = require('../utils/emailService');
-    await sendPasswordResetEmail(user.email, user.firstName, resetToken);
-    console.log(`📧 Password reset email sent to: ${user.email}`);
+    try {
+      await sendPasswordResetEmail(user.email, user.firstName, resetToken);
+      console.log(`📧 Password reset email sent to: ${user.email}`);
+    } catch (emailError) {
+      console.error('❌ Failed to send password reset email:', emailError.message);
+      // Still return success to prevent email enumeration, but log the error
+    }
 
     res.json({
       success: true,
