@@ -3,13 +3,20 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const User = require('../models/User');
-const { sendVerificationEmail } = require('../utils/emailService');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
 const { 
   generateVerificationToken, 
   hashToken, 
   compareToken,
   getTokenExpiration,
-  isTokenExpired 
+  isTokenExpired,
+  // Unified verification functions
+  verifyTokenFromDatabase,
+  generateAndSaveToken,
+  clearToken,
+  // Remember Me functions
+  generateRememberMeToken,
+  decryptRememberMeToken
 } = require('../utils/tokenUtils');
 
 // POST /api/auth/signup - Register new user
@@ -210,6 +217,14 @@ router.post('/login', async (req, res) => {
           });
         }
 
+        // Generate Remember Me token if requested (secure encrypted token with credentials)
+        let rememberMeToken = null;
+        if (remember === true || remember === 'true' || remember === 'on') {
+          // Pass the original password from request (before hashing) for Remember Me
+          const { encryptedData } = generateRememberMeToken(user._id, user.email, password);
+          rememberMeToken = encryptedData;
+        }
+
         // Return success with verification status
         res.json({
           success: true,
@@ -222,6 +237,8 @@ router.post('/login', async (req, res) => {
             isAdmin: user.isAdmin,
             isVerified: user.isVerified
           },
+          // Include encrypted Remember Me token (NOT password)
+          rememberMeToken: rememberMeToken,
           // Warn if email is not verified
           warning: !user.isVerified ? 'Please verify your email address to access all features' : null
         });
@@ -232,6 +249,53 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Error logging in' 
+    });
+  }
+});
+
+// GET /api/auth/remember-me - Retrieve remembered email from encrypted token
+router.get('/remember-me', async (req, res) => {
+  try {
+    const token = req.query.token || req.cookies?.ec_remember_token;
+    
+    if (!token) {
+      return res.json({
+        success: false,
+        message: 'No remember me token provided'
+      });
+    }
+
+    // Decrypt and verify the token
+    const decrypted = decryptRememberMeToken(token);
+    
+    if (!decrypted) {
+      return res.json({
+        success: false,
+        message: 'Invalid or expired remember me token'
+      });
+    }
+
+    // Verify user still exists
+    const user = await User.findById(decrypted.userId);
+    if (!user) {
+      return res.json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Return email and password for auto-fill (secured by encrypted token)
+    res.json({
+      success: true,
+      email: decrypted.email,
+      password: decrypted.password || null
+    });
+
+  } catch (error) {
+    console.error('Remember me verification error:', error);
+    res.json({
+      success: false,
+      message: 'Error verifying remember me token'
     });
   }
 });
@@ -402,58 +466,25 @@ router.get('/verify-email', async (req, res) => {
   try {
     const { token } = req.query;
 
-    // Validate token presence
-    if (!token) {
+    // Use unified token verification
+    const result = await verifyTokenFromDatabase(User, token, {
+      tokenField: 'verificationToken',
+      expiresField: 'verificationTokenExpires',
+      additionalQuery: { isVerified: false }
+    });
+
+    if (!result.success) {
       return res.status(400).json({
         success: false,
-        message: 'Verification token is required'
+        message: result.message
       });
     }
 
-    // Find user with unexpired verification token
-    // We need to select the token fields explicitly since they're excluded by default
-    const users = await User.find({
-      isVerified: false,
-      verificationTokenExpires: { $gt: new Date() }
-    }).select('+verificationToken +verificationTokenExpires');
-
-    if (!users || users.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired verification token'
-      });
-    }
-
-    // Find the user whose token matches
-    let matchedUser = null;
-    for (const user of users) {
-      const isMatch = await compareToken(token, user.verificationToken);
-      if (isMatch) {
-        matchedUser = user;
-        break;
-      }
-    }
-
-    if (!matchedUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired verification token'
-      });
-    }
-
-    // Check if token is expired
-    if (isTokenExpired(matchedUser.verificationTokenExpires)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Verification token has expired. Please request a new one.'
-      });
-    }
+    const matchedUser = result.user;
 
     // Mark user as verified and clear verification token
     matchedUser.isVerified = true;
-    matchedUser.verificationToken = undefined;
-    matchedUser.verificationTokenExpires = undefined;
-    await matchedUser.save();
+    await clearToken(matchedUser, 'verificationToken', 'verificationTokenExpires');
 
     console.log(`✅ Email verified for user: ${matchedUser.email}`);
 
@@ -505,19 +536,23 @@ router.post('/resend-verification', async (req, res) => {
       });
     }
 
-    // Generate new verification token
-    const verificationToken = generateVerificationToken();
-    const hashedToken = await hashToken(verificationToken);
-    const tokenExpiration = getTokenExpiration();
+    // Use unified token generation
+    const tokenResult = await generateAndSaveToken(user, {
+      tokenField: 'verificationToken',
+      expiresField: 'verificationTokenExpires',
+      expirationHours: 24
+    });
 
-    // Update user with new token
-    user.verificationToken = hashedToken;
-    user.verificationTokenExpires = tokenExpiration;
-    await user.save();
+    if (!tokenResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: tokenResult.message
+      });
+    }
 
     // Send verification email
     try {
-      await sendVerificationEmail(user.email, user.firstName, verificationToken);
+      await sendVerificationEmail(user.email, user.firstName, tokenResult.plainToken);
       console.log(`📧 Verification email resent to: ${user.email}`);
 
       res.json({
@@ -547,6 +582,8 @@ router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
 
+    console.log('📧 Forgot password request for:', email);
+
     if (!email) {
       return res.status(400).json({
         success: false,
@@ -556,6 +593,8 @@ router.post('/forgot-password', async (req, res) => {
 
     // Find user by email
     const user = await User.findOne({ email: email.toLowerCase() });
+    
+    console.log('📧 User found:', !!user);
     
     // Always return success to prevent email enumeration
     if (!user) {
@@ -567,28 +606,40 @@ router.post('/forgot-password', async (req, res) => {
 
     // Check if user signed up with Google (no password)
     if (user.googleId && !user.password) {
+      console.log('📧 User has Google account, no password to reset');
       return res.json({
         success: true,
         message: 'If an account with that email exists, a password reset link has been sent.'
       });
     }
 
-    // Generate reset token
-    const resetToken = generateVerificationToken();
-    const hashedToken = await hashToken(resetToken);
+    // Use unified token generation (1 hour expiration for password reset)
+    console.log('📧 Generating reset token for user:', user.email);
+    const tokenResult = await generateAndSaveToken(user, {
+      tokenField: 'resetPasswordToken',
+      expiresField: 'resetPasswordExpires',
+      expirationHours: 1
+    });
 
-    // Set reset token and expiration (1 hour)
-    user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000);
-    await user.save();
+    console.log('📧 Token generation result:', tokenResult.success, tokenResult.message);
+
+    if (!tokenResult.success) {
+      console.error('Failed to generate reset token');
+      return res.json({
+        success: true,
+        message: 'If an account with that email exists, a password reset link has been sent.'
+      });
+    }
+
+    console.log('📧 Plain token (first 20 chars):', tokenResult.plainToken.substring(0, 20) + '...');
 
     // Send password reset email
-    const { sendPasswordResetEmail } = require('../utils/emailService');
     try {
-      await sendPasswordResetEmail(user.email, user.firstName, resetToken);
+      await sendPasswordResetEmail(user.email, user.firstName, tokenResult.plainToken);
       console.log(`📧 Password reset email sent to: ${user.email}`);
     } catch (emailError) {
-      console.error('❌ Failed to send password reset email:', emailError.message);
+      console.error('❌ Failed to send password reset email:', emailError);
+      console.error('Email error details:', JSON.stringify(emailError, null, 2));
       // Still return success to prevent email enumeration, but log the error
     }
 
@@ -611,6 +662,8 @@ router.post('/reset-password', async (req, res) => {
   try {
     const { token, password } = req.body;
 
+    console.log('🔑 Reset password attempt with token:', token ? token.substring(0, 10) + '...' : 'none');
+
     if (!token || !password) {
       return res.status(400).json({
         success: false,
@@ -625,36 +678,25 @@ router.post('/reset-password', async (req, res) => {
       });
     }
 
-    // Find users with unexpired reset tokens
-    const users = await User.find({
-      resetPasswordExpires: { $gt: new Date() }
-    }).select('+resetPasswordToken +resetPasswordExpires');
+    // Use unified token verification
+    const result = await verifyTokenFromDatabase(User, token, {
+      tokenField: 'resetPasswordToken',
+      expiresField: 'resetPasswordExpires'
+    });
 
-    if (!users || users.length === 0) {
+    console.log('🔑 Token verification result:', result.success, result.message);
+
+    if (!result.success) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid or expired reset token'
+        message: result.message
       });
     }
 
-    // Find the user whose token matches
-    let matchedUser = null;
-    for (const user of users) {
-      const isMatch = await compareToken(token, user.resetPasswordToken);
-      if (isMatch) {
-        matchedUser = user;
-        break;
-      }
-    }
+    const matchedUser = result.user;
+    console.log('🔑 Resetting password for user:', matchedUser.email);
 
-    if (!matchedUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired reset token'
-      });
-    }
-
-    // Update password and clear reset token
+    // Update password and clear reset token (in one save)
     matchedUser.password = password;
     matchedUser.resetPasswordToken = undefined;
     matchedUser.resetPasswordExpires = undefined;

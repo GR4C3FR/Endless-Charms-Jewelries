@@ -7,12 +7,19 @@ const nodemailer = require('nodemailer');
 
 // Create reusable transporter using Gmail SMTP
 const createTransporter = () => {
+  const emailUser = process.env.EMAIL_USER || 'endlesscharmsofficial@gmail.com';
+  const emailPass = process.env.EMAIL_PASSWORD || 'cygf hxwe ebqx lrkc';
+  
+  console.log('📧 Creating email transporter for:', emailUser);
+  
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER || 'endlesscharmsofficial@gmail.com',     // endlesscharmsofficial@gmail.com
-      pass: process.env.EMAIL_PASSWORD || 'cygf hxwe ebqx lrkc' // Gmail App Password
-    }
+      user: emailUser,
+      pass: emailPass
+    },
+    debug: true, // Enable debug output
+    logger: true // Log to console
   });
 };
 

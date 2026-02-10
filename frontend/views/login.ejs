@@ -57,52 +57,70 @@
     </div>
   </main>
 
+  <!-- Forgot Password Modal -->
+  <div id="forgotPasswordModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;padding:40px;border-radius:12px;max-width:400px;width:90%;position:relative;">
+      <button id="closeForgotModal" style="position:absolute;top:15px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#666;">&times;</button>
+      <h2 style="color:#620418;margin:0 0 10px 0;font-size:24px;">Forgot Password?</h2>
+      <p style="color:#666;margin:0 0 20px 0;font-size:14px;">Enter your email and we'll send you a link to reset your password.</p>
+      <form id="forgotPasswordForm">
+        <input type="email" id="forgotEmail" placeholder="Enter your email" required style="width:100%;padding:12px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:15px;box-sizing:border-box;">
+        <div id="forgotMessage" style="display:none;padding:10px;border-radius:6px;margin-bottom:15px;font-size:13px;"></div>
+        <button type="submit" style="width:100%;padding:12px;background:#620418;color:white;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-weight:500;">Send Reset Link</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Email Sent Success Popup -->
+  <div id="emailSentPopup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
+    <div style="background:white;padding:40px;border-radius:12px;max-width:400px;width:90%;position:relative;text-align:center;">
+      <div style="width:60px;height:60px;background:#e8f5e9;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      <h2 style="color:#2e7d32;margin:0 0 10px 0;font-size:22px;">Email Sent!</h2>
+      <p style="color:#666;margin:0 0 25px 0;font-size:14px;line-height:1.5;">A password reset link has been sent to your email address. Please check your inbox and spam folder.</p>
+      <button id="closeEmailSentPopup" style="padding:12px 30px;background:#620418;color:white;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-weight:500;">OK</button>
+    </div>
+  </div>
+
   <script>
     // ========================================
     // REMEMBER ME - SECURE IMPLEMENTATION
     // ========================================
-    const REMEMBER_KEY = 'ec_remember_me';
+    const REMEMBER_KEY = 'ec_remember_token';
     
-    // Simple string obfuscation (not encryption, but hides plain text)
-    function obfuscate(str) {
-      return btoa(encodeURIComponent(str).split('').reverse().join(''));
-    }
-    
-    function deobfuscate(str) {
-      try {
-        return decodeURIComponent(atob(str).split('').reverse().join(''));
-      } catch (e) {
-        return null;
-      }
-    }
-    
-    // Load remembered email on page load
-    function loadRememberedEmail() {
-      const stored = localStorage.getItem(REMEMBER_KEY);
-      if (stored) {
+    async function loadRememberedEmail() {
+      const storedToken = localStorage.getItem(REMEMBER_KEY);
+      if (storedToken) {
         try {
-          const data = JSON.parse(stored);
-          const email = deobfuscate(data.e);
-          if (email) {
-            document.getElementById('email').value = email;
+          const response = await fetch(`/api/auth/remember-me?token=${encodeURIComponent(storedToken)}`);
+          const data = await response.json();
+          
+          if (data.success && data.email) {
+            document.getElementById('email').value = data.email;
+            if (data.password) {
+              document.getElementById('password').value = data.password;
+            }
             document.querySelector('input[name="remember"]').checked = true;
+          } else {
+            clearRememberMe();
           }
         } catch (e) {
-          localStorage.removeItem(REMEMBER_KEY);
+          console.error('Error loading remembered credentials:', e);
+          clearRememberMe();
         }
       }
     }
     
-    // Save email for Remember Me
-    function saveRememberMe(email) {
-      const data = {
-        e: obfuscate(email),
-        t: Date.now()
-      };
-      localStorage.setItem(REMEMBER_KEY, JSON.stringify(data));
+    function saveRememberMe(encryptedToken) {
+      if (encryptedToken) {
+        localStorage.setItem(REMEMBER_KEY, encryptedToken);
+      }
     }
     
-    // Clear Remember Me
     function clearRememberMe() {
       localStorage.removeItem(REMEMBER_KEY);
     }
@@ -111,15 +129,12 @@
     document.addEventListener('DOMContentLoaded', loadRememberedEmail);
 
     // Toggle password visibility
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-    const eyeIcon = document.getElementById('eyeIcon');
-
-    togglePassword.addEventListener('click', function() {
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eyeIcon');
       const type = passwordInput.type === 'password' ? 'text' : 'password';
       passwordInput.type = type;
       
-      // Toggle eye icon
       if (type === 'text') {
         eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
       } else {
@@ -132,6 +147,7 @@
       window.location.href = '/api/auth/google';
     });
 
+    // Login form submission
     document.querySelector('.profile-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -142,9 +158,7 @@
       try {
         const response = await fetch('/api/auth/login', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify({ email, password, remember })
         });
@@ -152,22 +166,17 @@
         const data = await response.json();
 
         if (data.success) {
-          // Handle Remember Me - save or clear email
-          if (remember) {
-            saveRememberMe(email);
+          if (remember && data.rememberMeToken) {
+            saveRememberMe(data.rememberMeToken);
           } else {
             clearRememberMe();
           }
           
-          // Set localStorage flag for client-side checks
           localStorage.setItem('ec_user_logged_in', 'true');
           localStorage.setItem('ec_user_email', data.user.email);
           localStorage.setItem('ec_user_name', `${data.user.firstName} ${data.user.lastName}`);
-          
-          // Set flag to skip session verification on next page load
           sessionStorage.setItem('ec_just_logged_in', 'true');
           
-          // Load bag from database after login
           try {
             const bagResponse = await fetch('/api/bag', { credentials: 'include' });
             if (bagResponse.ok) {
@@ -180,7 +189,6 @@
             console.error('Error loading bag:', error);
           }
           
-          // Redirect to home page
           window.location.href = '/';
         } else {
           alert(data.message || 'Login failed');
@@ -191,9 +199,10 @@
       }
     });
     
-    // Forgot Password functionality
-    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-    forgotPasswordLink.addEventListener('click', (e) => {
+    // ========================================
+    // FORGOT PASSWORD FUNCTIONALITY
+    // ========================================
+    document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('forgotPasswordModal').style.display = 'flex';
     });
@@ -227,12 +236,16 @@
         });
         
         const data = await response.json();
-        messageEl.textContent = data.message;
-        messageEl.style.color = data.success ? '#2e7d32' : '#c62828';
-        messageEl.style.display = 'block';
         
         if (data.success) {
+          document.getElementById('forgotPasswordModal').style.display = 'none';
           document.getElementById('forgotPasswordForm').reset();
+          messageEl.style.display = 'none';
+          document.getElementById('emailSentPopup').style.display = 'flex';
+        } else {
+          messageEl.textContent = data.message;
+          messageEl.style.color = '#c62828';
+          messageEl.style.display = 'block';
         }
       } catch (error) {
         messageEl.textContent = 'An error occurred. Please try again.';
@@ -243,20 +256,19 @@
         submitBtn.textContent = 'Send Reset Link';
       }
     });
+    
+    // ========================================
+    // EMAIL SENT POPUP
+    // ========================================
+    document.getElementById('closeEmailSentPopup').addEventListener('click', () => {
+      document.getElementById('emailSentPopup').style.display = 'none';
+    });
+    
+    document.getElementById('emailSentPopup').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('emailSentPopup')) {
+        document.getElementById('emailSentPopup').style.display = 'none';
+      }
+    });
   </script>
-  
-  <!-- Forgot Password Modal -->
-  <div id="forgotPasswordModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:white;padding:40px;border-radius:12px;max-width:400px;width:90%;position:relative;">
-      <button id="closeForgotModal" style="position:absolute;top:15px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#666;">&times;</button>
-      <h2 style="color:#620418;margin:0 0 10px 0;font-size:24px;">Forgot Password?</h2>
-      <p style="color:#666;margin:0 0 20px 0;font-size:14px;">Enter your email and we'll send you a link to reset your password.</p>
-      <form id="forgotPasswordForm">
-        <input type="email" id="forgotEmail" placeholder="Enter your email" required style="width:100%;padding:12px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:15px;box-sizing:border-box;">
-        <div id="forgotMessage" style="display:none;padding:10px;border-radius:6px;margin-bottom:15px;font-size:13px;"></div>
-        <button type="submit" style="width:100%;padding:12px;background:#620418;color:white;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-weight:500;">Send Reset Link</button>
-      </form>
-    </div>
-  </div>
 </body>
 </html>

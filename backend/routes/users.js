@@ -4,6 +4,7 @@ const User = require('../models/User');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { verifyUserPassword } = require('../utils/tokenUtils');
 
 // Configure multer for avatar uploads
 const storage = multer.diskStorage({
@@ -130,25 +131,21 @@ router.post('/:id/change-password', async (req, res) => {
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ message: 'Current password and new password are required' });
     }
-    
-    // Find user with password field
-    const user = await User.findById(req.params.id);
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long' });
     }
     
-    // Check if user has a password
-    if (!user.password) {
-      return res.status(400).json({ message: 'You must set a password first' });
+    // Use shared password verification utility
+    const verification = await verifyUserPassword(User, req.params.id, currentPassword);
+    
+    if (!verification.success) {
+      const statusCode = verification.message === 'User not found' ? 404 : 
+                         verification.message === 'Current password is incorrect' ? 401 : 400;
+      return res.status(statusCode).json({ message: verification.message });
     }
     
-    // Verify current password
-    const isMatch = await user.comparePassword(currentPassword);
-    
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Current password is incorrect' });
-    }
+    const user = verification.user;
     
     // Update password
     user.password = newPassword;
