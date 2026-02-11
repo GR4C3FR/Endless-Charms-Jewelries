@@ -12,8 +12,27 @@
 </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="/images/logo.png" type="image/png">
   <title>All Blogs - Endless Charms</title>
+  <meta name="description" content="Read all blog articles about jewelry, engagement rings, wedding bands, and custom designs from Endless Charms in Angeles City, Pampanga, Philippines.">
+  <meta name="keywords" content="jewelry blogs Philippines, engagement ring guides, wedding band tips, custom jewelry articles, jewelry insights, Endless Charms blog">
+  <link rel="canonical" href="https://endlesscharms.store/blogs/all/view">
+  <meta property="og:title" content="All Blogs - Endless Charms">
+  <meta property="og:description" content="Discover jewelry insights, guides, and expert tips about engagement rings, wedding bands, and custom jewelry from Endless Charms.">
+  <meta property="og:url" content="https://endlesscharms.store/blogs/all/view">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="All Blogs - Endless Charms">
+  <meta name="twitter:description" content="Explore all blog articles about jewelry, engagement rings, and custom designs from Endless Charms.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "BlogPosting",
+    "name": "All Blog Articles",
+    "description": "Collection of jewelry insights, guides, and expert tips from Endless Charms",
+    "url": "https://endlesscharms.store/blogs/all/view"
+  }
+  </script>
+  <link rel="icon" href="/images/logo.png" type="image/png">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -21,8 +40,8 @@
   <header class="main-header">
     <div class="container">
       <nav class="navbar">
-        <a href="/" class="logo">
-          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img">
+        <a href="/" class="logo" title="Endless Charms - Premium Jewelry Store">
+          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img" loading="lazy">
         </a>
         <div class="nav-links">
           <a href="/" class="nav-link">HOME</a>
@@ -39,14 +58,14 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
-          <button id="headerSearchBtn" class="icon-btn">
-            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
+          <button id="headerSearchBtn" class="icon-btn" aria-label="Search products">
+            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon" loading="lazy">
           </button>
-          <button class="icon-btn" onclick="handleProfileClick()">
-            <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon">
+          <button class="icon-btn" onclick="handleProfileClick()" aria-label="User profile">
+            <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon" loading="lazy">
           </button>
-          <button class="icon-btn" onclick="handleBagClick()">
-            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon">
+          <button class="icon-btn" onclick="handleBagClick()" aria-label="Shopping bag">
+            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon" loading="lazy">
             <span class="bag-badge" style="display: none;">0</span>
           </button>
         </div>
@@ -90,7 +109,7 @@
           <% blogs.forEach(function(blog) { %>
             <article class="blog-card">
               <div class="blog-card-image">
-                <img src="<%= blog.image %>" alt="<%= blog.title %>">
+                <img src="<%= blog.image %>" alt="<%= blog.title %>" loading="lazy">
               </div>
               <div class="blog-card-content">
                 <span class="blog-timestamp">
@@ -114,7 +133,7 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <img src="/images/endless-charms-logo-transparent.png" alt="Endless Charms" class="footer-logo-img">
+          <img src="/images/endless-charms-logo-transparent.png" alt="Endless Charms" class="footer-logo-img" loading="lazy">
           <p>100% authentic and pawnable gold,<br>secure payments, and fully<br>customizable made-to-order pieces.</p>
           <p class="copyright">© Copyright 2025</p>
         </div>

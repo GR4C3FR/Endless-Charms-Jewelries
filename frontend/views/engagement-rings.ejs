@@ -12,17 +12,42 @@
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engagement Rings - Endless Charms</title>
+    <meta name="description" content="Premium engagement rings in Angeles City, Pampanga. Shop custom-designed engagement rings crafted with 14k-18k gold. Fully customizable designs at Endless Charms.">
+    <meta name="keywords" content="engagement rings Angeles City, custom engagement rings Pampanga, diamond rings Angeles, 18k gold rings, engagement rings Philippines, Endless Charms">
+    <link rel="canonical" href="https://endlesscharms.store/engagement-rings">
+    <meta property="og:title" content="Engagement Rings - Endless Charms">
+    <meta property="og:description" content="Discover premium engagement rings from Endless Charms. Custom-designed pieces crafted with 14k-18k gold in Angeles City, Pampanga.">
+    <meta property="og:image" content="https://endlesscharms.store/images/shop-engagement-page/engagement-rings-hero.png">
+    <meta property="og:url" content="https://endlesscharms.store/engagement-rings">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Engagement Rings - Endless Charms">
+    <meta name="twitter:description" content="Premium engagement rings crafted with 14k-18k gold. Shop custom designs at Endless Charms in Angeles City, Pampanga.">
+    <meta name="twitter:image" content="https://endlesscharms.store/images/shop-engagement-page/engagement-rings-hero.png">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "CollectionPage",
+      "name": "Engagement Rings",
+      "description": "Premium engagement rings crafted with 14k-18k gold at Endless Charms in Angeles City, Pampanga, Philippines",
+      "url": "https://endlesscharms.store/engagement-rings",
+      "isPartOf": {
+        "@type": "Website",
+        "name": "Endless Charms"
+      }
+    }
+    </script>
     <link rel="icon" href="/images/logo.png" type="image/png">
     <title>Engagement Rings - Endless Charms</title>
     <link rel="stylesheet" href="/css/style.css">
-</head>
 <body>
     <!-- Navigation Header -->
   <header class="main-header">
     <div class="container">
       <nav class="navbar">
-        <a href="/" class="logo">
-          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img">
+        <a href="/" class="logo" title="Endless Charms - Premium Jewelry Store">
+          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img" loading="lazy">
         </a>
         <div class="nav-links">
           <a href="/" class="nav-link">HOME</a>
@@ -39,14 +64,14 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
-          <button id="headerSearchBtn" class="icon-btn">
-            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
+          <button id="headerSearchBtn" class="icon-btn" aria-label="Search products">
+            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon" loading="lazy">
           </button>
-          <button class="icon-btn" onclick="handleProfileClick()">
-            <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon">
+          <button class="icon-btn" onclick="handleProfileClick()" aria-label="User profile">
+            <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon" loading="lazy">
           </button>
-          <button class="icon-btn" onclick="handleBagClick()">
-            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon">
+          <button class="icon-btn" onclick="handleBagClick()" aria-label="Shopping bag">
+            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon" loading="lazy">
             <span class="bag-badge" style="display: none;">0</span>
           </button>
         </div>
@@ -97,7 +122,7 @@
         <!-- Hero Section (Row One) -->
         <section class="row-one">
             <div class="image-container">
-                <img src="/images/shop-engagement-page/engagement-rings-hero.png" alt="Engagement Ring" class="hero-image">
+                <img src="/images/shop-engagement-page/engagement-rings-hero.png" alt="Engagement Ring Hero" class="hero-image" loading="lazy">
             </div>
             <div class="text-row-one">
                 <p class="main-text">
@@ -112,9 +137,8 @@
         <!-- Products Section (Row Two) -->
         <section class="row-two">
             <div class="inner-div-row-two">
-                <h1>Engagement Rings</h1>
-                <p>Find the perfect engagement ring made just for you. Choose your design, pick your stone, and <br>
-                    customize it in 18k or 14k Yellow Gold, White Gold, or Rose Gold. Your choice of diamonds, your style, your moment.
+                <h1>Engagement Rings in Angeles City</h1>
+                <p>Find the perfect engagement ring made just for you. Choose your design, pick your stone, and customize it in 18k or 14k Yellow Gold, White Gold, or Rose Gold. Your choice of diamonds, your style, your moment.
                 </p>
             </div>
 
@@ -130,7 +154,7 @@
                          data-pricing="<%= ring.pricing && ring.pricing.combinations ? encodeURIComponent(JSON.stringify(ring.pricing.combinations)) : '' %>"
                          data-available-options="<%= ring.availableOptions ? encodeURIComponent(JSON.stringify(ring.availableOptions)) : '' %>">
                         <div class="weddingband-style-image">
-                          <img src="/images/<%= ring.image %>" alt="<%= ring.name %>">
+                          <img src="/images/<%= ring.image %>" alt="<%= ring.name %>" loading="lazy">
                         </div>
                         <div class="weddingband-style-info">
                           <p class="weddingband-style-label"><%= ring.name %></p>
@@ -150,7 +174,7 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <img src="/images/endless-charms-logo-transparent.png" alt="Endless Charms" class="footer-logo-img">
+          <img src="/images/endless-charms-logo-transparent.png" alt="Endless Charms" class="footer-logo-img" loading="lazy">
           <p>100% authentic and pawnable gold,<br>secure payments, and fully<br>customizable made-to-order pieces.</p>
           <p class="copyright">© Copyright 2025</p>
         </div>
