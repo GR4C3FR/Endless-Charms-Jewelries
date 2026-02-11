@@ -74,8 +74,29 @@ const publicPath = fs.existsSync(path.join(__dirname, '../frontend/public'))
 
 app.set('views', viewsPath);
 
+// Log paths for debugging (especially useful in production)
+console.log('=== Server Configuration ===');
+console.log('Views path:', viewsPath);
+console.log('Public path:', publicPath);
+console.log('Views path exists:', fs.existsSync(viewsPath));
+console.log('Public path exists:', fs.existsSync(publicPath));
+console.log('===========================');
+
 // Static files - MUST come before CORS to serve CSS/JS without CORS restrictions
-app.use(express.static(publicPath));
+// Add explicit options to ensure proper MIME types and caching
+app.use(express.static(publicPath, {
+  maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
+  setHeaders: (res, filePath) => {
+    // Ensure CSS files have correct MIME type
+    if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+    // Ensure JS files have correct MIME type
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+  }
+}));
 
 // CORS middleware - Applied only to API routes (configured via backend/middleware/cors.js)
 const corsMiddleware = require('./middleware/cors');
