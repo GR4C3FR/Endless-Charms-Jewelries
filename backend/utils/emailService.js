@@ -59,10 +59,10 @@ const sendVerificationEmail = async (userEmail, userName, verificationToken) => 
   <title>Verify Your Email - Endless Charms</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
       line-height: 1.6;
-      color: #333;
-      background-color: #f4f4f4;
+      color: #333333;
+      background-color: #f9f9f9;
       margin: 0;
       padding: 0;
     }
@@ -70,118 +70,135 @@ const sendVerificationEmail = async (userEmail, userName, verificationToken) => 
       max-width: 600px;
       margin: 20px auto;
       background-color: #ffffff;
-      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     .header {
-      background: linear-gradient(135deg, #d4af37 0%, #f4e5c3 100%);
-      padding: 30px;
+      background-color: #ffffff;
+      padding: 40px 30px 20px;
       text-align: center;
     }
     .header h1 {
       margin: 0;
-      color: #ffffff;
+      color: #5D0E1A;
+      font-family: Georgia, 'Times New Roman', serif;
       font-size: 28px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+    .header-divider {
+      height: 1px;
+      background-color: #e5e7eb;
+      margin: 0 30px;
     }
     .content {
       padding: 40px 30px;
     }
     .content h2 {
-      color: #d4af37;
+      color: #5D0E1A;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-weight: 400;
+      font-size: 22px;
       margin-top: 0;
+      letter-spacing: 0.5px;
     }
     .content p {
       margin: 15px 0;
-      font-size: 16px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #4b5563;
     }
     .verify-button {
       display: inline-block;
-      margin: 30px 0;
-      padding: 15px 40px;
-      background-color: #d4af37;
+      margin: 28px 0;
+      padding: 12px 32px;
+      background-color: #5D0E1A;
       color: #ffffff !important;
       text-decoration: none;
-      border-radius: 5px;
-      font-weight: bold;
-      font-size: 16px;
-      transition: background-color 0.3s;
-    }
-    .verify-button:hover {
-      background-color: #b8941f;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 15px;
+      letter-spacing: 0.3px;
     }
     .button-container {
       text-align: center;
     }
     .footer {
-      background-color: #f8f8f8;
+      background-color: #ffffff;
       padding: 20px 30px;
       text-align: center;
-      font-size: 14px;
-      color: #666;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .footer-divider {
+      height: 1px;
+      background-color: #e5e7eb;
+      margin: 0 30px;
     }
     .divider {
       height: 1px;
-      background-color: #e0e0e0;
-      margin: 20px 0;
-    }    .info-box {
-      background-color: #fff9e6;
-      border-left: 4px solid #d4af37;
-      padding: 15px;
-      margin: 20px 0;
-      font-size: 14px;
+      background-color: #e5e7eb;
+      margin: 24px 0;
+    }
+    .info-box {
+      border-left: 3px solid #5D0E1A;
+      padding: 12px 16px;
+      margin: 24px 0;
+      font-size: 13px;
+      color: #6b7280;
     }
     .dev-warning {
-      background-color: #fff3cd;
-      border-left: 4px solid #ffc107;
-      padding: 15px;
+      border-left: 3px solid #9ca3af;
+      padding: 12px 16px;
       margin: 20px 0;
-      font-size: 14px;
+      font-size: 13px;
+      color: #6b7280;
     }
   </style>
 </head>
 <body>
   <div class="email-container">
     <div class="header">
-      <h1>✨ Endless Charms ✨</h1>
+      <h1>Endless Charms</h1>
     </div>
+    <div class="header-divider"></div>
     
     <div class="content">
-      <h2>Welcome to Endless Charms, ${userName}!</h2>
+      <h2>Welcome to Endless Charms, ${userName}.</h2>
       
-      <p>Thank you for joining our community of jewelry lovers. We're thrilled to have you here!</p>
+      <p>Thank you for joining us. We are delighted to have you here.</p>
       
-      <p>To complete your registration and start exploring our exquisite collection of handcrafted jewelry, please verify your email address by clicking the button below:</p>
-        <div class="button-container">
+      <p>To complete your registration and begin exploring our collection, please verify your email address by clicking the button below.</p>
+      
+      <div class="button-container">
         <a href="${verificationLink}" class="verify-button">Verify Email</a>
       </div>
       
       ${devWarning}
       
       <div class="info-box">
-        <strong>⏰ Important:</strong> This verification link will expire in 24 hours for security reasons.
+        <strong>Please note:</strong> This verification link will expire in 24 hours for security reasons.
       </div>
       
       <div class="divider"></div>
       
-      <p style="font-size: 14px; color: #666;">
+      <p style="font-size: 13px; color: #9ca3af;">
         If the button above doesn't work, copy and paste this link into your browser:
       </p>
-      <p style="font-size: 14px; color: #d4af37; word-break: break-all;">
+      <p style="font-size: 13px; color: #5D0E1A; word-break: break-all;">
         ${verificationLink}
       </p>
       
-      <p style="margin-top: 30px; font-size: 14px; color: #666;">
-        If you didn't create an account with Endless Charms, please ignore this email.
+      <p style="margin-top: 28px; font-size: 13px; color: #9ca3af;">
+        If you didn't create an account with Endless Charms, please disregard this email.
       </p>
     </div>
     
+    <div class="footer-divider"></div>
     <div class="footer">
-      <p style="margin: 5px 0;"><strong>Endless Charms</strong></p>
-      <p style="margin: 5px 0;">Crafting Memories, One Charm at a Time</p>
-      <p style="margin: 15px 0 5px 0; font-size: 12px;">
-        © ${new Date().getFullYear()} Endless Charms. All rights reserved.
+      <p style="margin: 5px 0; color: #5D0E1A; font-family: Georgia, 'Times New Roman', serif; font-size: 15px; letter-spacing: 0.5px;">Endless Charms</p>
+      <p style="margin: 5px 0; font-size: 12px;">Crafting Memories, One Charm at a Time</p>
+      <p style="margin: 15px 0 5px 0; font-size: 11px;">
+        &copy; ${new Date().getFullYear()} Endless Charms. All rights reserved.
       </p>
     </div>
   </div>
@@ -248,41 +265,139 @@ const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reset Your Password - Endless Charms</title>
   <style>
-    body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
-    .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .header { background: linear-gradient(135deg, #620418 0%, #8a0621 100%); padding: 30px; text-align: center; }
-    .header h1 { margin: 0; color: #ffffff; font-size: 28px; }
-    .content { padding: 40px 30px; }
-    .content h2 { color: #620418; margin-top: 0; }
-    .content p { margin: 15px 0; font-size: 16px; }
-    .reset-button { display: inline-block; margin: 30px 0; padding: 15px 40px; background-color: #620418; color: #ffffff !important; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; }
-    .reset-button:hover { background-color: #8a0621; }
-    .button-container { text-align: center; }
-    .footer { background-color: #f8f8f8; padding: 20px 30px; text-align: center; font-size: 14px; color: #666; }
-    .warning-box { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; font-size: 14px; }
+    body {
+      font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
+      line-height: 1.6;
+      color: #333333;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      overflow: hidden;
+    }
+    .header {
+      background-color: #ffffff;
+      padding: 40px 30px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      color: #5D0E1A;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+    .header-divider {
+      height: 1px;
+      background-color: #e5e7eb;
+      margin: 0 30px;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content h2 {
+      color: #5D0E1A;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-weight: 400;
+      font-size: 22px;
+      margin-top: 0;
+      letter-spacing: 0.5px;
+    }
+    .content p {
+      margin: 15px 0;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #4b5563;
+    }
+    .reset-button {
+      display: inline-block;
+      margin: 28px 0;
+      padding: 12px 32px;
+      background-color: #5D0E1A;
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 15px;
+      letter-spacing: 0.3px;
+    }
+    .button-container {
+      text-align: center;
+    }
+    .footer {
+      background-color: #ffffff;
+      padding: 20px 30px;
+      text-align: center;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .footer-divider {
+      height: 1px;
+      background-color: #e5e7eb;
+      margin: 0 30px;
+    }
+    .divider {
+      height: 1px;
+      background-color: #e5e7eb;
+      margin: 24px 0;
+    }
+    .info-box {
+      border-left: 3px solid #5D0E1A;
+      padding: 12px 16px;
+      margin: 24px 0;
+      font-size: 13px;
+      color: #6b7280;
+    }
   </style>
 </head>
 <body>
   <div class="email-container">
     <div class="header">
-      <h1>🔐 Endless Charms</h1>
+      <h1>Endless Charms</h1>
     </div>
+    <div class="header-divider"></div>
+    
     <div class="content">
       <h2>Password Reset Request</h2>
+      
       <p>Hello ${userName},</p>
-      <p>We received a request to reset your password for your Endless Charms account. Click the button below to create a new password:</p>
+      
+      <p>We received a request to reset the password associated with your Endless Charms account. To create a new password, please click the button below.</p>
+      
       <div class="button-container">
         <a href="${resetLink}" class="reset-button">Reset Password</a>
       </div>
-      <div class="warning-box">
-        <strong>⏰ Important:</strong> This link will expire in 1 hour for security reasons.
+      
+      <div class="info-box">
+        <strong>Please note:</strong> This link will expire in 1 hour for security reasons.
       </div>
-      <p style="font-size: 14px; color: #666;">If you didn't request a password reset, please ignore this email. Your password will remain unchanged.</p>
-      <p style="font-size: 14px; color: #666; word-break: break-all;">If the button doesn't work, copy this link: ${resetLink}</p>
+      
+      <div class="divider"></div>
+      
+      <p style="font-size: 13px; color: #9ca3af;">
+        If the button above doesn't work, copy and paste this link into your browser:
+      </p>
+      <p style="font-size: 13px; color: #5D0E1A; word-break: break-all;">
+        ${resetLink}
+      </p>
+      
+      <p style="margin-top: 28px; font-size: 13px; color: #9ca3af;">
+        If you didn't request a password reset, please disregard this email. Your password will remain unchanged.
+      </p>
     </div>
+    
+    <div class="footer-divider"></div>
     <div class="footer">
-      <p><strong>Endless Charms</strong></p>
-      <p>© ${new Date().getFullYear()} Endless Charms. All rights reserved.</p>
+      <p style="margin: 5px 0; color: #5D0E1A; font-family: Georgia, 'Times New Roman', serif; font-size: 15px; letter-spacing: 0.5px;">Endless Charms</p>
+      <p style="margin: 5px 0; font-size: 12px;">Crafting Memories, One Charm at a Time</p>
+      <p style="margin: 15px 0 5px 0; font-size: 11px;">
+        &copy; ${new Date().getFullYear()} Endless Charms. All rights reserved.
+      </p>
     </div>
   </div>
 </body>
