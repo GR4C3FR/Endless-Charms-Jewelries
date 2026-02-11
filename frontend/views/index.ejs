@@ -13,6 +13,39 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Endless Charms - Where Every Piece Tells A Story</title>
+  <meta name="description" content="Endless Charms: Premium engagement rings, wedding bands, fine jewelry, and custom pieces in Angeles City, Pampanga, Philippines. 100% authentic gold jewelry.">
+  <meta name="keywords" content="engagement rings Angeles City, wedding bands Pampanga, jewelry store Angeles City, fine jewelry Philippines, custom jewelry Pampanga, diamond rings Angeles, Endless Charms">
+  <link rel="canonical" href="https://endlesscharms.store/">
+  <meta property="og:title" content="Endless Charms - Where Every Piece Tells A Story">
+  <meta property="og:description" content="Premium engagement rings, wedding bands, and fine jewelry from Endless Charms in Angeles City, Pampanga. Custom-made pieces crafted with 14k-18k gold.">
+  <meta property="og:image" content="https://endlesscharms.store/images/endless-charms-logo-transparent.png">
+  <meta property="og:url" content="https://endlesscharms.store/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Endless Charms - Where Every Piece Tells A Story">
+  <meta name="twitter:description" content="Premium engagement rings, wedding bands, and fine jewelry from Endless Charms in Angeles City, Pampanga.">
+  <meta name="twitter:image" content="https://endlesscharms.store/images/endless-charms-logo-transparent.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "JewelryStore",
+    "name": "Endless Charms",
+    "url": "https://endlesscharms.store",
+    "telephone": "+63 916 430 5638",
+    "email": "endlesscharmsofficial@gmail.com",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Angeles City",
+      "addressLocality": "Angeles City",
+      "addressRegion": "Pampanga",
+      "postalCode": "",
+      "addressCountry": "PH"
+    },
+    "image": "https://endlesscharms.store/images/endless-charms-logo-transparent.png",
+    "description": "Premium jewelry designer and custom jewelry store in Philippines. We craft timeless engagement rings, wedding bands, and fine jewelry using 14k-18k gold and precious gemstones.",
+    "priceRange": "PHP10000 - PHP500000"
+  }
+  </script>
   <link rel="icon" href="/images/logo.png" type="image/png">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -21,8 +54,8 @@
   <header class="main-header">
     <div class="container">
       <nav class="navbar">
-        <a href="/" class="logo">
-          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img">
+        <a href="/" class="logo" title="Endless Charms - Premium Jewelry Store">
+          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img" loading="lazy">
         </a>
         <div class="nav-links">
           <a href="/" class="nav-link">HOME</a>
@@ -39,14 +72,14 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
-          <button id="headerSearchBtn" class="icon-btn">
-            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
+          <button id="headerSearchBtn" class="icon-btn" aria-label="Search products">
+            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon" loading="lazy">
           </button>
-          <button class="icon-btn" onclick="handleProfileClick()">
-            <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon">
+          <button class="icon-btn" onclick="handleProfileClick()" aria-label="User profile">
+            <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon" loading="lazy">
           </button>
-          <button class="icon-btn" onclick="handleBagClick()">
-            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon">
+          <button class="icon-btn" onclick="handleBagClick()" aria-label="Shopping bag">
+            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon" loading="lazy">
             <span class="bag-badge" style="display: none;">0</span>
           </button>
         </div>
@@ -85,14 +118,14 @@
   <!-- Hero Section -->
   <section class="hero-section">
     <div class="hero-collage">
-      <div class="hero-image hero-image-1"></div>
-      <div class="hero-image hero-image-2"></div>
-      <div class="hero-image hero-image-3"></div>
+      <div class="hero-image hero-image-1" role="img" aria-label="Engagement rings collection"></div>
+      <div class="hero-image hero-image-2" role="img" aria-label="Wedding bands collection"></div>
+      <div class="hero-image hero-image-3" role="img" aria-label="Fine jewelry collection"></div>
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <p class="hero-subtitle">WELCOME TO ENDLESS CHARMS</p>
-      <h2 class="hero-title">Where Every Piece Tells A Story</h2>
+      <h1 class="hero-title">Where Every Piece Tells A Story</h1>
       <button class="cta-button" onclick="window.location.href='/engagement-rings'">Visit Our Collections</button>
     </div>
   </section>
@@ -110,7 +143,7 @@
                data-price="<%= product.basePrice || product.price || 0 %>"
                data-image="<%= product.image %>">
             <div class="product-image">
-              <img src="/images/<%= product.image %>" alt="<%= product.name %>">
+              <img src="/images/<%= product.image %>" alt="<%= product.name %>" loading="lazy">
             </div>
             <div class="product-info">
               <h3 class="product-name"><%= product.name %></h3>
@@ -124,7 +157,7 @@
                data-price="<%= product.basePrice || product.price || 0 %>"
                data-image="<%= product.image %>">
             <div class="product-image">
-              <img src="/images/<%= product.image %>" alt="<%= product.name %>">
+              <img src="/images/<%= product.image %>" alt="<%= product.name %>" loading="lazy">
             </div>
             <div class="product-info">
               <h3 class="product-name"><%= product.name %></h3>
@@ -162,7 +195,7 @@
                data-price="<%= style.basePrice || style.price || 0 %>"
                data-image="<%= style.image %>">
             <div class="ring-style-image">
-              <img src="/images/<%= style.image %>" alt="<%= style.name %>">
+              <img src="/images/<%= style.image %>" alt="<%= style.name %>" loading="lazy">
             </div>
             <p class="ring-style-label"><%= style.label || style.name %></p>
           </div>
@@ -188,7 +221,7 @@
         <% features.forEach(feature => { %>
           <div class="feature-card">
             <div class="feature-icon">
-              <img src="/images/<%= feature.icon %>" alt="<%= feature.title %>">
+              <img src="/images/<%= feature.icon %>" alt="<%= feature.title %>" loading="lazy">
             </div>
             <h3 class="feature-title"><%= feature.title %></h3>
             <p class="feature-desc"><%= feature.description %></p>
@@ -209,7 +242,7 @@
             <% if (reviewImages && reviewImages.length > 0) { %>
               <% reviewImages.forEach((image, index) => { %>
                 <div class="carousel-card" onclick="openImageModal('<%= image %>')">
-                  <img src="/images/<%= image %>" alt="Customer Review <%= index + 1 %>">
+                  <img src="/images/<%= image %>" alt="Customer Review <%= index + 1 %>" loading="lazy">
                 </div>
               <% }); %>
             <% } else { %>
@@ -233,7 +266,7 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <img src="/images/endless-charms-logo-transparent.png" alt="Endless Charms" class="footer-logo-img">
+          <img src="/images/endless-charms-logo-transparent.png" alt="Endless Charms" class="footer-logo-img" loading="lazy">
           <p>100% authentic and pawnable gold,<br>secure payments, and fully<br>customizable made-to-order pieces.</p>
           <p class="copyright">© Copyright 2025</p>
         </div>

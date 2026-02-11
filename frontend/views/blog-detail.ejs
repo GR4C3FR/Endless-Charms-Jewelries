@@ -1,10 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KK3P9FN7TL"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-KK3P9FN7TL');
+</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="/images/logo.png" type="image/png">
   <title><%= blog.title %> - Endless Charms</title>
+  <meta name="description" content="<%= blog.excerpt || blog.title %>">
+  <meta name="keywords" content="jewelry blog, <%= blog.title %>, jewelry insights, endless charms blog">
+  <link rel="canonical" href="https://endlesscharms.store/blogs/<%= blog.slug %>">
+  <meta property="og:title" content="<%= blog.title %>">
+  <meta property="og:description" content="<%= blog.excerpt || blog.title %>">
+  <meta property="og:image" content="<%= blog.image %>">
+  <meta property="og:url" content="https://endlesscharms.store/blogs/<%= blog.slug %>">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="<%= new Date(blog.publishedAt).toISOString() %>">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= blog.title %>">
+  <meta name="twitter:description" content="<%= blog.excerpt || blog.title %>">
+  <meta name="twitter:image" content="<%= blog.image %>">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "BlogPosting",
+    "headline": "<%= blog.title %>",
+    "description": "<%= blog.excerpt || blog.title %>",
+    "image": "<%= blog.image %>",
+    "datePublished": "<%= new Date(blog.publishedAt).toISOString() %>",
+    "url": "https://endlesscharms.store/blogs/<%= blog.slug %>"
+  }
+  </script>
+  <link rel="icon" href="/images/logo.png" type="image/png">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -12,8 +45,8 @@
   <header class="main-header">
     <div class="container">
       <nav class="navbar">
-        <a href="/" class="logo">
-          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img">
+        <a href="/" class="logo" title="Endless Charms - Premium Jewelry Store">
+          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img" loading="lazy">
         </a>
         <div class="nav-links">
           <a href="/" class="nav-link">HOME</a>
@@ -30,14 +63,14 @@
           <a href="/about" class="nav-link">ABOUT</a>
         </div>
         <div class="nav-icons">
-          <button id="headerSearchBtn" class="icon-btn">
-            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
+          <button id="headerSearchBtn" class="icon-btn" aria-label="Search products">
+            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon" loading="lazy">
           </button>
-          <button class="icon-btn" onclick="handleProfileClick()">
-            <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon">
+          <button class="icon-btn" onclick="handleProfileClick()" aria-label="User profile">
+            <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon" loading="lazy">
           </button>
-          <button class="icon-btn" onclick="handleBagClick()">
-            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon">
+          <button class="icon-btn" onclick="handleBagClick()" aria-label="Shopping bag">
+            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon" loading="lazy">
             <span class="bag-badge" style="display: none;">0</span>
           </button>
         </div>
@@ -118,7 +151,7 @@
 
         <!-- Featured Image -->
         <div class="blog-detail-image">
-          <img src="<%= blog.image %>" alt="<%= blog.title %>">
+          <img src="<%= blog.image %>" alt="<%= blog.title %>" loading="lazy">
         </div>
 
         <!-- Blog Content -->
