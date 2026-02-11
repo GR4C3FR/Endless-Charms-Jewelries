@@ -27,10 +27,6 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS middleware (configured via backend/middleware/cors.js)
-const corsMiddleware = require('./middleware/cors');
-app.use(corsMiddleware);
-
 // Trust proxy - CRITICAL for production (Hostinger uses reverse proxy)
 // Without this, Express can't detect HTTPS and secure cookies will fail
 if (process.env.NODE_ENV === 'production') {
@@ -78,17 +74,20 @@ const publicPath = fs.existsSync(path.join(__dirname, '../frontend/public'))
 
 app.set('views', viewsPath);
 
-// Static files
+// Static files - MUST come before CORS to serve CSS/JS without CORS restrictions
 app.use(express.static(publicPath));
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/blogs', blogRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/bag', bagRoutes);
-app.use('/api/admin', adminRoutes);
+// CORS middleware - Applied only to API routes (configured via backend/middleware/cors.js)
+const corsMiddleware = require('./middleware/cors');
+
+// API Routes with CORS
+app.use('/api/auth', corsMiddleware, authRoutes);
+app.use('/api/products', corsMiddleware, productRoutes);
+app.use('/api/orders', corsMiddleware, orderRoutes);
+app.use('/api/blogs', corsMiddleware, blogRoutes);
+app.use('/api/users', corsMiddleware, userRoutes);
+app.use('/api/bag', corsMiddleware, bagRoutes);
+app.use('/api/admin', corsMiddleware, adminRoutes);
 
 // Product data
 const products = [
