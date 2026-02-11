@@ -65,38 +65,75 @@ app.set('view engine', 'ejs');
 
 // Handle both local development and production deployment paths
 const fs = require('fs');
-const viewsPath = fs.existsSync(path.join(__dirname, '../frontend/views')) 
-  ? path.join(__dirname, '../frontend/views')
-  : path.join(__dirname, 'frontend/views');
-const publicPath = fs.existsSync(path.join(__dirname, '../frontend/public'))
-  ? path.join(__dirname, '../frontend/public')
-  : path.join(__dirname, 'frontend/public');
+
+// Try multiple possible paths for views and public folders
+let viewsPath, publicPath;
+
+// Check if running from backend folder (production scenario)
+if (fs.existsSync(path.join(__dirname, 'frontend/views'))) {
+  viewsPath = path.join(__dirname, 'frontend/views');
+  publicPath = path.join(__dirname, 'frontend/public');
+}
+// Check if frontend folder is at parent level (local development)
+else if (fs.existsSync(path.join(__dirname, '../frontend/views'))) {
+  viewsPath = path.join(__dirname, '../frontend/views');
+  publicPath = path.join(__dirname, '../frontend/public');
+}
+// Fallback: Use relative path from backend
+else {
+  viewsPath = path.join(__dirname, 'frontend/views');
+  publicPath = path.join(__dirname, 'frontend/public');
+}
 
 app.set('views', viewsPath);
 
 // Log paths for debugging (especially useful in production)
 console.log('=== Server Configuration ===');
+console.log('__dirname:', __dirname);
 console.log('Views path:', viewsPath);
 console.log('Public path:', publicPath);
 console.log('Views path exists:', fs.existsSync(viewsPath));
 console.log('Public path exists:', fs.existsSync(publicPath));
+if (fs.existsSync(publicPath)) {
+  console.log('Public folder contents:', fs.readdirSync(publicPath));
+  const cssPath = path.join(publicPath, 'css', 'style.css');
+  console.log('CSS file exists:', fs.existsSync(cssPath));
+}
+console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('===========================');
 
 // Static files - MUST come before CORS to serve CSS/JS without CORS restrictions
 // Add explicit options to ensure proper MIME types and caching
 app.use(express.static(publicPath, {
   maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
+  etag: true,
   setHeaders: (res, filePath) => {
     // Ensure CSS files have correct MIME type
     if (filePath.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
     }
     // Ensure JS files have correct MIME type
     if (filePath.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    }
+    // Log file serving in production for debugging
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Serving static file:', filePath);
     }
   }
 }));
+
+// Add a diagnostic route for troubleshooting static files
+app.get('/debug-static', (req, res) => {
+  res.json({
+    publicPath,
+    publicPathExists: fs.existsSync(publicPath),
+    cssExists: fs.existsSync(path.join(publicPath, 'css', 'style.css')),
+    publicContents: fs.existsSync(publicPath) ? fs.readdirSync(publicPath) : [],
+    __dirname,
+    nodeEnv: process.env.NODE_ENV
+  });
+});
 
 // CORS middleware - Applied only to API routes (configured via backend/middleware/cors.js)
 const corsMiddleware = require('./middleware/cors');
