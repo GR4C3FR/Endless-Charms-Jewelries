@@ -345,10 +345,22 @@
         function togglePreview() {
             const preview = document.getElementById('content-preview');
             const previewRender = document.getElementById('preview-render');
-            const content = document.getElementById('content').value;
+            let content = document.getElementById('content').value;
             const button = event.target;
             
             if (preview.style.display === 'none') {
+                // Replace server image paths with local base64 dataUrls for preview
+                // so content images show before the blog is submitted
+                if (content && uploadedContentImages) {
+                    uploadedContentImages.forEach(img => {
+                        if (img && img.name && img.dataUrl) {
+                            const sanitizedName = img.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                            const serverPath = `/images/blog-page/${sanitizedName}`;
+                            // Replace all occurrences of this image's server path with its dataUrl
+                            content = content.split(serverPath).join(img.dataUrl);
+                        }
+                    });
+                }
                 previewRender.innerHTML = content || '<p style="color: #6b7280; font-style: italic;">No content to preview yet. Start writing your blog content above.</p>';
                 preview.style.display = 'block';
                 button.textContent = 'Hide Preview';
@@ -436,7 +448,7 @@
             // Sanitize filename so the server can match and replace with the uploaded URL
             const sanitizedName = image.name.replace(/[^a-zA-Z0-9.-]/g, '_');
             const imagePath = `/images/blog-page/${sanitizedName}`;
-            const imageHtml = `\n<img src="${imagePath}" alt="${image.name.replace(/\.[^/.]+$/, '')}" class="blog-content-image" style="max-width: 100%; height: auto; margin: 20px 0; border-radius: 8px;">\n`;
+            const imageHtml = `\n<img src="${imagePath}" alt="${image.name.replace(/\.[^/.]+$/, '')}" class="blog-content-image" style="max-width: 100%; height: auto; margin: 20px 0; border-radius: 8px;" />\n`;
             
             const cursorPos = textarea.selectionStart;
             const textBefore = textarea.value.substring(0, cursorPos);

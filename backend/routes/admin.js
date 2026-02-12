@@ -9,7 +9,7 @@ const { isAdmin } = require('../middleware/adminAuth');
 // Configure multer for blog image uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../../frontend/public/images/blog-page');
+    const uploadPath = path.join(__dirname, '../frontend/public/images/blog-page');
     
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadPath)) {
@@ -227,7 +227,7 @@ router.put('/blogs/:id', isAdmin, upload.fields([
     // Update image if new one uploaded
     if (req.files && req.files.image) {
       // Delete old image
-      const oldImagePath = path.join(__dirname, '../../frontend/public', blog.image);
+      const oldImagePath = path.join(__dirname, '../frontend/public', blog.image);
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
@@ -280,7 +280,7 @@ router.delete('/blogs/:id', isAdmin, async (req, res) => {
     }
     
     // Delete associated image
-    const imagePath = path.join(__dirname, '../../frontend/public', blog.image);
+    const imagePath = path.join(__dirname, '../frontend/public', blog.image);
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
     }
