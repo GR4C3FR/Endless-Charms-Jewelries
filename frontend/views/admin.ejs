@@ -433,7 +433,9 @@
             if (!image) return;
             
             const textarea = document.getElementById('content');
-            const imagePath = `/images/blog-page/${image.name}`;
+            // Sanitize filename so the server can match and replace with the uploaded URL
+            const sanitizedName = image.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const imagePath = `/images/blog-page/${sanitizedName}`;
             const imageHtml = `\n<img src="${imagePath}" alt="${image.name.replace(/\.[^/.]+$/, '')}" class="blog-content-image" style="max-width: 100%; height: auto; margin: 20px 0; border-radius: 8px;">\n`;
             
             const cursorPos = textarea.selectionStart;
