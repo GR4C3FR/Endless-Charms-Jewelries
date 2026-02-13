@@ -30,7 +30,41 @@
                     <a href="/about" class="nav-link">ABOUT</a>
                 </div>
                 <div class="nav-icons">
-                    <button id="headerSearchBtn" class="icon-btn">
+                    <button id="headerSearchBtn" class="icon-btn desktop-icon">
+                        <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
+                    </button>
+                    <button class="icon-btn desktop-icon" onclick="window.location.href='/profile'">
+                        <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon">
+                    </button>
+                    <button class="icon-btn desktop-icon" onclick="window.location.href='/bag'">
+                        <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon">
+                    </button>
+                    <button id="mobileMenuBtn" class="mobile-hamburger" aria-label="Toggle mobile menu" aria-expanded="false">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+                </div>
+            </nav>
+            <!-- Mobile Navigation Panel -->
+            <div id="mobileMenuOverlay" class="mobile-menu-overlay"></div>
+            <nav id="mobileMenu" class="mobile-menu">
+                <div class="mobile-menu-header">
+                    <button id="mobileMenuClose" class="mobile-menu-close" aria-label="Close menu">
+                        <span class="close-icon">&times;</span>
+                    </button>
+                </div>
+                <div class="mobile-menu-links">
+                    <a href="/" class="mobile-nav-link">HOME</a>
+                    <a href="/blogs" class="mobile-nav-link">BLOGS</a>
+                    <a href="/engagement-rings" class="mobile-nav-link">ENGAGEMENT RINGS</a>
+                    <a href="/wedding-bands" class="mobile-nav-link">WEDDING BANDS</a>
+                    <a href="/accessories" class="mobile-nav-link">OTHER ACCESSORIES</a>
+                    <a href="/contact" class="mobile-nav-link">CONTACT</a>
+                    <a href="/about" class="mobile-nav-link">ABOUT</a>
+                </div>
+                <div class="mobile-menu-icons">
+                    <button id="mobileHeaderSearchBtn" class="icon-btn">
                         <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon">
                     </button>
                     <button class="icon-btn" onclick="window.location.href='/profile'">

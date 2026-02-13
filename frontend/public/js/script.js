@@ -2280,3 +2280,59 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 500);
   }
 });
+
+// ========================================
+// Mobile Menu Functionality
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+  const mobileMenuClose = document.getElementById('mobileMenuClose');
+  const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+  // Open menu
+  mobileMenuBtn?.addEventListener('click', function() {
+    mobileMenu?.classList.add('active');
+    mobileMenuOverlay?.classList.add('active');
+    mobileMenuBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  });
+
+  // Close menu
+  function closeMenu() {
+    mobileMenu?.classList.remove('active');
+    mobileMenuOverlay?.classList.remove('active');
+    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  // Close button
+  mobileMenuClose?.addEventListener('click', closeMenu);
+
+  // Close when clicking overlay
+  mobileMenuOverlay?.addEventListener('click', closeMenu);
+
+  // Close when clicking a link
+  mobileNavLinks.forEach(link => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  // Close menu on window resize if switching to desktop
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+      closeMenu();
+    }
+  });
+
+  // Link mobile search button to desktop search functionality
+  const mobileSearchBtn = document.getElementById('mobileHeaderSearchBtn');
+  const desktopSearchBtn = document.getElementById('headerSearchBtn');
+  if (mobileSearchBtn && desktopSearchBtn) {
+    mobileSearchBtn.addEventListener('click', function() {
+      desktopSearchBtn.click();
+      closeMenu();
+    });
+  }
+});
+
