@@ -288,8 +288,42 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       const userData = await response.json();
-      const addresses = userData.addresses || [];
+      let addresses = userData.addresses || [];
       const addressesList = document.getElementById('addressesList');
+      
+      // Fallback: include legacy single address if addresses array is empty
+      if (addresses.length === 0 && userData.address && userData.address.street && userData.address.city && userData.address.province) {
+        addresses = [{
+          _id: 'legacy',
+          firstName: userData.firstName || '',
+          lastName: userData.lastName || '',
+          province: userData.address.province || '',
+          city: userData.address.city || '',
+          barangay: userData.address.barangay || '',
+          postalCode: userData.address.postalCode || '',
+          street: userData.address.street || '',
+          phone: userData.address.phone || userData.phone || '',
+          social: '',
+          isDefault: true
+        }];
+      }
+      
+      // Fallback: include legacy single address if addresses array is empty
+      if (addresses.length === 0 && userData.address && userData.address.street && userData.address.city && userData.address.province) {
+        addresses = [{
+          _id: 'legacy',
+          firstName: userData.firstName || '',
+          lastName: userData.lastName || '',
+          province: userData.address.province || '',
+          city: userData.address.city || '',
+          barangay: userData.address.barangay || '',
+          postalCode: userData.address.postalCode || '',
+          street: userData.address.street || '',
+          phone: userData.address.phone || userData.phone || '',
+          social: '',
+          isDefault: true
+        }];
+      }
       
       if (addresses.length === 0) {
         addressesList.innerHTML = `
@@ -322,6 +356,12 @@ document.addEventListener('DOMContentLoaded', () => {
           });
           
           // Hover effect
+    // Reset modal to list view before showing
+    const listView = document.getElementById('addressListView');
+    const formView = document.getElementById('addressFormView');
+    if (listView) listView.style.display = 'block';
+    if (formView) formView.style.display = 'none';
+    
           card.addEventListener('mouseenter', function() {
             this.style.borderColor = '#620418';
             this.style.backgroundColor = '#fef3f4';
@@ -338,6 +378,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const addressesList = document.getElementById('addressesList');
       addressesList.innerHTML = '<p class="error-text">Failed to load addresses. Please try again.</p>';
     }
+    
+    // Reset modal to list view before showing
+    const listView = document.getElementById('addressListView');
+    const formView = document.getElementById('addressFormView');
+    if (listView) listView.style.display = 'block';
+    if (formView) formView.style.display = 'none';
     
     addressModal.setAttribute('aria-hidden', 'false');
     addressModal.classList.add('active');

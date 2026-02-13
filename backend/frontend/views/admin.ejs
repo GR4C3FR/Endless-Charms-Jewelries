@@ -744,7 +744,6 @@
                             <div class="blog-item" data-id="${blog._id}">
                                 <img src="${blog.image}" alt="${blog.title}" class="blog-item-image">
                                 <div class="blog-item-content">
-                                    <h3 class="blog-item-title">${blog.title}</h3>
                                     <div class="blog-item-meta">
                                         <span class="status-badge ${blog.published ? 'status-published' : (blog.scheduledPublishDate ? 'status-scheduled' : 'status-draft')}">
                                             ${blog.published ? 'Published' : (blog.scheduledPublishDate ? 'Scheduled' : 'Draft')}
@@ -753,11 +752,12 @@
                                             ${blog.scheduledPublishDate ? 'Scheduled: ' + new Date(blog.scheduledPublishDate).toLocaleString() : (blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString() : 'Not published')}
                                         </span>
                                     </div>
-                                    <p>${blog.excerpt.substring(0, 150)}...</p>
+                                    <h3 class="blog-item-title">${blog.title}</h3>
+                                    <p class="blog-item-excerpt">${blog.excerpt.substring(0, 120)}...</p>
                                     <div class="blog-item-actions">
-                                        <button class="btn btn-secondary" onclick="editBlog('${blog._id}')">Edit</button>
-                                        <button class="btn btn-secondary" onclick="viewBlog('${blog.slug}')">View</button>
-                                        <button class="btn btn-danger" onclick="deleteBlog('${blog._id}')">Delete</button>
+                                        <button onclick="editBlog('${blog._id}')">Edit</button>
+                                        <button onclick="viewBlog('${blog.slug}')">View</button>
+                                        <button onclick="deleteBlog('${blog._id}')">Delete</button>
                                     </div>
                                 </div>
                             </div>
@@ -1140,6 +1140,7 @@
                 }
             });
         });
+
 
     </script>
     <script src="/js/script.js"></script>
