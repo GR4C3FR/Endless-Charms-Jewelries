@@ -172,17 +172,17 @@
         if (order.shippingAddress) {
           const addr = order.shippingAddress;
           html += '<div class="shipping-info" style="margin-top:16px; padding:12px; background:#f9f9f9; border-radius:8px;">';
-          html += '<strong>📦 Shipping To:</strong><br>';
+          html += '<strong>Shipping To:</strong><br>';
           html += `<span>${addr.fullName || ''}</span><br>`;
           html += `<span>${addr.address || [addr.street, addr.barangay, addr.city, addr.province].filter(Boolean).join(', ')}</span><br>`;
-          if (addr.phone) html += `<span>📞 ${addr.phone}</span>`;
+          if (addr.phone) html += `<span>Phone: ${addr.phone}</span>`;
           html += '</div>';
         }
         
         // Order items
         if (order.items && order.items.length) {
           html += '<div class="items-ordered" style="margin-top:16px;">';
-          html += '<strong>🛍️ Items Ordered:</strong>';
+          html += '<strong>Items Ordered:</strong>';
           html += '<ul style="list-style:none; padding:0; margin-top:8px;">';
           order.items.forEach(it => {
             const itemTotal = (it.price || 0) * (it.quantity || 1);

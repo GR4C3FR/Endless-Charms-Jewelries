@@ -96,7 +96,7 @@
 
                 <div class="form-group">
                     <label for="content-images">Content Images (Optional)</label>
-                    <p style="font-size: 14px; color: #6b7280; margin-bottom: 10px;">Upload images (JPG, PNG, GIF, WebP) to use within your blog content. Click the 🖼️ button in the toolbar below to insert images. <strong>Note: Images will be automatically saved when you publish the blog.</strong></p>
+                    <p style="font-size: 14px; color: #6b7280; margin-bottom: 10px;">Upload images (JPG, PNG, GIF, WebP) to use within your blog content. Click the Image button in the toolbar below to insert images. <strong>Note: Images will be automatically saved when you publish the blog.</strong></p>
                     <input type="file" id="content-images" name="contentImages" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml" multiple>
                     <div id="content-images-preview" class="content-images-preview"></div>
                 </div>
@@ -149,7 +149,7 @@
                                 </div>
                                 
                                 <div class="guide-example">
-                                    <strong>📋 Complete Example:</strong>
+                                    <strong>Complete Example:</strong>
                                     <pre>&lt;p&gt;Introduction paragraph goes here.&lt;/p&gt;
 
 &lt;h2&gt;Main Section Title&lt;/h2&gt;
@@ -177,13 +177,13 @@
                         <button type="button" class="format-btn" onclick="insertFormatting('strong')" title="Bold"><strong>B</strong></button>
                         <button type="button" class="format-btn" onclick="insertFormatting('ul')" title="Bullet List">• List</button>
                         <button type="button" class="format-btn" onclick="insertFormatting('ol')" title="Numbered List">1. List</button>
-                        <button type="button" class="format-btn image-btn" onclick="toggleImageSelector()" title="Insert Image">🖼️ Image</button>
+                        <button type="button" class="format-btn image-btn" onclick="toggleImageSelector()" title="Insert Image">Image</button>
                         <button type="button" class="format-btn template-btn" onclick="insertTemplate()" title="Insert Blog Template">Template</button>
                     </div>
                     <div id="image-selector" class="image-selector" style="display: none;">
                         <div class="image-selector-header">
                             <span>Select an image to insert:</span>
-                            <button type="button" class="close-selector" onclick="toggleImageSelector()">✕</button>
+                            <button type="button" class="close-selector" onclick="toggleImageSelector()">×</button>
                         </div>
                         <div id="image-selector-grid" class="image-selector-grid">
                             <p style="color: #6b7280; padding: 20px; text-align: center;">No images uploaded yet. Upload images above first.</p>
@@ -192,7 +192,7 @@
                     <div class="content-stats">
                         <span id="char-count">0 characters</span>
                         <span id="word-count">0 words</span>
-                        <span id="html-validation" class="validation-ok">✓ Valid HTML</span>
+                        <span id="html-validation" class="validation-ok">Valid HTML</span>
                     </div>
                     <div class="content-preview-toggle">
                         <button type="button" class="btn btn-secondary preview-btn" onclick="togglePreview()">Preview Content</button>
@@ -574,15 +574,16 @@
             
             // Update validation display
             if (content.trim() === '') {
-                validation.textContent = '✓ Valid HTML';
+                validation.textContent = 'Valid HTML';
                 validation.className = 'validation-ok';
             } else if (isValid) {
-                validation.textContent = '✓ Valid HTML';
+                validation.textContent = 'Valid HTML';
                 validation.className = 'validation-ok';
             } else {
-                validation.textContent = `⚠ ${errorMsg}`;
+                validation.textContent = `${errorMsg}`;
                 validation.className = 'validation-error';
             }
+        
         }
         
         // Add event listener to content textarea
