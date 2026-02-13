@@ -96,7 +96,7 @@
 
                 <div class="form-group">
                     <label for="content-images">Content Images (Optional)</label>
-                    <p style="font-size: 14px; color: #6b7280; margin-bottom: 10px;">Upload images (JPG, PNG, GIF, WebP) to use within your blog content. Click the 🖼️ button in the toolbar below to insert images. <strong>Note: Images will be automatically saved when you publish the blog.</strong></p>
+                    <p style="font-size: 14px; color: #6b7280; margin-bottom: 10px;">Upload images (JPG, PNG, GIF, WebP) to use within your blog content. Click the Image button in the toolbar below to insert images. <strong>Note: Images will be automatically saved when you publish the blog.</strong></p>
                     <input type="file" id="content-images" name="contentImages" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml" multiple>
                     <div id="content-images-preview" class="content-images-preview"></div>
                 </div>
@@ -149,7 +149,7 @@
                                 </div>
                                 
                                 <div class="guide-example">
-                                    <strong>📋 Complete Example:</strong>
+                                    <strong>Complete Example:</strong>
                                     <pre>&lt;p&gt;Introduction paragraph goes here.&lt;/p&gt;
 
 &lt;h2&gt;Main Section Title&lt;/h2&gt;
@@ -177,13 +177,13 @@
                         <button type="button" class="format-btn" onclick="insertFormatting('strong')" title="Bold"><strong>B</strong></button>
                         <button type="button" class="format-btn" onclick="insertFormatting('ul')" title="Bullet List">• List</button>
                         <button type="button" class="format-btn" onclick="insertFormatting('ol')" title="Numbered List">1. List</button>
-                        <button type="button" class="format-btn image-btn" onclick="toggleImageSelector()" title="Insert Image">🖼️ Image</button>
+                        <button type="button" class="format-btn image-btn" onclick="toggleImageSelector()" title="Insert Image">Image</button>
                         <button type="button" class="format-btn template-btn" onclick="insertTemplate()" title="Insert Blog Template">Template</button>
                     </div>
                     <div id="image-selector" class="image-selector" style="display: none;">
                         <div class="image-selector-header">
                             <span>Select an image to insert:</span>
-                            <button type="button" class="close-selector" onclick="toggleImageSelector()">✕</button>
+                            <button type="button" class="close-selector" onclick="toggleImageSelector()">×</button>
                         </div>
                         <div id="image-selector-grid" class="image-selector-grid">
                             <p style="color: #6b7280; padding: 20px; text-align: center;">No images uploaded yet. Upload images above first.</p>
@@ -192,7 +192,7 @@
                     <div class="content-stats">
                         <span id="char-count">0 characters</span>
                         <span id="word-count">0 words</span>
-                        <span id="html-validation" class="validation-ok">✓ Valid HTML</span>
+                        <span id="html-validation" class="validation-ok">Valid HTML</span>
                     </div>
                     <div class="content-preview-toggle">
                         <button type="button" class="btn btn-secondary preview-btn" onclick="togglePreview()">Preview Content</button>
@@ -336,10 +336,22 @@
         function togglePreview() {
             const preview = document.getElementById('content-preview');
             const previewRender = document.getElementById('preview-render');
-            const content = document.getElementById('content').value;
+            let content = document.getElementById('content').value;
             const button = event.target;
             
             if (preview.style.display === 'none') {
+                // Replace server image paths with local base64 dataUrls for preview
+                // so content images show before the blog is submitted
+                if (content && uploadedContentImages) {
+                    uploadedContentImages.forEach(img => {
+                        if (img && img.name && img.dataUrl) {
+                            const sanitizedName = img.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                            const serverPath = `/images/blog-page/${sanitizedName}`;
+                            // Replace all occurrences of this image's server path with its dataUrl
+                            content = content.split(serverPath).join(img.dataUrl);
+                        }
+                    });
+                }
                 previewRender.innerHTML = content || '<p style="color: #6b7280; font-style: italic;">No content to preview yet. Start writing your blog content above.</p>';
                 preview.style.display = 'block';
                 button.textContent = 'Hide Preview';
@@ -424,8 +436,10 @@
             if (!image) return;
             
             const textarea = document.getElementById('content');
-            const imagePath = `/images/blog-page/${image.name}`;
-            const imageHtml = `\n<img src="${imagePath}" alt="${image.name.replace(/\.[^/.]+$/, '')}" class="blog-content-image" style="max-width: 100%; height: auto; margin: 20px 0; border-radius: 8px;">\n`;
+            // Sanitize filename so the server can match and replace with the uploaded URL
+            const sanitizedName = image.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const imagePath = `/images/blog-page/${sanitizedName}`;
+            const imageHtml = `\n<img src="${imagePath}" alt="${image.name.replace(/\.[^/.]+$/, '')}" class="blog-content-image" style="max-width: 100%; height: auto; margin: 20px 0; border-radius: 8px;" />\n`;
             
             const cursorPos = textarea.selectionStart;
             const textBefore = textarea.value.substring(0, cursorPos);
@@ -560,15 +574,16 @@
             
             // Update validation display
             if (content.trim() === '') {
-                validation.textContent = '✓ Valid HTML';
+                validation.textContent = 'Valid HTML';
                 validation.className = 'validation-ok';
             } else if (isValid) {
-                validation.textContent = '✓ Valid HTML';
+                validation.textContent = 'Valid HTML';
                 validation.className = 'validation-ok';
             } else {
-                validation.textContent = `⚠ ${errorMsg}`;
+                validation.textContent = `${errorMsg}`;
                 validation.className = 'validation-error';
             }
+        
         }
         
         // Add event listener to content textarea
@@ -730,7 +745,6 @@
                             <div class="blog-item" data-id="${blog._id}">
                                 <img src="${blog.image}" alt="${blog.title}" class="blog-item-image">
                                 <div class="blog-item-content">
-                                    <h3 class="blog-item-title">${blog.title}</h3>
                                     <div class="blog-item-meta">
                                         <span class="status-badge ${blog.published ? 'status-published' : (blog.scheduledPublishDate ? 'status-scheduled' : 'status-draft')}">
                                             ${blog.published ? 'Published' : (blog.scheduledPublishDate ? 'Scheduled' : 'Draft')}
@@ -739,11 +753,12 @@
                                             ${blog.scheduledPublishDate ? 'Scheduled: ' + new Date(blog.scheduledPublishDate).toLocaleString() : (blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString() : 'Not published')}
                                         </span>
                                     </div>
-                                    <p>${blog.excerpt.substring(0, 150)}...</p>
+                                    <h3 class="blog-item-title">${blog.title}</h3>
+                                    <p class="blog-item-excerpt">${blog.excerpt.substring(0, 120)}...</p>
                                     <div class="blog-item-actions">
-                                        <button class="btn btn-secondary" onclick="editBlog('${blog._id}')">Edit</button>
-                                        <button class="btn btn-secondary" onclick="viewBlog('${blog.slug}')">View</button>
-                                        <button class="btn btn-danger" onclick="deleteBlog('${blog._id}')">Delete</button>
+                                        <button onclick="editBlog('${blog._id}')">Edit</button>
+                                        <button onclick="viewBlog('${blog.slug}')">View</button>
+                                        <button onclick="deleteBlog('${blog._id}')">Delete</button>
                                     </div>
                                 </div>
                             </div>
@@ -1126,6 +1141,7 @@
                 }
             });
         });
+
 
     </script>
     <script src="/js/script.js"></script>

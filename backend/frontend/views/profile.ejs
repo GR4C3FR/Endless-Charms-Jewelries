@@ -112,33 +112,33 @@
               <div id="emailSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
             </div>
             <% if (!user.isAdmin) { %>
-            <!-- Email Verification Status -->
-            <div class="form-group" style="background: <%= user && user.isVerified ? '#f0fdf4' : '#fef3c7' %>; padding: 15px; border-radius: 8px; border: 1px solid <%= user && user.isVerified ? '#86efac' : '#fcd34d' %>;">
+            <!-- Email Verification Status (non-admin only) -->
+            <div class="form-group" style="background: <%= user && user.isVerified ? '#fafafa' : '#fafafa' %>; padding: 15px; border-radius: 4px; border-left: 3px solid <%= user && user.isVerified ? '#5D0E1A' : '#9ca3af' %>;">
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                 <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
                   <% if (user && user.isVerified) { %>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5D0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                       <polyline points="22 4 12 14.01 9 11.01"></polyline>
                     </svg>
                     <div>
-                      <div style="font-weight: 600; color: #16a34a; font-size: 14px;">Email Verified</div>
-                      <div style="color: #15803d; font-size: 13px;">Your email address has been verified</div>
+                      <div style="font-weight: 500; color: #5D0E1A; font-size: 14px;">Email Verified</div>
+                      <div style="color: #6b7280; font-size: 13px;">Your email address has been verified</div>
                     </div>
                   <% } else { %>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <circle cx="12" cy="12" r="10"></circle>
                       <line x1="12" y1="8" x2="12" y2="12"></line>
                       <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
                     <div>
-                      <div style="font-weight: 600; color: #d97706; font-size: 14px;">Email Not Verified</div>
-                      <div style="color: #b45309; font-size: 13px;">Please verify your email to access all features</div>
+                      <div style="font-weight: 500; color: #4b5563; font-size: 14px;">Email Not Verified</div>
+                      <div style="color: #6b7280; font-size: 13px;">Please verify your email to access all features</div>
                     </div>
                   <% } %>
                 </div>
                 <% if (user && !user.isVerified) { %>
-                  <button type="button" id="resendVerificationBtn" class="btn-resend-verification" style="padding: 8px 16px; background: #d97706; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.3s;">
+                  <button type="button" id="resendVerificationBtn" class="btn-resend-verification">
                     Resend Email
                   </button>
                 <% } %>
@@ -150,6 +150,7 @@
               <input type="tel" id="phone" name="phone" value="<%= user && user.phone ? user.phone : '' %>" placeholder="+63 XXX XXX XXXX">
               <div id="phoneSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; display: none;"></div>
             </div>
+            <% } %>
             <% if (!user.googleId) { %>
             <div class="form-group" style="position: relative;">
               <label for="currentPassword">Current Password</label>
@@ -183,7 +184,6 @@
             </div>
             <div id="passwordError" style="color: #dc2626; font-size: 14px; margin-top: 8px; margin-bottom: 15px; display: none;"></div>
             <div id="passwordSuccess" style="color: #059669; font-size: 14px; margin-top: 8px; margin-bottom: 15px; display: none;"></div>
-            <% } %>
             <% } %>
             <div class="form-actions">
               <button type="submit" class="btn-primary">Save Changes</button>
@@ -901,8 +901,8 @@
           const data = await response.json();
           
           if (data.success) {
-            messageDiv.textContent = '✓ ' + data.message;
-            messageDiv.style.color = '#16a34a';
+            messageDiv.textContent = data.message;
+            messageDiv.style.color = '#5D0E1A';
             messageDiv.style.display = 'block';
             
             // Hide button after successful send
@@ -918,8 +918,8 @@
               messageDiv.style.display = 'none';
             }, 60000);
           } else {
-            messageDiv.textContent = '✗ ' + data.message;
-            messageDiv.style.color = '#dc2626';
+            messageDiv.textContent = data.message;
+            messageDiv.style.color = '#6b7280';
             messageDiv.style.display = 'block';
             
             // Re-enable button
@@ -930,8 +930,8 @@
           }
         } catch (error) {
           console.error('Error resending verification:', error);
-          messageDiv.textContent = '✗ Failed to send verification email. Please try again.';
-          messageDiv.style.color = '#dc2626';
+          messageDiv.textContent = 'Failed to send verification email. Please try again.';
+          messageDiv.style.color = '#6b7280';
           messageDiv.style.display = 'block';
           
           // Re-enable button
