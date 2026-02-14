@@ -187,13 +187,80 @@ app.get('/debug-blog-images', async (req, res) => {
     };
   });
   
+  // Check upload directory permissions
+  const uploadDiagnostics = {
+    writable: false,
+    readable: false,
+    permissions: null,
+    uid: null,
+    gid: null,
+    error: null
+  };
+  
+  if (fs.existsSync(blogImagesPath)) {
+    try {
+      fs.accessSync(blogImagesPath, fs.constants.W_OK);
+      uploadDiagnostics.writable = true;
+    } catch (err) {
+      uploadDiagnostics.writableError = err.message;
+    }
+    
+    try {
+      fs.accessSync(blogImagesPath, fs.constants.R_OK);
+      uploadDiagnostics.readable = true;
+    } catch (err) {
+      uploadDiagnostics.readableError = err.message;
+    }
+    
+    try {
+      const stats = fs.statSync(blogImagesPath);
+      uploadDiagnostics.permissions = stats.mode.toString(8);
+      uploadDiagnostics.uid = stats.uid;
+      uploadDiagnostics.gid = stats.gid;
+      uploadDiagnostics.size = stats.size;
+      uploadDiagnostics.isDirectory = stats.isDirectory();
+    } catch (err) {
+      uploadDiagnostics.error = err.message;
+    }
+  }
+  
   res.json({
     blogImagesFolder: blogImagesPath,
     folderExists: fs.existsSync(blogImagesPath),
     imagesInFolder: fs.existsSync(blogImagesPath) ? fs.readdirSync(blogImagesPath) : [],
+    uploadDiagnostics,
     recentBlogs: blogImagesCheck,
-    publicPath
+    publicPath,
+    processUser: process.getuid ? process.getuid() : 'N/A',
+    processGroup: process.getgid ? process.getgid() : 'N/A'
   });
+});
+
+// Diagnostic route for blogs with missing images (public for troubleshooting)
+app.get('/debug-missing-images', async (req, res) => {
+  try {
+    const blogs = await Blog.find().select('_id title slug image createdAt');
+    
+    const blogsWithMissingImages = blogs.filter(blog => {
+      const imagePath = path.join(publicPath, blog.image.replace(/^\//, ''));
+      return !fs.existsSync(imagePath);
+    }).map(blog => ({
+      id: blog._id,
+      title: blog.title,
+      slug: blog.slug,
+      imageUrl: blog.image,
+      fullPath: path.join(publicPath, blog.image.replace(/^\//, '')),
+      createdAt: blog.createdAt
+    }));
+    
+    res.json({
+      total: blogsWithMissingImages.length,
+      blogs: blogsWithMissingImages,
+      note: 'These blogs have database entries but their image files are missing from the server'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // CORS middleware - Applied only to API routes (configured via backend/middleware/cors.js)
