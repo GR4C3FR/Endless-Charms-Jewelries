@@ -74,7 +74,7 @@ app.use(passport.session());
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
   // Cache busting version - update this when CSS/JS changes
-  res.locals.assetsVersion = 'v2.0.3'; // Change this version when you update CSS/JS
+  res.locals.assetsVersion = 'v2.1.0'; // Change this version when you update CSS/JS
   next();
 });
 
@@ -750,6 +750,89 @@ app.get('/blogs/:slug', async (req, res) => {
   } catch (error) {
     console.error('Error fetching blog:', error);
     res.status(500).send('Server error');
+  }
+});
+
+// robots.txt
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /profile
+Disallow: /bag
+Disallow: /checkout
+Disallow: /verify-email
+Disallow: /complete-profile
+Disallow: /reset-password
+
+Sitemap: https://endlesscharms.store/sitemap.xml
+`);
+});
+
+// sitemap.xml
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const Blog = require('./models/Blog');
+    const Product = require('./models/Product');
+    
+    // Get all published blogs
+    const blogs = await Blog.find({ published: true }).select('slug updatedAt');
+    
+    // Get all products (if they exist)
+    const products = await Product.find({ isActive: true }).select('slug updatedAt').catch(() => []);
+    
+    // Static pages with their priorities and change frequencies
+    const staticPages = [
+      { url: '/', priority: '1.0', changefreq: 'daily' },
+      { url: '/engagement-rings', priority: '0.9', changefreq: 'weekly' },
+      { url: '/wedding-bands', priority: '0.9', changefreq: 'weekly' },
+      { url: '/accessories', priority: '0.8', changefreq: 'weekly' },
+      { url: '/blogs', priority: '0.8', changefreq: 'daily' },
+      { url: '/blogs/all/view', priority: '0.7', changefreq: 'daily' },
+      { url: '/about', priority: '0.7', changefreq: 'monthly' },
+      { url: '/contact', priority: '0.7', changefreq: 'monthly' },
+    ];
+    
+    let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    
+    // Add static pages
+    staticPages.forEach(page => {
+      sitemap += '  <url>\n';
+      sitemap += `    <loc>https://endlesscharms.store${page.url}</loc>\n`;
+      sitemap += `    <changefreq>${page.changefreq}</changefreq>\n`;
+      sitemap += `    <priority>${page.priority}</priority>\n`;
+      sitemap += '  </url>\n';
+    });
+    
+    // Add blog posts
+    blogs.forEach(blog => {
+      sitemap += '  <url>\n';
+      sitemap += `    <loc>https://endlesscharms.store/blogs/${blog.slug}</loc>\n`;
+      sitemap += `    <lastmod>${blog.updatedAt.toISOString()}</lastmod>\n`;
+      sitemap += '    <changefreq>monthly</changefreq>\n';
+      sitemap += '    <priority>0.6</priority>\n';
+      sitemap += '  </url>\n';
+    });
+    
+    // Add products if any
+    products.forEach(product => {
+      sitemap += '  <url>\n';
+      sitemap += `    <loc>https://endlesscharms.store/products/${product.slug}</loc>\n`;
+      sitemap += `    <lastmod>${product.updatedAt.toISOString()}</lastmod>\n`;
+      sitemap += '    <changefreq>weekly</changefreq>\n';
+      sitemap += '    <priority>0.8</priority>\n';
+      sitemap += '  </url>\n';
+    });
+    
+    sitemap += '</urlset>';
+    
+    res.header('Content-Type', 'application/xml');
+    res.send(sitemap);
+  } catch (error) {
+    console.error('Error generating sitemap:', error);
+    res.status(500).send('Error generating sitemap');
   }
 });
 
