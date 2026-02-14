@@ -708,15 +708,35 @@ app.get('/blogs', async (req, res) => {
   }
 });
 
-// All blogs page
+// All blogs page with pagination
 app.get('/blogs/all/view', async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4; // 4 blogs per page (1 row)
+    const skip = (page - 1) * limit;
+    
+    const totalBlogs = await Blog.countDocuments({ published: true });
+    const totalPages = Math.ceil(totalBlogs / limit);
+    
     const blogs = await Blog.find({ published: true })
-      .sort({ publishedAt: -1 });
-    res.render('all-blogs', { blogs });
+      .sort({ publishedAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    res.render('all-blogs', { 
+      blogs,
+      currentPage: page,
+      totalPages,
+      totalBlogs
+    });
   } catch (error) {
     console.error('Error fetching all blogs:', error);
-    res.render('all-blogs', { blogs: [] });
+    res.render('all-blogs', { 
+      blogs: [],
+      currentPage: 1,
+      totalPages: 0,
+      totalBlogs: 0
+    });
   }
 });
 
