@@ -11,24 +11,51 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadPath = path.join(__dirname, '../frontend/public/images/blog-page');
     
+    console.log('Upload destination requested:', uploadPath);
+    console.log('__dirname:', __dirname);
+    
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
+      console.log('Creating upload directory:', uploadPath);
+      try {
+        fs.mkdirSync(uploadPath, { recursive: true });
+        console.log('Directory created successfully');
+      } catch (err) {
+        console.error('Failed to create directory:', err);
+        return cb(err);
+      }
     }
+    
+    // Verify directory is writable
+    try {
+      fs.accessSync(uploadPath, fs.constants.W_OK);
+      console.log('Directory is writable');
+    } catch (err) {
+      console.error('Directory is not writable:', uploadPath, err);
+      return cb(new Error(`Upload directory is not writable: ${uploadPath}`));
+    }
+    
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
+    console.log('Generating filename for:', file.fieldname, 'Original:', file.originalname);
+    
     // For cover image, add timestamp. For content images, keep original name
     if (file.fieldname === 'image') {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, 'blog-' + uniqueSuffix + path.extname(file.originalname));
+      const filename = 'blog-' + uniqueSuffix + path.extname(file.originalname);
+      console.log('Generated cover image filename:', filename);
+      cb(null, filename);
     } else if (file.fieldname === 'contentImages') {
       // Keep original filename for content images
       const sanitized = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+      console.log('Generated content image filename:', sanitized);
       cb(null, sanitized);
     } else {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, 'blog-' + uniqueSuffix + path.extname(file.originalname));
+      const filename = 'blog-' + uniqueSuffix + path.extname(file.originalname);
+      console.log('Generated filename:', filename);
+      cb(null, filename);
     }
   }
 });
@@ -55,6 +82,55 @@ function generateSlug(title) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 }
+
+// GET upload directory diagnostics
+router.get('/upload-diagnostics', isAdmin, (req, res) => {
+  const uploadPath = path.join(__dirname, '../frontend/public/images/blog-page');
+  
+  const diagnostics = {
+    uploadPath,
+    __dirname,
+    exists: fs.existsSync(uploadPath),
+    isDirectory: fs.existsSync(uploadPath) ? fs.statSync(uploadPath).isDirectory() : false,
+    writable: false,
+    readable: false,
+    files: [],
+    permissions: null
+  };
+  
+  if (fs.existsSync(uploadPath)) {
+    try {
+      fs.accessSync(uploadPath, fs.constants.W_OK);
+      diagnostics.writable = true;
+    } catch (err) {
+      diagnostics.writableError = err.message;
+    }
+    
+    try {
+      fs.accessSync(uploadPath, fs.constants.R_OK);
+      diagnostics.readable = true;
+    } catch (err) {
+      diagnostics.readableError = err.message;
+    }
+    
+    try {
+      const stats = fs.statSync(uploadPath);
+      diagnostics.permissions = stats.mode.toString(8);
+      diagnostics.uid = stats.uid;
+      diagnostics.gid = stats.gid;
+    } catch (err) {
+      diagnostics.statsError = err.message;
+    }
+    
+    try {
+      diagnostics.files = fs.readdirSync(uploadPath);
+    } catch (err) {
+      diagnostics.filesError = err.message;
+    }
+  }
+  
+  res.json(diagnostics);
+});
 
 // GET all blogs (including unpublished for admin)
 router.get('/blogs', isAdmin, async (req, res) => {
@@ -159,13 +235,31 @@ router.post('/blogs', isAdmin, upload.fields([
       scheduledPublishDate: scheduledPublishDate ? scheduleDate : null
     };
     
+    // Verify the uploaded file actually exists
+    const uploadedFilePath = req.files.image[0].path;
+    console.log('Uploaded file path:', uploadedFilePath);
+    console.log('File exists:', fs.existsSync(uploadedFilePath));
+    if (fs.existsSync(uploadedFilePath)) {
+      const stats = fs.statSync(uploadedFilePath);
+      console.log('File size:', stats.size, 'bytes');
+      console.log('File permissions:', stats.mode.toString(8));
+    } else {
+      console.error('ERROR: Uploaded file does not exist at:', uploadedFilePath);
+      throw new Error('File upload failed - file not found on disk');
+    }
+    
     const blog = new Blog(blogData);
     const newBlog = await blog.save();
     
     console.log('Blog created successfully');
     console.log('Cover image saved as:', blogData.image);
+    console.log('Database image URL:', blogData.image);
+    console.log('Actual file location:', uploadedFilePath);
     if (req.files && req.files.contentImages) {
       console.log('Content images saved:', req.files.contentImages.map(f => f.filename));
+      req.files.contentImages.forEach(file => {
+        console.log('Content image path:', file.path, 'Exists:', fs.existsSync(file.path));
+      });
     }
     
     res.status(201).json({ 
@@ -289,6 +383,58 @@ router.delete('/blogs/:id', isAdmin, async (req, res) => {
     res.json({ 
       success: true, 
       message: 'Blog deleted successfully' 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET blogs with missing images
+router.get('/blogs-with-missing-images', isAdmin, async (req, res) => {
+  try {
+    const blogs = await Blog.find();
+    const uploadPath = path.join(__dirname, '../frontend/public');
+    
+    const blogsWithMissingImages = blogs.filter(blog => {
+      const imagePath = path.join(uploadPath, blog.image.replace(/^\//, ''));
+      const exists = fs.existsSync(imagePath);
+      return !exists;
+    }).map(blog => ({
+      id: blog._id,
+      title: blog.title,
+      slug: blog.slug,
+      imageUrl: blog.image,
+      fullPath: path.join(uploadPath, blog.image.replace(/^\//, '')),
+      createdAt: blog.createdAt
+    }));
+    
+    res.json({
+      total: blogsWithMissingImages.length,
+      blogs: blogsWithMissingImages
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// DELETE all blogs with missing images (cleanup utility)
+router.delete('/blogs-with-missing-images', isAdmin, async (req, res) => {
+  try {
+    const blogs = await Blog.find();
+    const uploadPath = path.join(__dirname, '../frontend/public');
+    
+    const blogsToDelete = blogs.filter(blog => {
+      const imagePath = path.join(uploadPath, blog.image.replace(/^\//, ''));
+      return !fs.existsSync(imagePath);
+    });
+    
+    const deletePromises = blogsToDelete.map(blog => Blog.findByIdAndDelete(blog._id));
+    await Promise.all(deletePromises);
+    
+    res.json({
+      success: true,
+      message: `Deleted ${blogsToDelete.length} blog(s) with missing images`,
+      deletedBlogs: blogsToDelete.map(b => ({ id: b._id, title: b.title }))
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
