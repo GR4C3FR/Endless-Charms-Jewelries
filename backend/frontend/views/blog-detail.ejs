@@ -221,6 +221,28 @@
 
   <script src="/js/script.js"></script>
   <script>
+    // Fix blog image loading issues by ensuring proper paths and cache busting
+    document.addEventListener('DOMContentLoaded', function() {
+      const blogContent = document.getElementById('blogContent');
+      const allImages = blogContent.querySelectorAll('img');
+      
+      // Add cache-busting and error handling to all images in blog content
+      allImages.forEach(img => {
+        const originalSrc = img.src || img.getAttribute('src');
+        
+        // If image fails to load, try without cache
+        img.onerror = function() {
+          if (!this.dataset.retried) {
+            this.dataset.retried = 'true';
+            const separator = this.src.includes('?') ? '&' : '?';
+            this.src = this.src.split('?')[0] + separator + 't=' + Date.now();
+          } else {
+            console.error('Blog image failed to load:', this.src);
+          }
+        };
+      });
+    });
+
     // Generate Table of Contents from blog content - H2 only for SEO
     document.addEventListener('DOMContentLoaded', function() {
       const blogContent = document.getElementById('blogContent');

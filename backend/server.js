@@ -134,6 +134,20 @@ app.use(express.static(publicPath, {
     if (filePath.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
     }
+    // Ensure proper image MIME types
+    if (filePath.match(/\.(jpg|jpeg)$/i)) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.gif')) {
+      res.setHeader('Content-Type', 'image/gif');
+    } else if (filePath.endsWith('.webp')) {
+      res.setHeader('Content-Type', 'image/webp');
+    }
+    // Shorter cache for blog images (6 hours) to prevent issues with new uploads
+    if (filePath.includes('blog-page')) {
+      res.setHeader('Cache-Control', 'public, max-age=21600'); // 6 hours
+    }
     // Log file serving in production for debugging
     if (process.env.NODE_ENV === 'production') {
       console.log('Serving static file:', filePath);
@@ -143,12 +157,44 @@ app.use(express.static(publicPath, {
 
 // Add a diagnostic route for troubleshooting static files
 app.get('/debug-static', (req, res) => {
+  const blogImagesPath = path.join(publicPath, 'images', 'blog-page');
   res.json({
     publicPath,
     publicPathExists: fs.existsSync(publicPath),
     cssExists: fs.existsSync(path.join(publicPath, 'css', 'style.css')),
     publicContents: fs.existsSync(publicPath) ? fs.readdirSync(publicPath) : [],
+    blogImagesPath,
+    blogImagesExist: fs.existsSync(blogImagesPath),
+    blogImages: fs.existsSync(blogImagesPath) ? fs.readdirSync(blogImagesPath) : [],
     __dirname,
+    nodeEnv: process.env.NODE_ENV
+  });
+});
+
+// Diagnostic route for blog images
+app.get('/debug-blog-images', async (req, res) => {
+  const blogImagesPath = path.join(publicPath, 'images', 'blog-page');
+  const blogs = await Blog.find().select('title slug image').sort({ createdAt: -1 }).limit(10);
+  
+  const blogImagesCheck = blogs.map(blog => {
+    const imagePath = path.join(publicPath, blog.image.replace(/^\//, ''));
+    return {
+      title: blog.title,
+      slug: blog.slug,
+      imageUrl: blog.image,
+      fullPath: imagePath,
+      exists: fs.existsSync(imagePath)
+    };
+  });
+  
+  res.json({
+    blogImagesFolder: blogImagesPath,
+    folderExists: fs.existsSync(blogImagesPath),
+    imagesInFolder: fs.existsSync(blogImagesPath) ? fs.readdirSync(blogImagesPath) : [],
+    recentBlogs: blogImagesCheck,
+    publicPath
+  });
+});
     nodeEnv: process.env.NODE_ENV
   });
 });

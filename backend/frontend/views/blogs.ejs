@@ -262,6 +262,24 @@
 
   <script src="/js/script.js"></script>
   <script>
+    // Fix blog image loading issues
+    document.addEventListener('DOMContentLoaded', function() {
+      const blogImages = document.querySelectorAll('.blog-card-image img');
+      
+      blogImages.forEach(img => {
+        img.onerror = function() {
+          if (!this.dataset.retried) {
+            this.dataset.retried = 'true';
+            const separator = this.src.includes('?') ? '&' : '?';
+            this.src = this.src.split('?')[0] + separator + 't=' + Date.now();
+          } else {
+            console.error('Blog card image failed to load:', this.src);
+            this.style.display = 'none';
+          }
+        };
+      });
+    });
+
     // Blog carousel functionality
     document.addEventListener('DOMContentLoaded', function() {
       const blogGrid = document.getElementById('blogCardsGrid');

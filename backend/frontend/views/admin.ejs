@@ -475,6 +475,12 @@
             const imagePath = `/images/blog-page/${sanitizedName}`;
             const imageHtml = `\n<img src="${imagePath}" alt="${image.name.replace(/\.[^/.]+$/, '')}" class="blog-content-image" style="max-width: 100%; height: auto; margin: 20px 0; border-radius: 8px;" />\n`;
             
+            console.log('Inserting image:', {
+                original: image.name,
+                sanitized: sanitizedName,
+                fullPath: imagePath
+            });
+            
             const cursorPos = textarea.selectionStart;
             const textBefore = textarea.value.substring(0, cursorPos);
             const textAfter = textarea.value.substring(cursorPos);
@@ -486,8 +492,8 @@
             const newPos = cursorPos + imageHtml.length;
             textarea.setSelectionRange(newPos, newPos);
             
-            // Show alert
-            showAlert('create-alert', `Image inserted! Remember to upload "${image.name}" to /images/blog-page/ folder.`, 'success');
+            // Show alert with the actual path that will be used
+            showAlert('create-alert', `Image inserted with path: ${imagePath}`, 'success');
         }
 
         function removeContentImage(index) {
