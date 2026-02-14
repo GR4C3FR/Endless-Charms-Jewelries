@@ -74,7 +74,7 @@ app.use(passport.session());
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
   // Cache busting version - update this when CSS/JS changes
-  res.locals.assetsVersion = 'v2.0.2'; // Change this version when you update CSS/JS
+  res.locals.assetsVersion = 'v2.0.3'; // Change this version when you update CSS/JS
   next();
 });
 
