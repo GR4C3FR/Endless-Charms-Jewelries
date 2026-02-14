@@ -33,6 +33,22 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
+// WWW Redirect Middleware - Enforce consistent domain (non-www)
+// This prevents www and non-www from being treated as separate sites
+app.use((req, res, next) => {
+  const host = req.hostname;
+  
+  // Only redirect in production and if accessing via www
+  if (process.env.NODE_ENV === 'production' && host.startsWith('www.')) {
+    const protocol = req.protocol;
+    const newHost = host.replace('www.', '');
+    const newUrl = `${protocol}://${newHost}${req.originalUrl}`;
+    return res.redirect(301, newUrl);
+  }
+  
+  next();
+});
+
 // Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET || 'endless-charms-secret-key-2026',
