@@ -195,9 +195,6 @@ app.get('/debug-blog-images', async (req, res) => {
     publicPath
   });
 });
-    nodeEnv: process.env.NODE_ENV
-  });
-});
 
 // CORS middleware - Applied only to API routes (configured via backend/middleware/cors.js)
 const corsMiddleware = require('./middleware/cors');
