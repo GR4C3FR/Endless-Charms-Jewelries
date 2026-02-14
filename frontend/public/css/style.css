@@ -2800,7 +2800,7 @@ h1, h2, h3 {
 }
 
 .blog-cards-section {
-  padding: 280px 0 60px;
+  padding: 280px 0 80px;
   background: white;
   position: relative;
   z-index: 0;
@@ -2901,14 +2901,6 @@ h1, h2, h3 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 32px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-}
-
-.blog-cards-grid::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
 }
 
 .blog-card {

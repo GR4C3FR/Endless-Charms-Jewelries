@@ -695,21 +695,8 @@ app.get('/about', (req, res) => {
   res.render('about');
 });
 
-// Blogs page
+// Blogs page with pagination
 app.get('/blogs', async (req, res) => {
-  try {
-    const blogs = await Blog.find({ published: true })
-      .sort({ publishedAt: -1 })
-      .limit(6); // Show only 6 recent blogs on main page
-    res.render('blogs', { blogs });
-  } catch (error) {
-    console.error('Error fetching blogs:', error);
-    res.render('blogs', { blogs: [] });
-  }
-});
-
-// All blogs page with pagination
-app.get('/blogs/all/view', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 4; // 4 blogs per page (1 row)
@@ -723,20 +710,32 @@ app.get('/blogs/all/view', async (req, res) => {
       .skip(skip)
       .limit(limit);
     
-    res.render('all-blogs', { 
+    res.render('blogs', { 
       blogs,
       currentPage: page,
       totalPages,
       totalBlogs
     });
   } catch (error) {
-    console.error('Error fetching all blogs:', error);
-    res.render('all-blogs', { 
+    console.error('Error fetching blogs:', error);
+    res.render('blogs', { 
       blogs: [],
       currentPage: 1,
       totalPages: 0,
       totalBlogs: 0
     });
+  }
+});
+
+// All blogs page
+app.get('/blogs/all/view', async (req, res) => {
+  try {
+    const blogs = await Blog.find({ published: true })
+      .sort({ publishedAt: -1 });
+    res.render('all-blogs', { blogs });
+  } catch (error) {
+    console.error('Error fetching all blogs:', error);
+    res.render('all-blogs', { blogs: [] });
   }
 });
 
