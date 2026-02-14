@@ -70,9 +70,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Make user available to all views
+// Make user available to all views and add cache busting
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
+  // Cache busting version - update this when CSS/JS changes
+  res.locals.assetsVersion = 'v2.0.1'; // Change this version when you update CSS/JS
   next();
 });
 
