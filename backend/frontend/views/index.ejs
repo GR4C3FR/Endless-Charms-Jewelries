@@ -12,6 +12,17 @@
 </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Performance: Resource Hints -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+  <link rel="dns-prefetch" href="https://www.google-analytics.com">
+  
+  <!-- Performance: Preload critical assets -->
+  <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
+  <link rel="preload" href="/images/logo.png" as="image">
+  
   <title>Engagement Rings & Wedding Bands Angeles City | Endless Charms Jewelry</title>
   <meta name="description" content="Endless Charms - Premier jewelry store in Angeles City, Pampanga. Custom engagement rings, wedding bands, moissanite & diamond rings, pawnable gold jewelry. Free consultation & design service.">
   <meta name="keywords" content="engagement rings Angeles City, wedding bands Angeles City, jewelry store Angeles City, custom jewelry Angeles City, moissanite rings Angeles City, diamond rings Pampanga, pawnable gold jewelry, jewelry store near me">
@@ -194,7 +205,7 @@
                data-price="<%= product.basePrice || product.price || 0 %>"
                data-image="<%= product.image %>">
             <div class="product-image">
-              <img src="/images/<%= product.image %>" alt="<%= product.name %>">
+              <img src="/images/<%= product.image %>" alt="<%= product.name %>" loading="lazy" width="300" height="300">
             </div>
             <div class="product-info">
               <h3 class="product-name"><%= product.name %></h3>
@@ -208,7 +219,7 @@
                data-price="<%= product.basePrice || product.price || 0 %>"
                data-image="<%= product.image %>">
             <div class="product-image">
-              <img src="/images/<%= product.image %>" alt="<%= product.name %>">
+              <img src="/images/<%= product.image %>" alt="<%= product.name %>" loading="lazy" width="300" height="300">
             </div>
             <div class="product-info">
               <h3 class="product-name"><%= product.name %></h3>
@@ -246,7 +257,7 @@
                data-price="<%= style.basePrice || style.price || 0 %>"
                data-image="<%= style.image %>">
             <div class="ring-style-image">
-              <img src="/images/<%= style.image %>" alt="<%= style.name %>">
+              <img src="/images/<%= style.image %>" alt="<%= style.name %>" loading="lazy" width="400" height="400">
             </div>
             <p class="ring-style-label"><%= style.label || style.name %></p>
           </div>
@@ -272,7 +283,7 @@
         <% features.forEach(feature => { %>
           <div class="feature-card">
             <div class="feature-icon">
-              <img src="/images/<%= feature.icon %>" alt="<%= feature.title %>">
+              <img src="/images/<%= feature.icon %>" alt="<%= feature.title %>" loading="lazy" width="80" height="80">
             </div>
             <h3 class="feature-title"><%= feature.title %></h3>
             <p class="feature-desc"><%= feature.description %></p>
@@ -293,7 +304,7 @@
             <% if (reviewImages && reviewImages.length > 0) { %>
               <% reviewImages.forEach((image, index) => { %>
                 <div class="carousel-card" onclick="openImageModal('<%= image %>')">
-                  <img src="/images/<%= image %>" alt="Customer Review <%= index + 1 %>">
+                  <img src="/images/<%= image %>" alt="Customer Review <%= index + 1 %>" loading="lazy" width="600" height="600">
                 </div>
               <% }); %>
             <% } else { %>
@@ -375,8 +386,9 @@
     </div>
   </div>
 
-  <script src="/js/script.js"></script>
-  <script>
+  <!-- Performance: Defer non-critical JavaScript -->
+  <script src="/js/script.js" defer></script>
+  <script defer>
     // Handle Google OAuth success callback
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('google_login') === 'success') {

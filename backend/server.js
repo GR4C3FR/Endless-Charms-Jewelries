@@ -3,6 +3,7 @@ const path = require('path');
 const session = require('express-session');
 const passport = require('./config/passport');
 const connectDB = require('./config/database');
+const compression = require('compression');
 
 // Import routes
 const productRoutes = require('./routes/products');
@@ -22,6 +23,17 @@ const PORT = process.env.PORT || 3000;
 
 // Connect to MongoDB
 connectDB();
+
+// Performance: Enable gzip/brotli compression for all responses
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+  level: 6 // Compression level (0-9), 6 is good balance
+}));
 
 // Middleware
 app.use(express.json());
@@ -74,7 +86,7 @@ app.use(passport.session());
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
   // Cache busting version - update this when CSS/JS changes
-  res.locals.assetsVersion = 'v2.1.0'; // Change this version when you update CSS/JS
+  res.locals.assetsVersion = 'v2.2.0'; // Change this version when you update CSS/JS
   next();
 });
 
@@ -121,21 +133,40 @@ console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('===========================');
 
 // Static files - MUST come before CORS to serve CSS/JS without CORS restrictions
-// Add explicit options to ensure proper MIME types and caching
+// Optimized caching and compression for better performance
 app.use(express.static(publicPath, {
-  maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
+  maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0, // 7 days for production
   etag: true,
+  lastModified: true,
+  immutable: false,
   setHeaders: (res, filePath) => {
-    // Ensure CSS files have correct MIME type
+    // Performance: Enable caching with proper headers
+    if (process.env.NODE_ENV === 'production') {
+      // Images: Long cache (30 days) - they rarely change
+      if (filePath.match(/\.(jpg|jpeg|png|gif|webp|svg|ico)$/i)) {
+        res.setHeader('Cache-Control', 'public, max-age=2592000, immutable'); // 30 days
+        
+        // Shorter cache for blog images (6 hours) for new uploads
+        if (filePath.includes('blog-page')) {
+          res.setHeader('Cache-Control', 'public, max-age=21600'); // 6 hours
+        }
+      }
+      // CSS/JS: Medium cache (7 days) - versioned with cache busting
+      else if (filePath.match(/\.(css|js)$/)) {
+        res.setHeader('Cache-Control', 'public, max-age=604800'); // 7 days
+      }
+      // Fonts: Long cache (1 year)
+      else if (filePath.match(/\.(woff|woff2|ttf|eot)$/)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year
+      }
+    }
+    
+    // Ensure correct MIME types
     if (filePath.endsWith('.css')) {
       res.setHeader('Content-Type', 'text/css; charset=utf-8');
-    }
-    // Ensure JS files have correct MIME type
-    if (filePath.endsWith('.js')) {
+    } else if (filePath.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-    }
-    // Ensure proper image MIME types
-    if (filePath.match(/\.(jpg|jpeg)$/i)) {
+    } else if (filePath.match(/\.(jpg|jpeg)$/i)) {
       res.setHeader('Content-Type', 'image/jpeg');
     } else if (filePath.endsWith('.png')) {
       res.setHeader('Content-Type', 'image/png');
@@ -143,14 +174,8 @@ app.use(express.static(publicPath, {
       res.setHeader('Content-Type', 'image/gif');
     } else if (filePath.endsWith('.webp')) {
       res.setHeader('Content-Type', 'image/webp');
-    }
-    // Shorter cache for blog images (6 hours) to prevent issues with new uploads
-    if (filePath.includes('blog-page')) {
-      res.setHeader('Cache-Control', 'public, max-age=21600'); // 6 hours
-    }
-    // Log file serving in production for debugging
-    if (process.env.NODE_ENV === 'production') {
-      console.log('Serving static file:', filePath);
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
     }
   }
 }));
@@ -261,6 +286,23 @@ app.get('/debug-missing-images', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// Performance & Security Headers middleware
+app.use((req, res, next) => {
+  // Security Headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  // Performance Headers
+  res.setHeader('X-DNS-Prefetch-Control', 'on');
+  
+  // Remove powered-by header for security
+  res.removeHeader('X-Powered-By');
+  
+  next();
 });
 
 // CORS middleware - Applied only to API routes (configured via backend/middleware/cors.js)
