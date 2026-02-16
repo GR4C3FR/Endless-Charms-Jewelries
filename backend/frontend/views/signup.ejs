@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/images/logo.png" type="image/png">
     <title>Profile - Endless Charms</title>
+    <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
+    <link rel="preload" href="/images/profile-hero-image.png" as="image">
     <link rel="stylesheet" href="/css/style.css?v=<%= assetsVersion %>">
 </head>
 <body>
@@ -37,7 +39,7 @@
     <div class="profile-container">
       <!-- Left: Hero Image -->
       <div class="profile-hero">
-        <img src="/images/profile-hero-image.png" alt="Profile Hero">
+        <img src="/images/profile-hero-image.png" alt="Profile Hero" fetchpriority="high">
       </div>
       <!-- Right: Profile Card -->
       <div class="profile-card">

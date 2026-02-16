@@ -16,6 +16,8 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="About Endless Charms - Custom Jewelry Designer Angeles City">
   <meta name="twitter:description" content="Premier custom jewelry designer in Angeles City, Pampanga.">
+  <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
+  <link rel="preload" href="/images/about_banner_image.png" as="image">
   <link rel="stylesheet" href="/css/style.css?v=<%= assetsVersion %>">
 </head>
 <body>
@@ -122,7 +124,7 @@
   <!-- About Hero Section -->
   <section class="about-hero">
     <div class="hero-banner">
-      <img src="/images/about_banner_image.png" alt="Endless Charms About" class="hero-image">
+      <img src="/images/about_banner_image.png" alt="Endless Charms About" class="hero-image" fetchpriority="high">
       <div class="hero-overlay"></div>
       
       <!-- Left Side Content -->
@@ -303,6 +305,6 @@
     </div>
   </div>
 
-  <script src="/js/script.js"></script>
+  <script src="/js/script.js" defer></script>
 </body>
 </html>

@@ -16,6 +16,7 @@
   <meta name="description" content="Secure checkout for your Endless Charms jewelry purchase. Complete your order for engagement rings, wedding bands, and custom jewelry.">
   <meta name="robots" content="noindex, follow">
   <link rel="icon" href="/images/logo.png" type="image/png">
+  <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
   <link rel="stylesheet" href="/css/style.css?v=<%= assetsVersion %>">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 </head>
@@ -241,7 +242,7 @@
     // expose current user to frontend scripts
     window.EC_USER = <%- JSON.stringify(user || null) %>;
   </script>
-  <script src="/js/script.js"></script>
+  <script src="/js/script.js" defer></script>
   <script>
     // Checkout page-specific behavior initialized by script.js
   </script>
@@ -295,7 +296,7 @@
       </div>
     </div>
   </footer>
-  <script src="/js/checkout.js"></script>
+  <script src="/js/checkout.js" defer></script>
   <script>
     // Redirect to bag page if bag is empty
     window.addEventListener('DOMContentLoaded', () => {

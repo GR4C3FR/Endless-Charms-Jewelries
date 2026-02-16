@@ -25,6 +25,8 @@
   <meta name="twitter:title" content="About - Endless Charms">
   <meta name="twitter:description" content="Learn about Endless Charms jewelry design and craftsmanship in Pampanga, Philippines.">
   <meta name="twitter:image" content="https://endlesscharms.store/images/about_banner_image.png">
+  <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
+  <link rel="preload" href="/images/about_banner_image.png" as="image">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org/",
@@ -147,7 +149,7 @@
   <!-- About Hero Section -->
   <section class="about-hero">
     <div class="hero-banner">
-      <img src="/images/about_banner_image.png" alt="Endless Charms About" class="hero-image">
+      <img src="/images/about_banner_image.png" alt="Endless Charms About" class="hero-image" fetchpriority="high">
       <div class="hero-overlay"></div>
       
       <!-- Left Side Content -->
@@ -328,6 +330,6 @@
     </div>
   </div>
 
-  <script src="/js/script.js"></script>
+  <script src="/js/script.js" defer></script>
 </body>
 </html>

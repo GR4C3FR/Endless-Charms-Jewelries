@@ -16,6 +16,8 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Gold Jewelry & Accessories Angeles City | Endless Charms">
   <meta name="twitter:description" content="Fine gold jewelry - necklaces, bracelets, earrings in Angeles City.">
+  <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
+  <link rel="preload" href="/images/shop-other-accessories-page/accessories-hero-banner.png" as="image">
   <link rel="stylesheet" href="/css/style.css?v=<%= assetsVersion %>">
 </head>
 <body>
@@ -135,7 +137,7 @@
     <!-- Hero Section (two-column image + text like provided design) -->
     <section class="row-one">
       <div class="image-container">
-        <img src="/images/shop-other-accessories-page/accessories-hero-banner.png" alt="Accessories Hero" class="hero-image">
+        <img src="/images/shop-other-accessories-page/accessories-hero-banner.png" alt="Accessories Hero" class="hero-image" fetchpriority="high">
       </div>
       <div class="text-row-one">
         <p class="main-text">Find the design that speaks to your love. Shop our collection and visit our social media pages for more styles.</p>
@@ -239,4 +241,4 @@
     </div>
   </div>
 
-  <script src="/js/script.js"></script>
+  <script src="/js/script.js" defer></script>

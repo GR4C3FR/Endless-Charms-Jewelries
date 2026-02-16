@@ -16,6 +16,8 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Engagement Rings Angeles City | Endless Charms">
     <meta name="twitter:description" content="Custom engagement rings with diamonds, moissanite & lab-grown stones in Angeles City.">
+    <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
+    <link rel="preload" href="/images/shop-engagement-page/engagement-rings-hero.png" as="image">
     <link rel="stylesheet" href="/css/style.css?v=<%= assetsVersion %>">
 </head>
 <body>
@@ -134,7 +136,7 @@
         <!-- Hero Section (Row One) -->
         <section class="row-one">
             <div class="image-container">
-                <img src="/images/shop-engagement-page/engagement-rings-hero.png" alt="Engagement Ring" class="hero-image">
+                <img src="/images/shop-engagement-page/engagement-rings-hero.png" alt="Engagement Ring" class="hero-image" fetchpriority="high">
             </div>
             <div class="text-row-one">
                 <p class="main-text">
@@ -245,6 +247,6 @@
     </div>
   </div>
 
-    <script src="/js/script.js"></script>
+    <script src="/js/script.js" defer></script>
 </body>
 </html>

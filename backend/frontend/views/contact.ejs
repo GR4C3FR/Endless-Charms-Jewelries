@@ -16,6 +16,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Contact Endless Charms - Angeles City, Pampanga">
   <meta name="twitter:description" content="Free jewelry consultation in Angeles City, Pampanga. Contact us today.">
+  <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
   <link rel="stylesheet" href="/css/style.css?v=<%= assetsVersion %>">
 </head>
 <body>
@@ -23,7 +24,7 @@
     <div class="container">
       <nav class="navbar">
         <a href="/" class="logo">
-          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img">
+          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img" fetchpriority="high">
         </a>
         <div class="nav-links">
           <a href="/" class="nav-link">HOME</a>
@@ -297,7 +298,7 @@
     </div>
   </div>
 
-  <script src="/js/script.js"></script>
+  <script src="/js/script.js" defer></script>
   <script>
     // Contact form submission handler
     document.getElementById('contactForm').addEventListener('submit', async (e) => {

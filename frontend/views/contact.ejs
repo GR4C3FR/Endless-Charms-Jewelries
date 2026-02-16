@@ -23,6 +23,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Contact Endless Charms">
   <meta name="twitter:description" content="Contact Endless Charms jewelry store for inquiries and custom jewelry designs.">
+  <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org/",
@@ -52,7 +53,7 @@
     <div class="container">
       <nav class="navbar">
         <a href="/" class="logo" title="Endless Charms - Premium Jewelry Store">
-          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img" loading="lazy">
+          <img src="/images/navigation/logo.png" alt="Endless Charms Logo" class="logo-img" loading="lazy" fetchpriority="high">
         </a>
         <div class="nav-links">
           <a href="/" class="nav-link">HOME</a>

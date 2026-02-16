@@ -26,6 +26,7 @@
   <meta name="twitter:title" content="<%= blog.title %>">
   <meta name="twitter:description" content="<%= blog.excerpt || blog.title %>">
   <meta name="twitter:image" content="<%= blog.image %>">
+  <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org/",
@@ -186,7 +187,7 @@
 
         <!-- Featured Image -->
         <div class="blog-detail-image">
-          <img src="<%= blog.image %>" alt="<%= blog.title %>" loading="lazy">
+          <img src="<%= blog.image %>" alt="<%= blog.title %>" loading="lazy" fetchpriority="high">
         </div>
 
         <!-- Blog Content -->
@@ -252,7 +253,7 @@
     </div>
   </footer>
 
-  <script src="/js/script.js"></script>
+  <script src="/js/script.js" defer></script>
   <script>
     // Generate Table of Contents from blog content - H2 only for SEO
     document.addEventListener('DOMContentLoaded', function() {
