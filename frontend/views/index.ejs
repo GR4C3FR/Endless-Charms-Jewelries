@@ -44,6 +44,7 @@
     "@context": "https://schema.org/",
     "@type": "JewelryStore",
     "name": "Endless Charms",
+    "description": "Premier custom jewelry store specializing in engagement rings, wedding bands, and fine jewelry in Angeles City, Pampanga. Offering authentic 14k-18k pawnable gold jewelry with diamonds and moissanite stones.",
     "url": "https://endlesscharms.store",
     "logo": "https://endlesscharms.store/images/endless-charms-logo-transparent.png",
     "telephone": "+63 916 430 5638",
@@ -124,6 +125,15 @@
       <div id="mobileMenuOverlay" class="mobile-menu-overlay"></div>
       <nav id="mobileMenu" class="mobile-menu">
         <div class="mobile-menu-header">
+          <div class="profile-bag">
+            <button class="icon-btn" onclick="handleProfileClick()" aria-label="User profile">
+              <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon" loading="lazy">
+            </button>
+            <button class="icon-btn" onclick="handleBagClick()" aria-label="Shopping bag">
+              <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon" loading="lazy">
+              <span class="bag-badge" style="display: none;">0</span>
+            </button>
+          </div>
           <button id="mobileMenuClose" class="mobile-menu-close" aria-label="Close menu">
             <span class="close-icon">&times;</span>
           </button>
@@ -138,16 +148,7 @@
           <a href="/about" class="mobile-nav-link">ABOUT</a>
         </div>
         <div class="mobile-menu-icons">
-          <button id="mobileHeaderSearchBtn" class="icon-btn" aria-label="Search products">
-            <img src="/images/navigation/search-icon.png" alt="Search" class="search-icon" loading="lazy">
-          </button>
-          <button class="icon-btn" onclick="handleProfileClick()" aria-label="User profile">
-            <img src="/images/navigation/profile-icon.png" alt="Profile" class="profile-icon" loading="lazy">
-          </button>
-          <button class="icon-btn" onclick="handleBagClick()" aria-label="Shopping bag">
-            <img src="/images/navigation/bag.png" alt="Shopping Bag" class="bag-icon" loading="lazy">
-            <span class="bag-badge" style="display: none;">0</span>
-          </button>
+
         </div>
       </nav>
     </div>

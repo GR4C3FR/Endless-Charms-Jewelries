@@ -24,17 +24,43 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Wedding Bands Angeles City | Endless Charms">
   <meta name="twitter:description" content="Custom wedding bands & couple rings in 14k-18k gold in Angeles City.">
-  <meta name="twitter:image" content="https://endlesscharms.store/images/shop-wedding-page/wedding-bands-hero.png">    <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
-    <link rel="preload" href="/images/shop-wedding-page/wedding-bands-hero-banner.png" as="image">  <script type="application/ld+json">
+  <meta name="twitter:image" content="https://endlesscharms.store/images/shop-wedding-page/wedding-bands-hero.png">
+  <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
+  <link rel="preload" href="/images/shop-wedding-page/wedding-bands-hero-banner.png" as="image">
+  <script type="application/ld+json">
   {
     "@context": "https://schema.org/",
     "@type": "CollectionPage",
-    "name": "Wedding Bands",
-    "description": "Premium wedding bands crafted with 14k-18k gold at Endless Charms in Angeles City, Pampanga, Philippines",
+    "name": "Wedding Bands - Endless Charms",
+    "description": "Custom wedding bands and couple rings at Endless Charms in Angeles City. Premium 14k-18k pawnable gold with personalized engraving options.",
     "url": "https://endlesscharms.store/wedding-bands",
     "isPartOf": {
       "@type": "Website",
-      "name": "Endless Charms"
+      "name": "Endless Charms",
+      "url": "https://endlesscharms.store"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://endlesscharms.store/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Shop",
+          "item": "https://endlesscharms.store/shop"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Wedding Bands",
+          "item": "https://endlesscharms.store/wedding-bands"
+        }
+      ]
     }
   }
   </script>
@@ -134,9 +160,8 @@
     <!-- Wedding Bands Products Section -->
     <section class="row-two">
       <div class="inner-div-row-two">
-        <h1>Wedding Bands in Pampanga</h1>
-        <p>Discover the ultimate symbol of unity. Curate a bespoke set of couple rings that reflects your journey. <br>
-           Personalize your bands with precision in 18k or 14k Yellow Gold, White Gold, or Rose Gold. Pair with our stunning <a href="/engagement-rings" style="color: maroon; text-decoration: none; font-weight: bold;">engagement rings</a> for a complete bridal collection. Complete your look with elegant <a href="/accessories" style="color: maroon; text-decoration: none; font-weight: bold;">accessories</a>. <a href="/contact" style="color: maroon; text-decoration: none; font-weight: bold;">Contact us</a> for personalized guidance.
+        <h1>Wedding Bands - Custom Couple Rings & Matching Sets</h1>
+        <p>Discover the ultimate symbol of your commitment and unity with our exquisite wedding bands collection. Design bespoke couple rings that perfectly reflect your shared journey and personal style. Each wedding band is meticulously crafted in premium 18k or 14k Yellow Gold, White Gold, or Rose Gold, and features authentic, pawnable gold for lasting value. Personalize your bands with precision sizing and custom engraving options. Pair with our stunning <a href="/engagement-rings" style="color: maroon; text-decoration: none; font-weight: bold;">engagement rings</a> for a complete bridal collection that tells your love story. Enhance your elegant look with timeless <a href="/accessories" style="color: maroon; text-decoration: none; font-weight: bold;">accessories</a>. <a href="/contact" style="color: maroon; text-decoration: none; font-weight: bold;">Contact us for personalized guidance</a> on choosing the perfect wedding band for your special moment.
         </p>
       </div>
 
@@ -153,7 +178,7 @@
                  data-pricing="<%= band.pricing && band.pricing.combinations ? encodeURIComponent(JSON.stringify(band.pricing.combinations)) : '' %>"
                  data-available-options="<%= band.availableOptions ? encodeURIComponent(JSON.stringify(band.availableOptions)) : '' %>">
               <div class="weddingband-style-image">
-                <img src="/images/<%= band.image %>" alt="Custom wedding band - <%= band.name %> in 14k-18k gold" loading="lazy">
+                <img src="/images/<%= band.image %>" alt="Custom wedding band - <%= band.name %> in 14k-18k pawnable gold with personalized options - Endless Charms Angeles City" loading="lazy">
               </div>
               <div class="weddingband-style-info">
                 <p class="weddingband-style-label"><%= band.name %></p>

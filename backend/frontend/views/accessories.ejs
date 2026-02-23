@@ -18,6 +18,43 @@
   <meta name="twitter:description" content="Fine gold jewelry - necklaces, bracelets, earrings in Angeles City.">
   <link rel="preload" href="/css/style.css?v=<%= assetsVersion %>" as="style">
   <link rel="preload" href="/images/shop-other-accessories-page/accessories-hero-banner.png" as="image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Accessories - Endless Charms",
+    "description": "Fine jewelry and accessories collection at Endless Charms in Angeles City. Custom necklaces, bracelets, and earrings in 14k-18k pawnable gold.",
+    "url": "https://endlesscharms.store/accessories",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Endless Charms",
+      "url": "https://endlesscharms.store"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://endlesscharms.store/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Shop",
+          "item": "https://endlesscharms.store/shop"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Accessories",
+          "item": "https://endlesscharms.store/accessories"
+        }
+      ]
+    }
+  }
+  </script>
   <link rel="stylesheet" href="/css/style.css?v=<%= assetsVersion %>">
 </head>
 <body>
@@ -137,7 +174,7 @@
     <!-- Hero Section (two-column image + text like provided design) -->
     <section class="row-one">
       <div class="image-container">
-        <img src="/images/shop-other-accessories-page/accessories-hero-banner.png" alt="Accessories Hero" class="hero-image" fetchpriority="high">
+        <img src="/images/shop-other-accessories-page/accessories-hero-banner.png" alt="Fine gold jewelry and accessories collection - necklaces, bracelets, and earrings in 14k-18k gold" class="hero-image" fetchpriority="high">
       </div>
       <div class="text-row-one">
         <p class="main-text">Find the design that speaks to your love. Shop our collection and visit our social media pages for more styles.</p>
@@ -147,8 +184,8 @@
 
     <section class="row-two">
       <div class="inner-div-row-two">
-        <h1>Other Accessories</h1>
-        <p>Discover the ultimate symbol of unity. Curate a bespoke set of couple rings that reflects your journey. Personalize your bands with precision in 18k or 14k Yellow Gold, White Gold, or Rose Gold. Exquisite craftsmanship for your perfect match.</p>
+        <h1>Gold Jewelry & Accessories - Necklaces, Bracelets & More</h1>
+        <p>Complete your jewelry collection with our elegant selection of fine accessories. From stunning necklaces and bracelets to delicate earrings and eye-catching pendants, each piece is crafted from authentic 14k-18k pawnable gold. Our accessories perfectly complement your <a href="/engagement-rings" style="color: maroon; text-decoration: none; font-weight: bold;">engagement rings</a> and <a href="/wedding-bands" style="color: maroon; text-decoration: none; font-weight: bold;">wedding bands</a>. Whether you prefer classic, modern, or personalized designs, our accessories are crafted with exceptional attention to detail. Each piece showcases the quality and craftsmanship you expect from Endless Charms. Pair with our bridal collections for a coordinated look, or wear them as standalone statement pieces. <a href="/contact" style="color: maroon; text-decoration: none; font-weight: bold;">Contact us today</a> to explore custom options and design your perfect accessory.</p>
       </div>
 
       <div class="container">
@@ -163,7 +200,7 @@
                  data-pricing="<%= item.pricing && item.pricing.combinations ? encodeURIComponent(JSON.stringify(item.pricing.combinations)) : '' %>"
                  data-available-options="<%= item.availableOptions ? encodeURIComponent(JSON.stringify(item.availableOptions)) : '' %>">
               <div class="weddingband-style-image">
-                <img src="/images/<%= item.image %>" alt="<%= item.name %>">
+                <img src="/images/<%= item.image %>" alt="<%= item.name %> - Custom gold jewelry accessory in 14k-18k gold - Endless Charms Angeles City" loading="lazy">
               </div>
               <div class="weddingband-style-info">
                 <p class="weddingband-style-label"><%= item.name %></p>

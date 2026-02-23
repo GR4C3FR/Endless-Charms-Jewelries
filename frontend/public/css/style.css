@@ -1033,6 +1033,14 @@ body {
   cursor: not-allowed;
 }
 
+/* Mobile Carousel - Show 2 cards instead of 4 */
+@media (max-width: 768px) {
+  .carousel-card {
+    min-width: calc(50% - 10px);
+    width: calc(50% - 10px);
+  }
+}
+
 /* Image Modal */
 .image-modal {
   display: none;
@@ -5645,7 +5653,7 @@ body.page-blog-detail * {
 .mobile-menu-header {
   padding: 20px 20px 10px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .mobile-menu-close {

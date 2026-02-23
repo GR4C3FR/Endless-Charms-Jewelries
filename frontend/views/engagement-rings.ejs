@@ -31,12 +31,36 @@
     {
       "@context": "https://schema.org/",
       "@type": "CollectionPage",
-      "name": "Engagement Rings",
-      "description": "Premium engagement rings crafted with 14k-18k gold at Endless Charms in Angeles City, Pampanga, Philippines",
+      "name": "Engagement Rings - Endless Charms",
+      "description": "Custom engagement rings collection at Endless Charms in Angeles City, Pampanga. Choose from diamond, moissanite, or lab-grown stones in 14k-18k pawnable gold.",
       "url": "https://endlesscharms.store/engagement-rings",
       "isPartOf": {
         "@type": "Website",
-        "name": "Endless Charms"
+        "name": "Endless Charms",
+        "url": "https://endlesscharms.store"
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://endlesscharms.store/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Shop",
+            "item": "https://endlesscharms.store/shop"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Engagement Rings",
+            "item": "https://endlesscharms.store/engagement-rings"
+          }
+        ]
       }
     }
     </script>
@@ -139,8 +163,8 @@
         <!-- Products Section (Row Two) -->
         <section class="row-two">
             <div class="inner-div-row-two">
-                <h1>Engagement Rings in Angeles City</h1>
-                <p>Find the perfect engagement ring made just for you. Choose your design, pick your stone, and customize it in 18k or 14k Yellow Gold, White Gold, or Rose Gold. Pair with matching <a href="/wedding-bands" style="color: maroon; text-decoration: none; font-weight: bold;">wedding bands</a> for a complete bridal set. Your choice of diamonds, your style, your moment. <a href="/contact" style="color: maroon; text-decoration: none; font-weight: bold;">Contact us</a> for a free consultation or learn more <a href="/about" style="color: maroon; text-decoration: none; font-weight: bold;">about our craftsmanship</a>.
+                <h1>Engagement Rings - Custom Diamond & Moissanite Collections</h1>
+                <p>Find the perfect engagement ring made just for you. Choose your design, pick your stone - diamonds, lab-grown diamonds, or moissanite - and customize it in 18k or 14k Yellow Gold, White Gold, or Rose Gold. Our engagement rings feature exceptional craftsmanship with authentic, pawnable gold, making them both beautiful and a valuable investment. Pair with matching <a href="/wedding-bands" style="color: maroon; text-decoration: none; font-weight: bold;">wedding bands</a> for a complete bridal set. Whether you prefer classic, modern, or vintage styles, our collection has the perfect engagement ring for your unique love story. Your choice of stones, your style, your budget. <a href="/contact" style="color: maroon; text-decoration: none; font-weight: bold;">Contact us for a free consultation</a> or learn more <a href="/about" style="color: maroon; text-decoration: none; font-weight: bold;">about our craftsmanship and commitment to quality</a>.
                 </p>
             </div>
 
@@ -156,7 +180,7 @@
                          data-pricing="<%= ring.pricing && ring.pricing.combinations ? encodeURIComponent(JSON.stringify(ring.pricing.combinations)) : '' %>"
                          data-available-options="<%= ring.availableOptions ? encodeURIComponent(JSON.stringify(ring.availableOptions)) : '' %>">
                         <div class="weddingband-style-image">
-                          <img src="/images/<%= ring.image %>" alt="Diamond engagement ring - <%= ring.name %> in 14k-18k gold" loading="lazy">
+                          <img src="/images/<%= ring.image %>" alt="<%= ring.name %> - Customizable diamond engagement ring in 14k-18k gold - Endless Charms Angeles City" loading="lazy">
                         </div>
                         <div class="weddingband-style-info">
                           <p class="weddingband-style-label"><%= ring.name %></p>
