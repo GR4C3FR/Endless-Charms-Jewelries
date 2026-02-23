@@ -979,12 +979,27 @@ app.get('/signin', (req, res) => {
 
 // Error handling middleware - must be after all routes
 app.use((err, req, res, next) => {
-  console.error('Error:', err.stack);
-  res.status(500).json({ 
-    success: false,
-    error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
-  });
+  console.error('Error:', err && err.stack ? err.stack : err);
+
+  const isApi = req.originalUrl && req.originalUrl.startsWith('/api');
+  const wantsJson = req.xhr || (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1);
+  const errMessage = process.env.NODE_ENV === 'development' ? (err && err.message ? err.message : String(err)) : 'Something went wrong';
+
+  if (isApi || wantsJson) {
+    return res.status(500).json({ 
+      success: false,
+      error: 'Internal Server Error',
+      message: errMessage
+    });
+  }
+
+  // For regular page requests, try rendering a friendly 500 page
+  try {
+    return res.status(500).render('500', { error: errMessage });
+  } catch (renderErr) {
+    // Fallback to simple HTML if render fails
+    return res.status(500).send(`<!doctype html><html><head><meta charset="utf-8"><title>Server Error</title></head><body><h1>Internal Server Error</h1><p>${errMessage}</p><p><a href="/">Return home</a></p></body></html>`);
+  }
 });
 
 // 404 handler for unmatched routes
