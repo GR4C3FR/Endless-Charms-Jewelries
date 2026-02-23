@@ -982,13 +982,12 @@ app.use((err, req, res, next) => {
   console.error('Error:', err && err.stack ? err.stack : err);
 
   const isApi = req.originalUrl && req.originalUrl.startsWith('/api');
-  const acceptsHtml = req.accepts && req.accepts('html');
-  const acceptsJson = req.accepts && req.accepts('json');
-  const wantsJson = req.xhr || (acceptsJson && !acceptsHtml);
   const errMessage = process.env.NODE_ENV === 'development' ? (err && err.message ? err.message : String(err)) : 'Something went wrong';
 
-  // Prefer HTML when client accepts HTML (typical browser requests).
-  if (isApi || wantsJson) {
+  // If this is an API route or an XHR request, return JSON. For all other
+  // non-API routes (normal browser navigation) prefer rendering the HTML
+  // `500` view so users see a friendly error page instead of a JSON blob.
+  if (isApi || req.xhr) {
     return res.status(500).json({ 
       success: false,
       error: 'Internal Server Error',
