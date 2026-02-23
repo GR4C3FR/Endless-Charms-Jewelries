@@ -982,9 +982,12 @@ app.use((err, req, res, next) => {
   console.error('Error:', err && err.stack ? err.stack : err);
 
   const isApi = req.originalUrl && req.originalUrl.startsWith('/api');
-  const wantsJson = req.xhr || (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1);
+  const acceptsHtml = req.accepts && req.accepts('html');
+  const acceptsJson = req.accepts && req.accepts('json');
+  const wantsJson = req.xhr || (acceptsJson && !acceptsHtml);
   const errMessage = process.env.NODE_ENV === 'development' ? (err && err.message ? err.message : String(err)) : 'Something went wrong';
 
+  // Prefer HTML when client accepts HTML (typical browser requests).
   if (isApi || wantsJson) {
     return res.status(500).json({ 
       success: false,
