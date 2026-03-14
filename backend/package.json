@@ -6,11 +6,11 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "scripts": {
-    "start": "node --env-file=.env server.js",
+  "scripts": {    "start": "node --env-file=.env server.js",
     "dev": "nodemon --env-file=.env server.js",
     "seed": "node --env-file=.env seed.js",
-    "test:db": "node --env-file=.env test-connection.js"
+    "test:db": "node --env-file=.env test-connection.js",
+    "minify:css": "cleancss -o frontend/public/css/style.min.css frontend/public/css/style.css"
   },
   "keywords": [
     "jewelry",
@@ -34,6 +34,7 @@
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
+    "clean-css-cli": "^5.6.3",
     "nodemon": "^3.1.11"
   }
 }
