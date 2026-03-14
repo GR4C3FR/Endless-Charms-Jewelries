@@ -31,7 +31,9 @@
     const seoKeywords = Array.from(new Set([...tagsArray, ...longTailKeywords])).join(', ');
     const seoTitle = `${blog.title} | Angeles City, Pampanga | Endless Charms`;
     const seoDescription = `${defaultDescription} Visit Endless Charms in Angeles City, Pampanga for custom engagement rings, wedding bands, and authentic pawnable gold jewelry.`;
-    const absoluteImage = blog.image && blog.image.startsWith('http') ? blog.image : `https://endlesscharms.store${blog.image}`;
+    const absoluteImage = blog.image && (blog.image.startsWith('http') || blog.image.startsWith('data:image/'))
+      ? blog.image
+      : `https://endlesscharms.store${blog.image}`;
   %>
   <link rel="icon" href="/images/logo.png" type="image/png">
   <title><%= seoTitle %></title>

@@ -6,59 +6,42 @@ const fs = require('fs');
 const Blog = require('../models/Blog');
 const { isAdmin } = require('../middleware/adminAuth');
 
-// Configure multer for blog image uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../frontend/public/images/blog-page');
-    
-    console.log('Upload destination requested:', uploadPath);
-    console.log('__dirname:', __dirname);
-    
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadPath)) {
-      console.log('Creating upload directory:', uploadPath);
-      try {
-        fs.mkdirSync(uploadPath, { recursive: true });
-        console.log('Directory created successfully');
-      } catch (err) {
-        console.error('Failed to create directory:', err);
-        return cb(err);
-      }
-    }
-    
-    // Verify directory is writable
-    try {
-      fs.accessSync(uploadPath, fs.constants.W_OK);
-      console.log('Directory is writable');
-    } catch (err) {
-      console.error('Directory is not writable:', uploadPath, err);
-      return cb(new Error(`Upload directory is not writable: ${uploadPath}`));
-    }
-    
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    console.log('Generating filename for:', file.fieldname, 'Original:', file.originalname);
-    
-    // For cover image, add timestamp. For content images, keep original name
-    if (file.fieldname === 'image') {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const filename = 'blog-' + uniqueSuffix + path.extname(file.originalname);
-      console.log('Generated cover image filename:', filename);
-      cb(null, filename);
-    } else if (file.fieldname === 'contentImages') {
-      // Keep original filename for content images
-      const sanitized = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
-      console.log('Generated content image filename:', sanitized);
-      cb(null, sanitized);
-    } else {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const filename = 'blog-' + uniqueSuffix + path.extname(file.originalname);
-      console.log('Generated filename:', filename);
-      cb(null, filename);
-    }
+const MAX_TOTAL_IMAGE_BYTES = 8 * 1024 * 1024;
+
+// Configure multer for in-memory image uploads so images can be persisted in MongoDB.
+const storage = multer.memoryStorage();
+
+function sanitizeFilename(name) {
+  return String(name || '').replace(/[^a-zA-Z0-9.-]/g, '_');
+}
+
+function toDataUrl(file) {
+  return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+}
+
+function replaceContentImagePaths(content, contentImages) {
+  if (!content || !Array.isArray(contentImages) || contentImages.length === 0) {
+    return content;
   }
-});
+
+  let processed = content;
+  contentImages.forEach((file) => {
+    const placeholderPath = `/images/blog-page/${sanitizeFilename(file.originalname)}`;
+    processed = processed.split(placeholderPath).join(toDataUrl(file));
+  });
+
+  return processed;
+}
+
+function getTotalUploadedImageBytes(files) {
+  const imageBytes = (files?.image || []).reduce((total, file) => total + (file.size || 0), 0);
+  const contentBytes = (files?.contentImages || []).reduce((total, file) => total + (file.size || 0), 0);
+  return imageBytes + contentBytes;
+}
+
+function isDatabaseStoredImage(imageValue) {
+  return typeof imageValue === 'string' && imageValue.startsWith('data:image/');
+}
 
 const upload = multer({
   storage: storage,
@@ -165,26 +148,26 @@ router.post('/blogs', isAdmin, upload.fields([
     console.log('Received body:', req.body);
     
     const { title, excerpt, content, author, tags, published } = req.body;
+
+    const totalImageBytes = getTotalUploadedImageBytes(req.files);
+    if (totalImageBytes > MAX_TOTAL_IMAGE_BYTES) {
+      return res.status(400).json({
+        message: 'Total uploaded image size is too large. Please keep combined images under 8MB.'
+      });
+    }
     
     // Validate required fields
     if (!title || !excerpt || !content) {
-      // Delete uploaded files
-      if (req.files && req.files.image) {
-        fs.unlinkSync(req.files.image[0].path);
-      }
-      if (req.files && req.files.contentImages) {
-        req.files.contentImages.forEach(file => fs.unlinkSync(file.path));
-      }
       return res.status(400).json({ message: 'Title, excerpt, and content are required' });
     }
     
     // Check if cover image was uploaded
     if (!req.files || !req.files.image) {
-      if (req.files && req.files.contentImages) {
-        req.files.contentImages.forEach(file => fs.unlinkSync(file.path));
-      }
       return res.status(400).json({ message: 'Blog cover image is required' });
     }
+
+    const coverImageDataUrl = toDataUrl(req.files.image[0]);
+    const contentWithEmbeddedImages = replaceContentImagePaths(content, req.files.contentImages || []);
     
     // Generate slug from title
     let slug = generateSlug(title);
@@ -225,9 +208,9 @@ router.post('/blogs', isAdmin, upload.fields([
     const blogData = {
       title,
       slug,
-      image: `/images/blog-page/${req.files.image[0].filename}`,
+      image: coverImageDataUrl,
       excerpt,
-      content,
+      content: contentWithEmbeddedImages,
       author: author || 'Endless Charms',
       tags: tagsArray,
       published: scheduledPublishDate ? (scheduleDate <= new Date()) : isPublished,
@@ -235,31 +218,13 @@ router.post('/blogs', isAdmin, upload.fields([
       scheduledPublishDate: scheduledPublishDate ? scheduleDate : null
     };
     
-    // Verify the uploaded file actually exists
-    const uploadedFilePath = req.files.image[0].path;
-    console.log('Uploaded file path:', uploadedFilePath);
-    console.log('File exists:', fs.existsSync(uploadedFilePath));
-    if (fs.existsSync(uploadedFilePath)) {
-      const stats = fs.statSync(uploadedFilePath);
-      console.log('File size:', stats.size, 'bytes');
-      console.log('File permissions:', stats.mode.toString(8));
-    } else {
-      console.error('ERROR: Uploaded file does not exist at:', uploadedFilePath);
-      throw new Error('File upload failed - file not found on disk');
-    }
-    
     const blog = new Blog(blogData);
     const newBlog = await blog.save();
     
     console.log('Blog created successfully');
-    console.log('Cover image saved as:', blogData.image);
-    console.log('Database image URL:', blogData.image);
-    console.log('Actual file location:', uploadedFilePath);
+    console.log('Cover image storage:', 'database (data URL)');
     if (req.files && req.files.contentImages) {
-      console.log('Content images saved:', req.files.contentImages.map(f => f.filename));
-      req.files.contentImages.forEach(file => {
-        console.log('Content image path:', file.path, 'Exists:', fs.existsSync(file.path));
-      });
+      console.log('Embedded content images count:', req.files.contentImages.length);
     }
     
     res.status(201).json({ 
@@ -269,13 +234,6 @@ router.post('/blogs', isAdmin, upload.fields([
     });
   } catch (error) {
     console.error('Error creating blog:', error);
-    // Delete uploaded files if blog creation fails
-    if (req.files && req.files.image) {
-      fs.unlinkSync(req.files.image[0].path);
-    }
-    if (req.files && req.files.contentImages) {
-      req.files.contentImages.forEach(file => fs.unlinkSync(file.path));
-    }
     res.status(400).json({ message: error.message });
   }
 });
@@ -287,16 +245,16 @@ router.put('/blogs/:id', isAdmin, upload.fields([
 ]), async (req, res) => {
   try {
     const { title, excerpt, content, author, tags, published } = req.body;
+
+    const totalImageBytes = getTotalUploadedImageBytes(req.files);
+    if (totalImageBytes > MAX_TOTAL_IMAGE_BYTES) {
+      return res.status(400).json({
+        message: 'Total uploaded image size is too large. Please keep combined images under 8MB.'
+      });
+    }
     
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
-      // Delete uploaded files if blog not found
-      if (req.files && req.files.image) {
-        fs.unlinkSync(req.files.image[0].path);
-      }
-      if (req.files && req.files.contentImages) {
-        req.files.contentImages.forEach(file => fs.unlinkSync(file.path));
-      }
       return res.status(404).json({ message: 'Blog not found' });
     }
     
@@ -306,7 +264,9 @@ router.put('/blogs/:id', isAdmin, upload.fields([
       blog.slug = generateSlug(title);
     }
     if (excerpt) blog.excerpt = excerpt;
-    if (content) blog.content = content;
+    if (content) {
+      blog.content = replaceContentImagePaths(content, req.files?.contentImages || []);
+    }
     if (author) blog.author = author;
     
     // Update tags
@@ -320,12 +280,14 @@ router.put('/blogs/:id', isAdmin, upload.fields([
     
     // Update image if new one uploaded
     if (req.files && req.files.image) {
-      // Delete old image
-      const oldImagePath = path.join(__dirname, '../frontend/public', blog.image);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
+      // Delete legacy file-based image if it exists on disk.
+      if (blog.image && !isDatabaseStoredImage(blog.image)) {
+        const oldImagePath = path.join(__dirname, '../frontend/public', blog.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
       }
-      blog.image = `/images/blog-page/${req.files.image[0].filename}`;
+      blog.image = toDataUrl(req.files.image[0]);
     }
     
     // Handle scheduled publishing
@@ -358,9 +320,6 @@ router.put('/blogs/:id', isAdmin, upload.fields([
       blog: updatedBlog 
     });
   } catch (error) {
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
-    }
     res.status(400).json({ message: error.message });
   }
 });
@@ -373,10 +332,12 @@ router.delete('/blogs/:id', isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Blog not found' });
     }
     
-    // Delete associated image
-    const imagePath = path.join(__dirname, '../frontend/public', blog.image);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
+    // Delete associated legacy image file (for older blogs that still use file paths).
+    if (blog.image && !isDatabaseStoredImage(blog.image)) {
+      const imagePath = path.join(__dirname, '../frontend/public', blog.image);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
     }
     
     await Blog.findByIdAndDelete(req.params.id);
@@ -396,7 +357,11 @@ router.get('/blogs-with-missing-images', isAdmin, async (req, res) => {
     const uploadPath = path.join(__dirname, '../frontend/public');
     
     const blogsWithMissingImages = blogs.filter(blog => {
-      const imagePath = path.join(uploadPath, blog.image.replace(/^\//, ''));
+      if (isDatabaseStoredImage(blog.image)) {
+        return false;
+      }
+
+      const imagePath = path.join(uploadPath, String(blog.image || '').replace(/^\//, ''));
       const exists = fs.existsSync(imagePath);
       return !exists;
     }).map(blog => ({
@@ -404,7 +369,8 @@ router.get('/blogs-with-missing-images', isAdmin, async (req, res) => {
       title: blog.title,
       slug: blog.slug,
       imageUrl: blog.image,
-      fullPath: path.join(uploadPath, blog.image.replace(/^\//, '')),
+      fullPath: path.join(uploadPath, String(blog.image || '').replace(/^\//, '')),
+      storageType: isDatabaseStoredImage(blog.image) ? 'database' : 'filesystem',
       createdAt: blog.createdAt
     }));
     
@@ -424,7 +390,11 @@ router.delete('/blogs-with-missing-images', isAdmin, async (req, res) => {
     const uploadPath = path.join(__dirname, '../frontend/public');
     
     const blogsToDelete = blogs.filter(blog => {
-      const imagePath = path.join(uploadPath, blog.image.replace(/^\//, ''));
+      if (isDatabaseStoredImage(blog.image)) {
+        return false;
+      }
+
+      const imagePath = path.join(uploadPath, String(blog.image || '').replace(/^\//, ''));
       return !fs.existsSync(imagePath);
     });
     
